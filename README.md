@@ -16,8 +16,9 @@
 │       └── Mermaid.jsx        # Mermaid 流程图渲染组件
 ├── Logic-and-Proof/           # 第 1 章：逻辑与证明
 │   ├── index.html             # 本章网页入口 → 部署后路径 /Logic-and-Proof/
-│   ├── src/                   # App.jsx（页面结构）、figures.jsx（SVG 示意图）、main.jsx
-│   ├── content/*.md           # 页面正文（Markdown + LaTeX + Mermaid），按标签页拆分
+│   ├── src/                   # App.jsx（页面结构）、figures.jsx（SVG 示意图）、GlossaryPage.jsx、main.jsx
+│   ├── content/*.md           # 页面正文（Markdown + LaTeX + Mermaid），按标签页拆分；exam.md 为试卷双语对照
+│   ├── content/glossary.js    # 中英术语表：正文中出现的英文术语会自动变为可点击词
 │   ├── Midterm-Review-Guide.md  # 同一份内容的纯 Markdown 版本
 │   ├── Midterm-Test-01.md     # 期中试卷原题
 │   ├── Slides-2in1/、Tutorials/ # 课程 PDF（已 gitignore）
@@ -59,4 +60,5 @@ npm run preview    # 本地预览构建产物
 - 公式用 LaTeX：行内 `$...$`；块级 `$$` 必须独占一行开头和结尾（否则 remark-math 会把后续全文吞进公式块）。
 - 流程图用 ```mermaid 围栏。
 - 重点术语用 `==词语==` 包裹，渲染为暗红加粗放大（深色卡片上为白色高亮）。
-- 可以写原生 HTML 容器（`callout`、`proof` 等），容器起止标签与内部 Markdown 之间要留空行。
+- 可以写原生 HTML 容器（`callout`、`proof`、双语对照 `bi > en / zh` 等），容器起止标签与内部 Markdown 之间要留空行。
+- 英文术语：`content/glossary.js` 里的 `en` 和 `alias` 会在正文中自动识别并变为可点击弹窗（代码、公式、HTML 标签内不识别）；也可手动写 `[[term]]` 或 `[[term|显示文本]]`。新增术语只需在 glossary.js 加一条。
