@@ -1,0 +1,11 @@
+{
+  // Cloudflare Workers 静态站点配置：无 Worker 脚本，直接托管 Vite 构建产物 dist/
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "discretemaths",
+  "compatibility_date": "2025-10-01",
+  "assets": {
+    "directory": "./dist",
+    "html_handling": "auto-trailing-slash",
+    "not_found_handling": "404-page"
+  }
+}
