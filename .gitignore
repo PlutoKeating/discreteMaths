@@ -1,0 +1,5 @@
+# Ignore all PDFs (slides and tutorials are large binaries)
+**/*.pdf
+
+# Except the final review notes at project root
+!/FinalReviewNotes.pdf
