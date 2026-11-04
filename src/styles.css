@@ -134,3 +134,39 @@ h1,h2,h3,h4,.head{font-family:var(--font-head);font-weight:700;text-wrap:balance
 @media (min-width:960px){.hero-grid{grid-template-columns:1.05fr .95fr;align-items:center}}
 .three{display:grid;gap:1rem}
 @media (min-width:860px){.three{grid-template-columns:repeat(3,1fr)}}
+
+/* 术语弹窗 */
+.term{all:unset;cursor:pointer;color:inherit;font:inherit;border-bottom:2px dotted color-mix(in srgb,var(--accent) 70%,transparent);
+  background:linear-gradient(0deg, color-mix(in srgb,var(--accent) 12%,transparent), color-mix(in srgb,var(--accent) 12%,transparent)) no-repeat bottom/100% 0;transition:background-size .15s;border-radius:2px}
+.term:hover,.term.open{background-size:100% 100%}
+.term:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ink .term,.inkcard .term{border-bottom-color:rgba(255,255,255,.6)}
+.term-pop{position:fixed;z-index:60;background:var(--card);color:var(--fg);border:1px solid var(--line);border-radius:16px;padding:.9rem 2.2rem .9rem 1rem;
+  box-shadow:0 24px 60px -20px rgba(0,0,0,.45), 0 0 0 1px color-mix(in srgb,var(--accent) 25%,transparent), 0 0 40px -10px color-mix(in srgb,var(--accent) 45%,transparent);
+  font-family:var(--font-body);font-size:.92rem;line-height:1.6;animation:pop .14s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
+.term-pop-en{font-family:var(--font-mono);font-weight:700;font-size:1.08rem;color:var(--accent)}
+.term-pop-zh{font-family:var(--font-head);font-weight:700;font-size:1.1rem;color:var(--kw);margin:.1rem 0 .35rem}
+.term-pop-def{font-family:var(--font-song);font-weight:700}
+.term-pop-alias{margin-top:.4rem;font-size:.78rem;color:var(--muted)}
+.term-pop-close{position:absolute;top:.35rem;right:.5rem;border:0;background:transparent;color:var(--muted);font-size:1.3rem;cursor:pointer;line-height:1}
+@media (max-width:640px){
+  .term-pop{top:auto !important;left:12px !important;right:12px;bottom:max(12px,env(safe-area-inset-bottom,0px));width:auto !important;border-radius:18px}
+}
+/* 双语对照卡 */
+.md .bi{display:grid;gap:.9rem;margin:1rem 0}
+@media (min-width:860px){.md .bi{grid-template-columns:1fr 1fr}}
+.md .bi>.en,.md .bi>.zh{min-width:0;padding:.9rem 1.1rem;border-radius:14px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.md .bi>.en{background:var(--card2);font-family:var(--font-mono);font-size:.95rem;line-height:1.7}
+.md .bi>.zh{background:var(--card);font-family:var(--font-song);font-weight:700}
+.md .bi .lbl{display:inline-block;font-family:var(--font-head);font-weight:700;font-size:.7rem;letter-spacing:.1em;padding:.1rem .5rem;border-radius:6px;background:var(--accent);color:#fff;margin-bottom:.4rem}
+.md .bi>.zh .lbl{background:var(--kw)}
+.md .en p,.md .zh p{margin:.4rem 0}
+.gl-search{width:100%;box-sizing:border-box;padding:.7rem 1rem;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--fg);font:inherit;box-shadow:var(--shadow)}
+.gl-search:focus{outline:2px solid var(--accent)}
+.gl-row{display:grid;grid-template-columns:1fr;gap:.2rem .9rem;padding:.7rem .9rem;border-top:1px solid var(--line)}
+@media (min-width:760px){.gl-row{grid-template-columns:13rem 9rem 1fr}}
+.gl-row:first-child{border-top:0}
+.gl-en{font-family:var(--font-mono);font-weight:700;color:var(--accent);min-width:0;overflow-wrap:anywhere}
+.gl-zh{font-family:var(--font-head);font-weight:700;color:var(--kw)}
+.gl-def{font-size:.92rem;min-width:0}

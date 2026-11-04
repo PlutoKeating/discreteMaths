@@ -1,0 +1,162 @@
+// 英文术语表：en 为试卷/slides 中的英文原词（自动在正文中识别为可点击词），zh 为中文译名，
+// def 为一句话解释，cat 为分类，alias 为其他英文写法（复数、缩写、同义表达）。
+export const CATS = {
+  exam: '试卷指令词（看懂题目要求）',
+  prop: '命题逻辑',
+  pred: '谓词与量词',
+  infer: '推理规则',
+  proof: '证明方法',
+  math: '数学基础词',
+  vocab: '题干情景词',
+};
+
+export const GLOSSARY = [
+  // ---- 试卷指令词 ----
+  { en: 'translate', zh: '翻译（成逻辑式）', cat: 'exam', def: '把英文句子写成带量词和谓词的形式逻辑表达式。评分点：量词、联结词、括号都要对。' },
+  { en: 'formal logical expression', zh: '形式逻辑表达式', cat: 'exam', def: '只用 ∀ ∃ ¬ ∧ ∨ → ↔ 和题目给的谓词写出的式子，不能夹英文。', alias: ['formal logical expressions', 'logical expression'] },
+  { en: 'determine', zh: '判定、确定', cat: 'exam', def: '给出明确结论（能 / 不能、真 / 假、等价 / 不等价），并附理由。' },
+  { en: 'can be drawn', zh: '（结论）能被推出', cat: 'exam', def: '"a conclusion can be drawn" = 这个结论可以由前提有效地推出来。', alias: ['draw a conclusion', 'be drawn'] },
+  { en: 'write down the proof in detail', zh: '写出详细证明', cat: 'exam', def: '要一步一步写，每一步标明用了哪条推理规则（Step / Reason 表）。' },
+  { en: 'explain why', zh: '解释原因', cat: 'exam', def: '不能推出时，要指出是哪种谬误，并给出前提全真、结论为假的反例场景。' },
+  { en: 'no truth table should be used', zh: '不得使用真值表', cat: 'exam', def: '必须用等价律或推理规则，用真值表不给分。', alias: ['do not use truth tables', 'without truth table'] },
+  { en: 'show whether', zh: '判断是否……（并证明）', cat: 'exam', def: '"show whether A and B are equivalent" = 先下结论等价或不等价，再给证明或反例。' },
+  { en: 'propose a counterexample', zh: '给出一个反例', cat: 'exam', def: '写出一组具体真值赋值，并算出两边的值不同。', alias: ['give a counterexample', 'provide a counterexample'] },
+  { en: 'assume', zh: '假设、设', cat: 'exam', def: '题目给出的前提条件；证明里也用 "Assume…" 开头写假设。', alias: ['suppose', 'assuming'] },
+  { en: 'independent to', zh: '与……无关', cat: 'exam', def: '"p is independent to x" = p 里不含变量 x，所以 ∀x p ≡ p（域非空时）。', alias: ['independent of'] },
+  { en: 'nonempty', zh: '非空的', cat: 'exam', def: '域里至少有一个元素。若域为空，∀x P(x) 会"空真"，很多等价就不成立。', alias: ['non-empty', 'nonempty domain'] },
+  { en: 'giving justification', zh: '给出理由', cat: 'exam', def: '每个 True / False 后面必须跟理由：真要说明为什么对所有 / 举例，假要给反例 / 反证。', alias: ['justify', 'justification', 'with justification'] },
+  { en: 'decide which', zh: '判断哪些', cat: 'exam', def: '逐个判断列出的式子哪些为真、哪些为假。' },
+  { en: 'prove or disprove', zh: '证明或否证', cat: 'exam', def: '先判断命题真假：真则证明，假则给反例。本卷第 5 题为真，要证明。' },
+  { en: 'fixed integer', zh: '固定的整数', cat: 'exam', def: '题目里 n 是事先给定不变的常数，证明过程中不能改变它。', alias: ['fixed'] },
+  { en: 'such that', zh: '使得', cat: 'exam', def: '"there exist q and r such that a = nq + r" = 存在 q、r 使得 a = nq + r。数学英语最常见短语之一。' },
+  { en: 'there exist', zh: '存在', cat: 'exam', def: '对应 ∃。"there exist unique" = 存在且唯一（∃!），要分存在性和唯一性两段证。', alias: ['there exists', 'there is', 'there are'] },
+  { en: 'for every', zh: '对每一个', cat: 'exam', def: '对应 ∀。同义：for all / for each / for any / every / all / any。', alias: ['for all', 'for each', 'for any'] },
+  { en: 'the following', zh: '下列的', cat: 'exam', def: '"the following formulas" = 下面列出的这些式子。' },
+  { en: 'marks', zh: '分值', cat: 'exam', def: '"(24 marks)" = 本题 24 分。分值大的题要写足步骤。', alias: ['mark', 'total marks'] },
+  { en: 'hence', zh: '因此', cat: 'exam', def: '证明中的"所以"。同义：therefore / thus / so / it follows that。', alias: ['therefore', 'thus', 'it follows that'] },
+  { en: 'by definition', zh: '根据定义', cat: 'exam', def: '证明里把"n 是奇数"换成 "n = 2k + 1" 时写的理由。' },
+  { en: 'holds', zh: '成立', cat: 'exam', def: '"the statement holds" = 该命题成立。', alias: ['hold'] },
+  { en: 'contradicting', zh: '与……矛盾', cat: 'exam', def: '反证法结尾："…, contradicting the assumption" = 与假设矛盾。', alias: ['contradicts', 'a contradiction'] },
+
+  // ---- 命题逻辑 ----
+  { en: 'proposition', zh: '命题', cat: 'prop', def: '非真即假的陈述句。真值 (truth value) 只有 T / F。', alias: ['propositions', 'statement'] },
+  { en: 'compound proposition', zh: '复合命题', cat: 'prop', def: '用联结词把命题拼起来的式子，如 (p ∧ ¬q) → r。', alias: ['compound propositions'] },
+  { en: 'truth value', zh: '真值', cat: 'prop', def: '命题的值：True (T) 或 False (F)。', alias: ['truth values'] },
+  { en: 'truth table', zh: '真值表', cat: 'prop', def: '列出所有变量取值组合并算出结果的表。n 个变量有 2ⁿ 行。本卷禁止使用。', alias: ['truth tables'] },
+  { en: 'negation', zh: '否定（非）', cat: 'prop', def: '¬p，"not p"。真值取反。' },
+  { en: 'conjunction', zh: '合取（且）', cat: 'prop', def: 'p ∧ q，"p and q"。只有两者都真才真。也是推理规则名：由 p、q 得 p ∧ q。' },
+  { en: 'disjunction', zh: '析取（或）', cat: 'prop', def: 'p ∨ q，"p or q"，包含"两者都"的情况（inclusive or）。只有两者都假才假。' },
+  { en: 'exclusive or', zh: '异或', cat: 'prop', def: 'p ⊕ q，恰好一个为真时为真。', alias: ['XOR'] },
+  { en: 'conditional statement', zh: '条件语句（蕴含）', cat: 'prop', def: 'p → q，"if p then q"。只有 p 真 q 假时为假。p 叫 hypothesis / antecedent，q 叫 conclusion / consequence。', alias: ['conditional', 'implication', 'implies', 'imply'] },
+  { en: 'biconditional', zh: '双条件（当且仅当）', cat: 'prop', def: 'p ↔ q，"p if and only if q"。两边真值相同时为真。等价于 (p→q) ∧ (q→p)。', alias: ['biconditional statement', 'bi-implication'] },
+  { en: 'if and only if', zh: '当且仅当', cat: 'prop', def: '缩写 iff，对应 ↔。翻译题看到它就写 ↔。', alias: ['iff'] },
+  { en: 'only if', zh: '仅当（后面是结论）', cat: 'prop', def: '"p only if q" = p → q。注意方向：only if 后面的是箭头右边。' },
+  { en: 'necessary condition', zh: '必要条件', cat: 'prop', def: '"q is necessary for p" = p → q（没有 q 就没有 p）。必要条件在箭头右边。', alias: ['necessary'] },
+  { en: 'sufficient condition', zh: '充分条件', cat: 'prop', def: '"p is sufficient for q" = p → q（有 p 就保证 q）。充分条件在箭头左边。', alias: ['sufficient'] },
+  { en: 'converse', zh: '逆命题', cat: 'prop', def: 'p → q 的逆命题是 q → p，与原式不等价。' },
+  { en: 'inverse', zh: '否命题', cat: 'prop', def: 'p → q 的否命题是 ¬p → ¬q，与原式不等价（与逆命题等价）。' },
+  { en: 'contrapositive', zh: '逆否命题', cat: 'prop', def: 'p → q 的逆否命题是 ¬q → ¬p，与原式等价。逆否证明法的依据。' },
+  { en: 'logically equivalent', zh: '逻辑等价', cat: 'prop', def: 'P ≡ Q：任何真值赋值下 P、Q 真值相同，即 P ↔ Q 是永真式。', alias: ['equivalent', 'equivalence', 'equivalences', 'logical equivalence'] },
+  { en: 'tautology', zh: '永真式', cat: 'prop', def: '任何赋值下都为真的复合命题，如 p ∨ ¬p。' },
+  { en: 'contradiction', zh: '矛盾式 / 矛盾', cat: 'prop', def: '任何赋值下都为假的复合命题，如 p ∧ ¬p。反证法 (proof by contradiction) 就是推出它。' },
+  { en: 'contingency', zh: '可满足式（偶然式）', cat: 'prop', def: '既不是永真式也不是矛盾式。' },
+  { en: 'counterexample', zh: '反例', cat: 'prop', def: '使命题为假的一个具体例子：对 ∀ 是一个元素，对等价是一组赋值，对论证是前提真结论假的场景。', alias: ['counterexamples', 'counter-example'] },
+  { en: "De Morgan's laws", zh: '德摩根律', cat: 'prop', def: '¬(p ∧ q) ≡ ¬p ∨ ¬q；¬(p ∨ q) ≡ ¬p ∧ ¬q。量词版：¬∀x P ≡ ∃x ¬P，¬∃x P ≡ ∀x ¬P。', alias: ["De Morgan's Laws", 'De Morgan'] },
+  { en: 'distributive laws', zh: '分配律', cat: 'prop', def: 'p ∧ (q ∨ r) ≡ (p∧q) ∨ (p∧r)；p ∨ (q ∧ r) ≡ (p∨q) ∧ (p∨r)。像乘法分配 / 提公因式。', alias: ['distributive law', 'Distributive Laws'] },
+  { en: 'absorption laws', zh: '吸收律', cat: 'prop', def: 'p ∨ (p ∧ q) ≡ p；p ∧ (p ∨ q) ≡ p。', alias: ['absorption law', 'Absorption Laws'] },
+  { en: 'idempotent laws', zh: '幂等律', cat: 'prop', def: 'p ∨ p ≡ p；p ∧ p ≡ p。', alias: ['idempotent'] },
+  { en: 'identity laws', zh: '同一律', cat: 'prop', def: 'p ∧ T ≡ p；p ∨ F ≡ p。', alias: ['identity law'] },
+  { en: 'domination laws', zh: '支配律', cat: 'prop', def: 'p ∨ T ≡ T；p ∧ F ≡ F。', alias: ['domination law'] },
+  { en: 'double negation', zh: '双重否定', cat: 'prop', def: '¬(¬p) ≡ p。', alias: ['double negation law'] },
+  { en: 'commutative laws', zh: '交换律', cat: 'prop', def: 'p ∧ q ≡ q ∧ p；p ∨ q ≡ q ∨ p。', alias: ['commutative'] },
+  { en: 'associative laws', zh: '结合律', cat: 'prop', def: '(p ∧ q) ∧ r ≡ p ∧ (q ∧ r)；对 ∨ 同理。', alias: ['associative'] },
+  { en: 'negation laws', zh: '否定律', cat: 'prop', def: 'p ∨ ¬p ≡ T；p ∧ ¬p ≡ F。', alias: ['negation law'] },
+  { en: 'precedence', zh: '优先级', cat: 'prop', def: '¬ 最高，然后 ∧，∨/⊕，→，↔ 最低；量词高于所有联结词。' },
+  { en: 'exportation', zh: '输出律', cat: 'prop', def: 'p → (q → r) ≡ (p ∧ q) → r。第 2 题 b。' },
+
+  // ---- 谓词与量词 ----
+  { en: 'predicate', zh: '谓词（命题函数）', cat: 'pred', def: '带变量的陈述，如 P(x) = "x 通过课程"，代入具体对象后才成为命题。', alias: ['predicates', 'propositional function'] },
+  { en: 'quantifier', zh: '量词', cat: 'pred', def: '说明谓词对域中多少元素成立：∀（全部）、∃（至少一个）。', alias: ['quantifiers', 'quantification'] },
+  { en: 'universal quantifier', zh: '全称量词', cat: 'pred', def: '∀x P(x)："对所有 x，P(x) 成立"。有限域时等于一长串 ∧。', alias: ['universal quantification', 'universal'] },
+  { en: 'existential quantifier', zh: '存在量词', cat: 'pred', def: '∃x P(x)："存在 x 使 P(x) 成立"。有限域时等于一长串 ∨。', alias: ['existential quantification', 'existential'] },
+  { en: 'domain', zh: '论域（变量取值范围）', cat: 'pred', def: '量词所管辖的对象集合，也叫 universe of discourse。换域答案可能变。', alias: ['domain of discourse', 'universe of discourse'] },
+  { en: 'nested quantifiers', zh: '嵌套量词', cat: 'pred', def: '一个量词在另一个量词作用域内。不同类型的量词不能交换顺序：∀x∃y ≠ ∃y∀x。', alias: ['nested quantifier', 'nested'] },
+  { en: 'bound variable', zh: '约束变量', cat: 'pred', def: '被量词管住的变量。式子里所有变量都被约束后才是命题。', alias: ['bound'] },
+  { en: 'free variable', zh: '自由变量', cat: 'pred', def: '没有量词管的变量。含自由变量的式子不是命题，翻译题漏写 ∀x 就会出现它。', alias: ['free'] },
+  { en: 'scope', zh: '作用域', cat: 'pred', def: '量词所管辖的那一段式子。' },
+  { en: 'uniqueness quantifier', zh: '唯一量词', cat: 'pred', def: '∃!x P(x)："恰好一个 x"。可写成 ∃x (P(x) ∧ ∀y (P(y) → y = x))。', alias: ['exactly one', 'uniqueness quantification'] },
+  { en: 'vacuously true', zh: '空真', cat: 'pred', def: '前件为假的蕴含自动为真；空域上的 ∀x P(x) 自动为真。', alias: ['vacuous'] },
+  { en: 'restricted domain', zh: '受限域', cat: 'pred', def: '∀x>0 (…) 是 ∀x (x>0 → …) 的缩写；∃x>0 (…) 是 ∃x (x>0 ∧ …) 的缩写。' },
+
+  // ---- 推理规则 ----
+  { en: 'argument', zh: '论证', cat: 'infer', def: '一串前提加一个结论。有效 (valid) 指前提全真时结论必真。', alias: ['arguments', 'argument form'] },
+  { en: 'valid', zh: '有效的', cat: 'infer', def: '(p₁ ∧ … ∧ pₙ) → q 是永真式。无效 (invalid) = 存在前提全真而结论假的情况。', alias: ['validity', 'invalid'] },
+  { en: 'premise', zh: '前提', cat: 'infer', def: '论证中已知为真的命题。试卷里叫 hypothesis / hypotheses。', alias: ['premises'] },
+  { en: 'hypothesis', zh: '假设 / 前提；（蕴含的）前件', cat: 'infer', def: '试卷里 "Hypotheses" 指给定的前提；在 p → q 里 hypothesis 指 p（前件）。', alias: ['hypotheses', 'antecedent'] },
+  { en: 'conclusion', zh: '结论；（蕴含的）后件', cat: 'infer', def: '论证要推出的命题；在 p → q 里 conclusion 指 q（后件）。', alias: ['conclusions', 'consequence', 'consequent'] },
+  { en: 'rules of inference', zh: '推理规则', cat: 'infer', def: '已被证明有效的小论证模板，如 Modus Ponens，用来搭建大证明。', alias: ['rule of inference', 'inference'] },
+  { en: 'Modus Ponens', zh: '肯定前件式', cat: 'infer', def: 'p, p → q ∴ q。"有因必有果"。', alias: ['modus ponens'] },
+  { en: 'Modus Tollens', zh: '否定后件式', cat: 'infer', def: '¬q, p → q ∴ ¬p。"无果必无因"。', alias: ['modus tollens'] },
+  { en: 'hypothetical syllogism', zh: '假言三段论', cat: 'infer', def: 'p → q, q → r ∴ p → r。链式传递。' },
+  { en: 'disjunctive syllogism', zh: '析取三段论', cat: 'infer', def: 'p ∨ q, ¬p ∴ q。二选一排除。' },
+  { en: 'simplification', zh: '化简规则', cat: 'infer', def: 'p ∧ q ∴ p。从"且"里拆出一个。注意：对 ∨ 不能用。' },
+  { en: 'addition', zh: '附加规则', cat: 'infer', def: 'p ∴ p ∨ q。' },
+  { en: 'resolution', zh: '消解规则', cat: 'infer', def: 'p ∨ q, ¬p ∨ r ∴ q ∨ r。' },
+  { en: 'universal instantiation', zh: '全称实例化 (UI)', cat: 'infer', def: '∀x P(x) ∴ P(c)，c 是域中任一指定元素，如 Bob。', alias: ['UI'] },
+  { en: 'universal generalization', zh: '全称推广 (UG)', cat: 'infer', def: 'P(c) 对任意 c 成立 ∴ ∀x P(x)。c 必须是"任取的"。', alias: ['UG'] },
+  { en: 'existential instantiation', zh: '存在实例化 (EI)', cat: 'infer', def: '∃x P(x) ∴ P(c)，c 是一个新名字，只知道存在。', alias: ['EI'] },
+  { en: 'existential generalization', zh: '存在推广 (EG)', cat: 'infer', def: 'P(c) ∴ ∃x P(x)。有一个例子就能说存在。', alias: ['EG'] },
+  { en: 'fallacy', zh: '谬误', cat: 'infer', def: '看起来像推理规则、其实无效的论证形式。', alias: ['fallacies'] },
+  { en: 'affirming the conclusion', zh: '肯定后件谬误', cat: 'infer', def: 'p → q, q ∴ p。错误：q 真时 p 可真可假。', alias: ['affirming the consequent'] },
+  { en: 'denying the hypothesis', zh: '否定前件谬误', cat: 'infer', def: 'p → q, ¬p ∴ ¬q。错误：p 假时 q 可真可假。本卷第 1 题 ii)、iii) 的陷阱。', alias: ['denying the antecedent'] },
+
+  // ---- 证明方法 ----
+  { en: 'theorem', zh: '定理', cat: 'proof', def: '能被证明为真的命题。' },
+  { en: 'proof', zh: '证明', cat: 'proof', def: '从前提、定义和已知事实一步步推到结论的有效论证。', alias: ['proofs', 'prove', 'proving'] },
+  { en: 'direct proof', zh: '直接证明', cat: 'proof', def: '证 p → q：假设 p，推出 q。' },
+  { en: 'proof by contraposition', zh: '逆否证明', cat: 'proof', def: '证 p → q：假设 ¬q，推出 ¬p。因为 p → q ≡ ¬q → ¬p。第 5 题用它。', alias: ['contraposition', 'indirect proof'] },
+  { en: 'proof by contradiction', zh: '反证法', cat: 'proof', def: '要证 p：假设 ¬p，推出矛盾。证 p → q 时假设 p ∧ ¬q。' },
+  { en: 'proof by cases', zh: '分情况证明', cat: 'proof', def: '把所有可能分成若干情况，每种情况各证一次。依据 (p₁∨p₂)→q ≡ (p₁→q)∧(p₂→q)。' },
+  { en: 'exhaustive proof', zh: '穷举证明', cat: 'proof', def: '可能情况有限且少时，全部代入检查。' },
+  { en: 'existence proof', zh: '存在性证明', cat: 'proof', def: '证 ∃x P(x)：构造出一个满足条件的具体例子。', alias: ['existence'] },
+  { en: 'uniqueness proof', zh: '唯一性证明', cat: 'proof', def: '两段：①存在：给出例子；②唯一：设另有 y 满足，推出 y = x。第 6 题。', alias: ['uniqueness', 'unique'] },
+  { en: 'disprove', zh: '否证（证明为假）', cat: 'proof', def: '给出一个反例说明命题不成立。' },
+  { en: 'well-ordering principle', zh: '良序原理', cat: 'proof', def: '非负整数的任意非空集合有最小元。带余除法存在性的另一种证法。' },
+  { en: 'Q.E.D.', zh: '证毕', cat: 'proof', def: '拉丁语 quod erat demonstrandum，常用符号 ∎ 或 □ 表示证明结束。', alias: ['QED'] },
+
+  // ---- 数学基础词 ----
+  { en: 'integer', zh: '整数', cat: 'math', def: '…, −2, −1, 0, 1, 2, …，记作 ℤ。第 4 题的域、第 5、6 题的对象。', alias: ['integers'] },
+  { en: 'even', zh: '偶数', cat: 'math', def: 'n 是偶数 ⇔ 存在整数 k 使 n = 2k。证明题必须用这个定义展开。' },
+  { en: 'odd', zh: '奇数', cat: 'math', def: 'n 是奇数 ⇔ 存在整数 k 使 n = 2k + 1。' },
+  { en: 'rational', zh: '有理数', cat: 'math', def: '能写成 p/q（p、q 为整数，q ≠ 0）的实数。', alias: ['rational number'] },
+  { en: 'irrational', zh: '无理数', cat: 'math', def: '不是有理数的实数，如 √2。常用反证法证明。' },
+  { en: 'divides', zh: '整除', cat: 'math', def: 'n | m ⇔ 存在整数 k 使 m = nk。', alias: ['divisible', 'divide'] },
+  { en: 'quotient', zh: '商', cat: 'math', def: 'a = nq + r 中的 q。' },
+  { en: 'remainder', zh: '余数', cat: 'math', def: 'a = nq + r 中的 r，满足 0 ≤ r < n。' },
+  { en: 'division algorithm', zh: '带余除法', cat: 'math', def: '对整数 a 和正整数 n，存在唯一的 q、r 使 a = nq + r 且 0 ≤ r < n。第 6 题。' },
+  { en: 'floor', zh: '向下取整', cat: 'math', def: '⌊x⌋ = 不超过 x 的最大整数。' },
+  { en: 'perfect square', zh: '完全平方数', cat: 'math', def: 'a 是完全平方数 ⇔ 存在整数 b 使 a = b²。' },
+  { en: 'real number', zh: '实数', cat: 'math', def: '记作 ℝ。换成实数域时 x·y = 0 之类的式子真假可能变化。', alias: ['real numbers'] },
+  { en: 'positive integer', zh: '正整数', cat: 'math', def: '1, 2, 3, …（不含 0）。', alias: ['positive integers'] },
+
+  // ---- 题干情景词 ----
+  { en: 'attends', zh: '出席、上（课）', cat: 'vocab', def: 'A(x, y)："x attends lecture y" = 学生 x 上了第 y 节课。', alias: ['attend', 'attended'] },
+  { en: 'lecture', zh: '讲座、一节课', cat: 'vocab', def: '第 1 题中 y 的域：课程的所有讲座。', alias: ['lectures'] },
+  { en: 'understands the material', zh: '理解课程内容', cat: 'vocab', def: 'M(x)。"material" 这里指课程材料 / 内容。', alias: ['understand the material', 'material'] },
+  { en: 'passes the course', zh: '通过课程', cat: 'vocab', def: 'P(x)。', alias: ['pass the course', 'passes'] },
+  { en: 'respected', zh: '受尊敬的', cat: 'vocab', def: 'R(x)："x is respected"。' },
+  { en: 'students in the class', zh: '班上的学生', cat: 'vocab', def: '第 1 题中 x 的域。' },
+];
+
+const norm = (s) => s.toLowerCase().replace(/\s+/g, ' ').trim();
+export const TERM_INDEX = (() => {
+  const m = new Map();
+  for (const t of GLOSSARY) {
+    m.set(norm(t.en), t);
+    for (const a of t.alias || []) m.set(norm(a), t);
+  }
+  return m;
+})();
+export const lookupTerm = (s) => TERM_INDEX.get(norm(s));
+// 自动识别用：所有英文写法，长的优先，避免 "quantifier" 抢先匹配 "universal quantifier"
+export const ALL_PATTERNS = [...TERM_INDEX.keys()].sort((a, b) => b.length - a.length);
