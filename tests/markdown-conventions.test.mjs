@@ -85,3 +85,36 @@ test('all chapter content Markdown files obey standalone $$ and HTML container r
     }
   }
 });
+
+test('Relation exam, question solutions, templates, and standalone offline guide exist and are clean', () => {
+  const required = [
+    'overview.md',
+    'sets-functions.md',
+    'relations.md',
+    'equiv-poset.md',
+    'exam.md',
+    'q1.md',
+    'q2.md',
+    'q3.md',
+    'q4.md',
+    'q5.md',
+    'templates-review.md',
+  ];
+  for (const f of required) {
+    const p = path.join(ROOT, 'Relation/content', f);
+    assert.equal(fs.existsSync(p), true, `Missing Relation/content/${f}`);
+  }
+
+  const guidePath = path.join(ROOT, 'Relation/Midterm-Review-Guide.md');
+  assert.equal(fs.existsSync(guidePath), true, 'Missing Relation/Midterm-Review-Guide.md');
+  checkMarkdownFile(guidePath);
+  const guide = fs.readFileSync(guidePath, 'utf8');
+  assert.equal(/<div\b/i.test(guide), false, 'Standalone Midterm-Review-Guide.md must not contain raw <div HTML wrappers');
+  assert.equal(/\[\[[^\]]+\]\]/.test(guide), false, 'Standalone Midterm-Review-Guide.md must not contain custom [[term]] syntax');
+  for (const kw of ['3x^4+30x^2+80', 'Warshall', 'Hasse', '650', 'Lattice']) {
+    assert.ok(
+      guide.replace(/\s+/g, '').includes(kw.replace(/\s+/g, '')),
+      `Midterm-Review-Guide.md missing expected content "${kw}"`
+    );
+  }
+});
