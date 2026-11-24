@@ -79,7 +79,7 @@ iii) Jessica 没有通过这门课
 - ==explain why== → 说出谬误名（denying the hypothesis）并给前提全真、结论假的反例场景。
 - ==No truth table should be used== → 用了真值表 = 0 分。
 
-答案见"逐题精讲"第 1 题。
+完整推演与满分落笔见主线正文 **第 04 节（1a 翻译）** 与 **第 05 节（1b 推理链与反例）**。
 
 </div>
 
@@ -114,7 +114,7 @@ c) $p$ 与 $\forall x\,(\neg p\rightarrow(p\land r(x)))$，假设 $p$ 与 $x$ �
 - ==independent to $x$== → $p$ 里没有 $x$，所以可以用 $\forall x\,p\equiv p$。
 - ==nonempty== → 这是让 $\forall x\,p\equiv p$ 成立的条件，答题时要引用它。
 
-答案见"逐题精讲"第 2 题（三问全部等价）。
+完整推演与满分落笔见主线正文 **第 02 节（a, b 问）** 与 **第 03 节（c 问，三问全部等价）**。
 
 </div>
 
@@ -152,7 +152,7 @@ d) 存在 $y$、存在 $x$，使得 $P(x,y)$
 - ==Decide which … are true== → 四个都要判断，不是只挑真的写。
 - ==giving justification== → 只写 True / False 不得分：真要给构造（$x=10-y$）或例子，假要给反例或反证。卷面 −2 大概率扣在这里。
 
-答案见"逐题精讲"第 4 题。
+完整推演与先后手出牌实验见主线正文 **第 03 节**。
 
 </div>
 
@@ -175,7 +175,7 @@ Prove or disprove that for all integers $n$, if $n^2$ is even, then $n$ must als
 - ==even== / ==odd== → 卷面手写"偶 / 奇"。证明必须用定义：$n=2k$ 或 $n=2k+1$。
 - ==if …, then …== → $p\to q$ 形式，可选直接 / 逆否 / 反证。这题从 $n^2=2k$ 开根号算不动，用逆否。
 
-答案见"逐题精讲"第 5 题。
+完整推演与英文证明示范见主线正文 **第 06 节**。
 
 </div>
 
@@ -198,7 +198,7 @@ Let $2\leq n$ be a fixed integer. Prove that for every integer $a$ there exist u
 - ==there exist unique== → 必须写两段：Existence（存在）+ Uniqueness（唯一）。卷面手写"唯一的?"说明漏了第二段。
 - ==with $0\le r<n$== / ==such that== → "满足 / 使得"，这是对 $q,r$ 的约束条件，唯一性证明里要用到 $|r_1-r_2|<n$。
 
-答案见"逐题精讲"第 6 题。
+完整推演与两段式夹逼证明见主线正文 **第 07 节**。
 
 </div>
 

@@ -148,6 +148,19 @@ export const GLOSSARY = [
   { en: 'students in the class', zh: '班上的学生', cat: 'vocab', def: '第 1 题中 x 的域。' },
 ];
 
+const CAT_DEFAULT_SECTION = {
+  exam: 's04',
+  prop: 's01',
+  pred: 's03',
+  infer: 's05',
+  proof: 's06',
+  math: 's06',
+  vocab: 's04',
+};
+for (const item of GLOSSARY) {
+  if (!item.sectionId) item.sectionId = CAT_DEFAULT_SECTION[item.cat] || 's01';
+}
+
 const norm = (s) => s.toLowerCase().replace(/\s+/g, ' ').trim();
 export const TERM_INDEX = (() => {
   const m = new Map();
