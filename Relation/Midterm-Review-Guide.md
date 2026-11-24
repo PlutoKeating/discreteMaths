@@ -1,822 +1,264 @@
-# Midterm Test 02 & 全章体系复习指南 —— Sets, Functions & Relations（Ch2.1–2.3, Ch9.1–9.3, Ch9.5–9.6）
+# 集合、函数与二元关系 · 怎么把对象配成对、连成网、分好类、排出上下级？
 
-> 配套材料：`Midterm-Test-02.md`、`Slides-2in1/` 三份课件（Ch2.1–2.3、Ch9.1–9.3、Ch9.5–9.6）、`Tutorials/`（Tutorial 04–06 答案）。
-> 本指南为 `/Relation/` 网页的纯 Markdown 离线同步版，分为七部分：**第一性原理总纲 → 集合与函数 → 二元关系与闭包 → 等价关系与偏序/格 → Midterm Test 02 原题与翻译 → 逐题精讲 → 通用解法模板与通关自测**。
-
----
-
-# 第 0 部分：第一性原理总纲
-
-## 0.1 整章只有一个底层事实：集合与关系只是“谓词的真值表”
-
-如果把第 1 章（Logic and Proof）和本章放在一起看，你会发现 **Sets、Functions、Relations、Equivalence、Posets 根本不是五章零散的定义，而是同一个东西不断加约束长出来的五棵枝干**：
-
-- **第 1 章的一元谓词 $P(x)$** $\Longleftrightarrow$ **第 2 章的集合 $A = \{x \in U \mid P(x)\}$**：所谓 $x \in A$，不过是 "$P(x)$ 的**真值**算出来是 $\mathbf{T}$"。因此集合的 $\cup,\ \cap,\ \overline{A},\ \subseteq$ 与逻辑的 $\lor,\ \land,\ \neg,\ \to$ 一字不差！
-- **第 1 章的二元谓词 $R(a,b)$** $\Longleftrightarrow$ **第 9 章的二元关系 $R \subseteq A \times B$**：所谓 $(a,b) \in R$，不过是 "$R(a,b)$ 的真值算出来是 $\mathbf{T}$"。当集合有限时，把所有 $(a_i, b_j)$ 的 $\mathbf{T}/\mathbf{F}$（写成 $1/0$）排成一张方格表，就是 **0-1 关系矩阵 $M_R$**；把 $1$ 画成箭头，就是 **有向图（Directed Graph）**。
-
-```mermaid
-flowchart TD
-  P1["第 1 章：谓词与真值 T / F"] --> S["一元谓词 P(x) 的真值集<br/>集合 Set: A = {x | P(x)}"]
-  S --> CP["有序对 (a,b) 与笛卡尔积 A × B"]
-  CP --> R["任意子集 R ⊆ A × B<br/>二元关系 Binary Relation"]
-  R -->|"约束 1：每个输入恰好 1 个输出<br/>∀a∈A ∃!b∈B ((a,b)∈f)"| FN["函数 Function f: A → B<br/>单射 · 满射 · 双射 · 逆函数"]
-  R -->|"约束 2：自反 + 对称 + 传递<br/>抽象“相等 =”"| EQ["等价关系 Equivalence Relation<br/>等价类 [a]_R ↔ 集合划分 Partition"]
-  R -->|"约束 3：自反 + 反对称 + 传递<br/>抽象“小于等于 ≤ / 整除 | / 包含 ⊆”"| PO["偏序集 Poset (A, ≼)<br/>Hasse 图 · 极值上下界 · 格 Lattice"]
-```
-
-## 0.2 四大核心结构的一页纸判别总表
-
-考场上看到任何对象，先问自己它在下面哪一行，证明套路和反例套路立刻自动浮现：
-
-| 结构 | 本质直觉 | 充要条件（怎么证成立） | 怎么举反例推翻（Disprove） |
-|---|---|---|---|
-| **集合相等** $A = B$ | 两盒装的元素完全相同 | 互含：$A \subseteq B$ **且** $B \subseteq A$（任取 $x\in A$ 推 $x\in B$，反之亦然） | 找**一个元素** $x$ 属于一边但不属于另一边 |
-| **函数** $f: A \to B$ | 每个输入**有且仅有** 1 个输出 | ① 全定义（每行至少一个 1）② 单值（每行至多一个 1） | 找 $a\in A$ 没像（如 $1/0$），或找 $a\in A$ 有两个像（如 Test 02 Q3a 的 $3\to 1,2$） |
-| **双射** Bijection | 左右两边元素一根绳拴一个，不重不漏 | ① **One-to-One**：设 $f(a)=f(b)$ 推出 $a=b$；② **Onto**：任取 $y\in B$ 解出 $x\in A$ 使 $f(x)=y$ | 非单射：举 $a\neq b$ 但 $f(a)=f(b)$；非满射：举 $b\in B$ 无原像 |
-| **等价关系** | 把元素按“同一属性”分班抱团 | **自反 + 对称 + 传递**（矩阵重排后是主对角线上的全 $1$ 方块） | 缺哪条举哪条的具体元素反例 |
-| **偏序关系** | 给元素排“辈分/上下级”（允许平级不可比） | **自反 + 反对称 + 传递**（有向图抹掉自环后绝无有向环，可画 Hasse 图） | 找异点双向边 $a\neq b$ 但 $aRb \land bRa$（破反对称），或两步可达一步不可达（破传递） |
-| **格** Lattice | 任意两元素往上必汇于唯一最小上界、往下必聚于唯一最大下界 | 对 $A$ 中**每一对** $\{a,b\}$，$\text{lub}\{a,b\}$ 与 $\text{glb}\{a,b\}$ 均存在 | 找**一对** $\{a,b\}$ 无公共上/下界，或有多个极小上界/极大下界（蝴蝶结结构） |
-
-## 0.3 教材与老师课件章节号对照说明（防迷路必看）
-
-老师分发页 `bd.htm` 与考试大纲采用 **Rosen《Discrete Mathematics and Its Applications》第 7/8 版**章节号（`Ch9.1–9.6`），而老师三份 PDF 课件内页页脚保留了 **Rosen 第 5 版**旧章节号（`Ch5.1–5.6`），且内含部分超标题延伸小节。本站完整对齐如下：
-
-| 考试大纲标号（Image 1 / `bd.htm`） | 老师 PDF 内页标号 | 配套练习 | 核心必考模块 vs 课件延伸概念 |
-|---|---|---|---|
-| **Ch2.1, 2.2, 2.3**: Sets and Functions | `Ch 2.1, 2.2, 2.3`（41 页） | `Tutorial 04` | **必考**：$\in$ 与 $\subseteq$、幂集、笛卡尔积、集合运算、函数单/满/双射与逆、复合、限制域造双射；**概念速览**：三集合容斥、位串表示 |
-| **Ch9.1, 9.2, 9.3**: Relations and Properties | `Ch 5.1, 5.2, 5.3, 5.4`（48 页） | `Tutorial 05` | **必考**：关系有向图与 0-1 矩阵、6 大性质、关系计数、逆/补/异或/复合、三种闭包与 **Warshall 算法**；**概念速览**：$n$ 元关系与数据库 |
-| **Ch9.5, 9.6**: Equivalence and Partial Orderings | `Ch 5.5, 5.6`（35 页） | `Tutorial 06` | **必考**：等价关系、同余、等价类与划分、偏序与对偶、全序、Hasse 图、极值与上下界、**格 Lattice**；**概念速览**：字典序、良序集、有界格与有补格 |
-
-#### 【重点提示】考前最值钱的三句保命提醒（来自课件与 Test 02 深度排雷）
-
-1. **复合矩阵左右顺序大坑（Slide 45）**：$(a,c)\in R_2\circ R_1$ 意思是**先走 $R_1$、再走 $R_2$**！虽然老师 PPT 把矩阵写成了符号 $M_{R_2}\circ M_{R_1}$，但按下标公式 $(i,j)=\bigvee_k ((M_{R_1})_{ik}\land (M_{R_2})_{kj})$，**手算矩阵乘法时左边必须放 $M_{R_1}$、右边放 $M_{R_2}$**！放反直接丢光整小问分数。
-2. **极值看子集内部，上下界看全集外部（Test 02 Q5）**：求子集 $B$ 的 minimal / maximal / least / greatest，候选人**只能在 $B$ 里面挑**；求 $B$ 的 upper / lower bounds、LUB、GLB，候选人在**整个偏序集 $A$ 里挑**！且在非全整数子集上求整除 LUB/GLB **绝不能盲套数论 $\operatorname{lcm}/\gcd$**（见第 5 题 g 的 $\{10,13\}$ 神坑）。
-3. **论域决定生死（Test 02 Q3c & Tutorial 04 Q13）**：$x^2 \ge y$ 在**整数集 $\mathbb{Z}$** 上是自反的（整数没有 $(0,1)$ 之间的小数！），换到实数集 $\mathbb{R}$ 上就不自反（$0.5^2 < 0.5$）；$\lceil n/2\rceil$ 在 $\mathbb{Z}\to\mathbb{Z}$ 上是满射，函数性质永远先圈出 domain 与 codomain！
+> 不用把集合、函数、关系矩阵、等价类和偏序格当成五门互不相干的字典来背。直接以 Midterm Test 02（76 分）的五道大题为路标，顺着“给机器动手术 → 在 0-1 表上算中转 → 给关系做体检 → 把整除画成层级网”一路打穿。
+> 配套在线交互版路径：`/Relation/`（含交互实验教具、原卷双语抽屉、术语点击速查与本机笔记保存）。
 
 ---
 
-# 第 1 部分：集合与函数（Ch2.1–2.3）
+## 开篇 · 把真题摊在桌上
 
-## 1.1 集合基础：元素 $\in$ 与子集 $\subseteq$ 的盒子模型【高频必考】
+翻开这门课第二阶段的课件，目录跨度大得吓人：先是第 2 章的集合与函数，猛地跳到第 9 章的二元关系、0-1 矩阵、Warshall 算法，接着又是等价类、偏序集、哈斯图和格（Lattice）。如果照着字典背名词，不出半小时就会彻底迷路。
 
-- **定义（Slides 2.1 p3–p8）**：集合（set）是对象的无序聚集（unordered collection）。
-  - **无序且互异**：$\{1, 3, 3, 5, 5\} = \{5, 3, 1\}$（Tutorial 04 Q3a）。
-  - **常用数集记号（Slides p4）**：自然数 $\mathbb{N}=\{0,1,2,\dots\}$、整数 $\mathbb{Z}$、正整数 $\mathbb{Z}^+=\{1,2,3,\dots\}$、有理数 $\mathbb{Q}$、实数 $\mathbb{R}$、正实数 $\mathbb{R}^+$。
-  - **真值集（Truth Set，Slides p17）**：给定 domain $D$，谓词 $P(x)$ 的真值集为 $\{x \in D \mid P(x)\}$。例如在 $\mathbb{Z}$ 上 $|x|=1$ 的真值集是 $\{-1, 1\}$。
+我们还是用老办法：不看课本目录，直接把这一模块对应的真实考卷 **Midterm Test 02（满分 76 分，共 5 道大题）** 摊在面前，看看要拿满这 76 分，考官到底让你动手做哪五件事：
 
-### 考场第一易错点：$\in$（属于）vs $\subseteq$（包含于）与空集 $\varnothing$
+1. **摆弄三台实数加工机**（第 1 题，12 分）：把两台机器串起来算复合、加起来算和，找出绝对值机器 $h(x)=|x/2|$ 能吐出哪些数，再给它的入口和出口动两刀小手术，让它变成能原路倒推回去的“一一对应”。
+2. **在两张 $3 \times 3$ 的 0-1 方格表上做六次推演**（第 2 题，24 分，占了近三分之一张卷子！）：把箭头掉头、黑白反转、挑出两张表不一样的地方、先走第一张表再走第二张表，最后补上最少的新 `1` 让单行道变双向、让转车变直达。
+3. **给三条规则做八项全身检查**（第 3 题，12 分）：给你一串数字配对、一句“拥有相同的朋友”和一条整数不等式 $x^2 \ge y$，逐项判断它们算不算函数、算不算分班抱团的等价关系、算不算排辈分的偏序关系。
+4. **写一段 8 分的英文短证明**（第 4 题，8 分）：已知两份关系名单都是“有去必有回”的，证明它们重叠的交集依然有去必有回。
+5. **把 6 个数的整除关系画成极简层级图**（第 5 题，20 分）：在 $\{1, 5, 10, 13, 65, 650\}$ 上擦掉多余连线画出哈斯图，在图上找谁垫底、谁封顶、谁是公共天花板，最后判断整张图算不算一个“格”。
 
-把集合想象成**带外包装的快递盒**：
-- **$x \in A$（属于）**：把最外层盒子 $A$ 打开，**往里只看一层**，能直接摸到一模一样的物品 $x$。
-- **$B \subseteq A$（子集）**：$\forall x\,(x\in B \to x\in A)$ —— 把盒子 $B$ 打开倒出里面每一件物品，每一件都能在盒子 $A$ 里找到。
-- **集合相等 $A = B$**：$A \subseteq B \land B \subseteq A \iff \forall x\,(x\in A \leftrightarrow x\in B)$。
+你会发现，这五件事从头到尾其实只是在把“**两个对象配成一对**”玩出不同的花样。下面我们分四幕顺着考卷一路推过去。
 
-#### 【重点提示】Tutorial 04 Q3–Q5 经典陷阱：∅ vs {∅} vs {∅, {∅}}
+<details>
+<summary><strong>开篇自查 1 · </strong>纸箱 {∅} 里面是空无一物，还是装着一件东西？</summary>
 
-- **空集 $\varnothing = \{\}$**：一个空空如也的盒子，基数 $|\varnothing| = 0$。对任何集合 $S$，永远有 $\varnothing \subseteq S$（因为 $x\in\varnothing$ 恒为 $\mathbf{F}$，蕴含式 $\forall x\,(x\in\varnothing \to x\in S)$ **空真 vacuously true**！）。
-- **单元素集 $\{\varnothing\}$**：一个大盒子里装着**一个空盒子**！它**不是空集**，基数 $|\{\varnothing\}| = 1$，它唯一的成员是 $\varnothing$。
-- 逐条秒杀 Tutorial 04 Q5：
-  - $\varnothing \in \{\varnothing\}$ —— **True**（打开外盒就是 $\varnothing$）
-  - $\varnothing \in \{\varnothing, \{\varnothing\}\}$ —— **True**
-  - $\{\varnothing\} \in \{\varnothing\}$ —— **False**（打开外盒只有 $\varnothing$，没有带壳的 $\{\varnothing\}$）
-  - $\{\varnothing\} \in \{\{\varnothing\}\}$ —— **True**
-  - $\{\varnothing\} \subset \{\varnothing, \{\varnothing\}\}$ —— **True**（左盒元素 $\varnothing$ 在右盒中，且右盒多了 $\{\varnothing\}$，是真子集 proper subset）
-  - $\{\{\varnothing\}\} \subset \{\{\varnothing\}, \{\varnothing\}\}$ —— **False**！右边重复写两次等于 $\{\{\varnothing\}\}$，左右相等，不是**真**子集（$\subset$ 要求 $\subseteq$ 且 $\neq$）！
-- **手写卷面常见记法错误（Test 02 Q1c 实录）**：想表达“正实数与 $0$ 并起来”，**绝不能写** $\{\mathbb{R}^+, 0\}$！因为 $\{\mathbb{R}^+, 0\}$ 表示一个只含 2 个元素（一个是集合 $\mathbb{R}^+$ 本身、一个是数字 $0$）的二元集。正确写法是 $[0, +\infty)$、$\mathbb{R}^+ \cup \{0\}$ 或 $\{y \in \mathbb{R} \mid y \ge 0\}$。
+**装着 1 件东西！** 空集 $\varnothing$ 是一只空纸箱（元素个数为 $0$）；而 $\{\varnothing\}$ 是一只大纸箱，打开盖子能摸出里面放着一只空纸箱（元素个数为 $1$）。分清“箱子本身”和“箱子里的东西”，集合题就不会再绕晕。
 
----
+</details>
 
-## 1.2 幂集 Power Set 与笛卡尔积 Cartesian Product【高频必考】
+<details>
+<summary><strong>开篇自查 2 · </strong>如果 A 认识 B、B 认识 C，A 未必认识 C。那如果把规则换成“A 和 B 拥有一模一样的朋友圈”，它还能一路传下去吗？</summary>
 
-### A. 幂集 $\mathcal{P}(S)$（Slides 2.1 p10）
-- **定义**：集合 $S$ 的所有子集组成的集合，记作 $\mathcal{P}(S) = \{X \mid X \subseteq S\}$。
-- **基数公式**：若 $|S| = n$，则每个元素有“选 / 不选” 2 种状态，故：
+**完全能传下去！** 因为“朋友圈一模一样”背后是一个真正的**等号** $F(A) = F(B)$：既然 $F(A)=F(B)$ 且 $F(B)=F(C)$，当然 $F(A)=F(C)$。这正是 Test 02 第 3b 题考的“等价关系”。
 
-$$
-|\mathcal{P}(S)| = 2^n
-$$
-
-- 特例：$\mathcal{P}(\varnothing) = \{\varnothing\}$（含 $2^0=1$ 个元素）；$\mathcal{P}(\{\varnothing\}) = \{\varnothing, \{\varnothing\}\}$（含 $2^1=2$ 个元素）。
-
-### B. 有序 $n$ 元组与笛卡尔积（Slides 2.1 p11–p15，Tutorial 04 Q6–Q7）
-- **有序对（Ordered Pair）**：$(a,b) = (c,d) \iff a=c \land b=d$。当 $a\neq b$ 时 $(a,b)\neq (b,a)$。
-- **笛卡尔积（Cartesian Product）**：
-
-$$
-A \times B = \{(a,b) \mid a \in A \land b \in B\}, \qquad |A \times B| = |A| \cdot |B|
-$$
-
-- **不满足交换律，也不满足结合律（Tutorial 04 Q7 必考简答）**：
-  - 当 $A, B$ 非空且 $A \neq B$ 时，$A \times B \neq B \times A$；但若其中有一个是 $\varnothing$，则 $A \times \varnothing = \varnothing \times A = \varnothing$。
-  - **为什么 $A \times B \times C \neq (A \times B) \times C$？（标准英文答法）**：
-    Assume $(a,b,c) \in A \times B \times C$, which is an **ordered 3-tuple**; whereas $((a,b), c) \in (A \times B) \times C$ is an **ordered 2-tuple** whose first entry is a 2-tuple. Therefore, their elements have different structures and the two sets are not equal (assuming $A, B, C$ are nonempty).
+</details>
 
 ---
 
-## 1.3 集合运算、恒等式与三种标准证法【高频必考】
+# 第 1 幕：从“把范围说清”到“能原路倒推的机器”（直指第 1 题（12 分））
 
-### A. 五种集合运算与逻辑联结词的一一对应（Slides 2.2 p18–p22）
+> 先把写集合范围时的拆箱规矩立稳，再把三台实数加工机摆上桌面：串起来怎么算？两个不同输入撞上同一个输出时，怎么动两刀小手术让它能唯一倒推回去？
 
-| 集合运算 | 集合构造定义 | 对应的第 1 章逻辑式 | Tutorial 04 Q10 典型充要结论 |
-|---|---|---|---|
-| 并集 Union $A \cup B$ | $\{x \mid x\in A \lor x\in B\}$ | $P(x) \lor Q(x)$ | $A \cup B = A \iff B \subseteq A$ |
-| 交集 Intersection $A \cap B$ | $\{x \mid x\in A \land x\in B\}$ | $P(x) \land Q(x)$ | $A \cap B = A \iff A \subseteq B$；不相交 Disjoint $\iff A\cap B=\varnothing$ |
-| 差集 Difference $A - B$ | $\{x \mid x\in A \land x\notin B\} = A \cap \overline{B}$ | $P(x) \land \neg Q(x)$ | $A - B = A \iff A \cap B = \varnothing$；$A - B = B - A \iff A = B$ |
-| 补集 Complement $\overline{A}$ | $\{x \in U \mid x\notin A\} = U - A$ | $\neg P(x)$ | $\overline{\overline{A}} = A$；De Morgan: $\overline{A\cup B}=\overline{A}\cap\overline{B},\ \overline{A\cap B}=\overline{A}\cup\overline{B}$ |
-| 对称差 Symmetric Diff $A \oplus B$ | $(A - B) \cup (B - A) = (A\cup B)-(A\cap B)$ | $P(x) \oplus Q(x)$ | $A \oplus A = \varnothing$；$A \oplus \varnothing = A$ |
+## 01 写答案范围时，为什么多套一层花括号意思就全变了？
 
-### B. 集合恒等式全部十律（直接把第 1 章逻辑等价律的 $\land,\lor,\neg,\mathbf{F},\mathbf{T}$ 换成 $\cap,\cup,\overline{\phantom{A}},\varnothing,U$！）
-- 同一律：$A \cup \varnothing = A$，$A \cap U = A$；支配律：$A \cup U = U$，$A \cap \varnothing = \varnothing$；
-- 幂等律、双重补律、交换律、结合律、分配律 $A \cap (B \cup C) = (A\cap B) \cup (A\cap C)$、吸收律 $A \cup (A\cap B) = A$、补律 $A \cup \overline{A} = U,\ A \cap \overline{A} = \varnothing$、De Morgan 律。
+*为 Q1c 排雷 · 集合、子集与有序对*
 
-### C. 证明集合恒等式的三种正规武器
-1. **双向包含元素追逐法（Element Argument）**：证 $L = R$，先任取 $x\in L$ 展开为逻辑式推至 $x\in R$（得 $L\subseteq R$），再反推 $R\subseteq L$（若每步都是 $\iff$ 可合并写）。
-2. **集合代数定律法（Set Identities）**：从左式每步套用集合恒等律化为右式并标律名（与逻辑无真值表证明完全同构）。
-3. **成员表法（Membership Table）**：列 $x$ 属于/不属于 $A,B,C$ 的 $2^k$ 种 $1/0$ 组合，核对两列完全一致。
+先看一个当年真实考卷（Test 02 第 1c 题）上的失分小现场。题目让你写出绝对值函数 $h(x) = |x/2|$ 能算出哪些实数。有位同学心里非常清楚答案是“所有正实数再加上一个 $0$”，于是提笔在卷面上写下了：
+
+$$
+\{\mathbb{R}^+, 0\}
+$$
+
+阅卷老师看到这一行，眉头立刻皱了起来。明明意思想对了，为什么这么写就出了岔子？
+
+把一对花括号 $\{\dots\}$ 想成一个**贴了封条的快递纸箱**。往纸箱里塞进几个互不相同的东西，不排先后次序（写 $\{1, 3, 5\}$ 和写 $\{5, 3, 3, 1\}$ 是同一个箱子），这就是数学里的 **集合（set）**，箱子里的每件物品叫作它的 **元素（element）**。
+
+问题就出在“拆箱只拆最外一层”上：
+- 写 $x \in A$（读作属于），意思是把箱子 $A$ 的盖子掀开，**伸手进去直接能摸到 $x$ 这件东西**。
+- 写 $B \subseteq A$（读作 **子集 subset**），意思是把箱子 $B$ 里的每一样东西倒出来，样样都能在箱子 $A$ 里找到（也就是第 1 章学过的 $\forall x\,(x \in B \to x \in A)$；如果 $A$ 里还比 $B$ 多出至少一件东西，就叫 **真子集 proper subset**，记作 $B \subset A$）。
+
+现在回头看那位同学写的 $\{\mathbb{R}^+, 0\}$：他在外面套了一层新纸箱，往里面放了**两件物品**——第一件物品是“装满全体正实数的那个大箱子 $\mathbb{R}^+$ 整体”，第二件物品是数字 $0$。如果你伸手进 $\{\mathbb{R}^+, 0\}$ 里找数字 $3$，摸得着吗？摸不着！因为 $3$ 锁在里面的小箱子 $\mathbb{R}^+$ 肚子里，外层大箱子里总共只有两样东西！
+
+想把两个箱子里的东西倒进同一个大池子里合起来，应该用开口朝上的 **并集（union）** 符号 $\cup$，写成 $\mathbb{R}^+ \cup \{0\}$；或者用竖线把挑选规则写清楚——`{代表元素 | 它要满足的条件}`，叫 **集合构造记法（set builder notation）**，写成 $\{y \in \mathbb{R} \mid y \ge 0\}$，也就是区间 $[0, +\infty)$。
+
+用同一个“拆快递箱”的眼光，Tutorial 04 前五题最爱考的“空集绕口令”也一下子就透明了：
+- 什么都没装的空箱子记作 $\varnothing$（或 $\{\}$），叫 **空集（empty set）**，里面有 $0$ 件东西（集合里不同元素的个数叫 **基数 cardinality**，记作 $|\varnothing| = 0$）。因为空箱子里倒不出任何能违规的东西，所以空集是世上任何集合的子集（$\varnothing \subseteq A$ 永远空真）。
+- 那 $\{\varnothing\}$ 是空的吗？**不是！** 它是一个大纸箱，掀开盖子往里看，肚子里端端正正放着**一只空纸箱**！所以 $|\{\varnothing\}| = 1$，$\varnothing \in \{\varnothing\}$ 为真，同时 $\varnothing \subseteq \{\varnothing\}$ 也为真。
+
+除了并集 $A \cup B$（至少在一边），后面给关系做运算还会频繁用到另外四种拼箱子的动作：取两边共有的 **交集（intersection）** $A \cap B$（若没有公共元素即 $A \cap B = \varnothing$，称两集合 **不相交 disjoint**）；从 $A$ 里挖掉属于 $B$ 的部分叫 **差集（set difference）** $A - B$；在全集 $U$ 里取 $A$ 以外的一切叫 **补集（complement）** $\overline{A} = U - A$；而只留“恰在一边、挖掉公共重叠区”的两翼月牙，叫 **对称差（symmetric difference）**，记作圆圈加号 $A \oplus B = (A - B) \cup (B - A)$。
+
+最后，花括号里的元素是不分先后的，$\{1, 2\} = \{2, 1\}$；可要是我们想记录平面坐标或者“谁指向谁”，前后顺序就不能乱了。用圆括号括起来的 $(a, b)$ 叫 **有序对（ordered pair）**，只有第一个位置和第二个位置分别相等时才算同一对。从集合 $A$ 里挑第一个元素、从集合 $B$ 里挑第二个元素拼出的所有有序对集合，记作 $A \times B = \{(a,b) \mid a \in A \land b \in B\}$，叫 **笛卡尔积（Cartesian product）**——接下来整门课的主角“函数”和“二元关系”，全都是从 $A \times B$ 这块大画布里剪出来的图案。
+
+<details>
+<summary><strong>选读 · 课件里的幂集（Power Set）、三元组直积、容斥原理与计算机位串表示</strong></summary>
+
+把集合的基础再往前推半步，就能顺手收掉课件 Ch2.1–2.2 与 Tutorial 04 里的四个常客：
+1. **幂集（power set，$\mathcal{P}(S)$）**：把集合 $S$ 的**所有子集**（从空集 $\varnothing$ 到 $S$ 自己）打包放进一个大盒子里。如果 $|S| = n$，每个元素都有“进子集 / 不进子集” 2 种选择，所以子集总数永远是 **$|mathcal{P}(S)| = 2^n$**（例如 $|\mathcal{P}(\varnothing)| = 2^0 = 1$，$|\mathcal{P}(\{\varnothing\})| = 2^1 = 2$）。
+2. **为什么 $A \times B \times C \neq (A \times B) \times C$？（Tutorial 04 Q7）**：当 $A,B,C$ 非空时，$A \times B \times C$ 的成员是平铺的**有序三元组（ordered n-tuple）** $(a, b, c)$；而 $(A \times B) \times C$ 的成员是先打包前两个、再配第三个的**有序二元组** $((a, b), c)$，连零件的层数都不一样，当然不是同一个集合！
+3. **证明集合恒等式的三把钥匙**：和第 1 门课逻辑等价一模一样——把 $\cup,\cap,\overline{A}$ 分别看作 $\lor,\land,\neg$，可以用 ① **双向包含元素追逐法**（任取 $x\in L$ 推到 $x\in R$，再反推）、② **集合代数定律化简**（德摩根律 $\overline{A\cup B}=\overline{A}\cap\overline{B}$、分配律、吸收律）、或 ③ **成员表**。
+4. **容斥原理（inclusion-exclusion）与位串（bit string）表示**：
+   - 两个或三个集合并起来去重计数：$|A\cup B| = |A|+|B|-|A\cap B|$；$|A\cup B\cup C| = |A|+|B|+|C|-|A\cap B|-|A\cap C|-|B\cap C|+|A\cap B\cap C|$。
+   - 计算机怎么存子集？把全集元素排好队 $U=\{u_1,\dots,u_n\}$，子集 $A$ 就成了一串长 $n$ 的 **bit string**（在 $A$ 里标 `1`，不在标 `0`）：求并集就是按位 `OR`，求交集是按位 `AND`，求对称差 $\oplus$ 正好是按位异或 `XOR`！
+
+</details>
+
+<details>
+<summary><strong>练习 · 拆箱快问快答（Tutorial 04 Q4–Q5 & Q10 精选）</strong></summary>
+
+1. 判断真假：(a) $\{\varnothing\} \in \{\varnothing, \{\varnothing\}\}$；(b) $\{\{\varnothing\}\} \subset \{\{\varnothing\}, \{\varnothing\}\}$。
+2. 如果已知两个集合满足 $A - B = B - A$，你能断定 $A$ 和 $B$ 是什么关系吗？
+
+<details>
+<summary>给我一点提示</summary>
+
+第 1(b) 题先看右边的花括号里写了两次完全一样的东西，去重以后剩几个元素？第 2 题想想月牙形：左边专属区和右边专属区居然相等，而它们本来是互斥不相交的！
+
+</details>
+
+<details>
+<summary>对照考场满分写法</summary>
+
+1. **(a) True**（掀开右边最外层花括号，第二个成员正是 $\{\varnothing\}$）；**(b) False**！因为右边两个相同元素合并后就是 $\{\{\varnothing\}\}$，左右两集合完全相等，不满足**真子集（proper subset，$\subset$）**“必须不等”的要求。
+2. **必定有 $A = B$**！因为 $(A - B)$ 与 $(B - A)$ 天生没有公共元素（$(A-B)\cap(B-A)=\varnothing$），两个不相交的集合居然相等，唯一可能是它们俩都是空集 $\varnothing$，即 $A\subseteq B$ 且 $B\subseteq A \implies A = B$。
+
+</details>
+
+</details>
+
+## 02 什么样的规则才配叫“函数”？把两台机器串起来谁先动？
+
+*当场拿下 Test 02 Question 1a, 1b, 1c（6 分）*
+
+准备好了装数的集合，Test 02 的第一道大题 **Question 1a, 1b, 1c（共 6 分）** 就直接送到手边了：
+
+> 已知 $f(x) = x^2 + 5$，$g(x) = 3x^2 + 5$，$h(x) = |x/2|$ 都是从 $\mathbb{R}$ 到 $\mathbb{R}$ 的函数。求：a) $g \circ f$；b) $f + g$；c) $h(x)$ 的值域（Range）。
+
+动笔算之前，先花一分钟问一句后头第 3 题也要考的事：**到底什么样的规则，才配叫作从集合 $A$ 到集合 $B$ 的“函数”？**
+
+Tutorial 04 第 11 题摆了三个反面教材，问它们为什么**不是**从实数集 $\mathbb{R}$ 到 $\mathbb{R}$ 的函数：
+1. $f(x) = 1/x$ —— 把 $x = 0$ 塞进去，机器当场卡壳报错，吐不出结果（**漏了输入没安排去处**）；
+2. $f(x) = \sqrt{x}$ —— 把负数 $x = -4$ 塞进去，在实数池子 $\mathbb{R}$ 里根本没有平方等于 $-4$ 的数（**跑出了声明的目标池子**）；
+3. $f(x) = \pm\sqrt{x^2 + 1}$ —— 把 $x = 0$ 塞进去，居然同时吐出 $+1$ 和 $-1$ 两个答案（**一个输入劈腿了两个输出**）。
+
+避开这三条红线，规矩就清清楚楚了：从 $A$ 到 $B$ 的 **函数（function）** $f: A \to B$，必须给输入池 $A$ 里的**每一个**元素，指派目标池 $B$ 里**恰好一个**确定的结果。输入池 $A$ 叫 **定义域（domain）**，声明的目标大池子 $B$ 叫 **余域（codomain）**；而 $B$ 里面真正被某个输入射中的那部分结果集合 $\{f(a) \mid a \in A\}$，才叫 **值域（range）**。当 $f(a) = b$ 时，$b$ 叫 $a$ 的 **像（image）**，反过来 $a$ 叫 $b$ 的一个 **原像（preimage）**。
+
+看清这几个词，Test 02 前三小问简直像热身一样轻松：
+
+- 先看 **1b) 求和函数 $f + g$**：当两个函数输出都是实数时，$(f + g)(x)$ 就是把同一个 $x$ 喂给两台机器后把结果加起来：$(x^2 + 5) + (3x^2 + 5) = 4x^2 + 10$。（乘积 $(fg)(x) = f(x)g(x)$ 同理。）
+- 再看 **1a) 求复合函数 $g \circ f$**：唯一要留神的是**先后顺序**！写下 $(g \circ f)(x)$ 时，紧贴着自变量 $x$ 右边站着的是 $f$，所以**右边的 $f$ 先干活，左边的 $g$ 后干活**，叫 **函数复合（composition of functions）**，也就是 $g(f(x))$：先把 $x$ 送进 $f$ 算出半成品 $x^2 + 5$，再把整团 $(x^2 + 5)$ 当作原料塞进 $g(\square) = 3(\square)^2 + 5$ 的框里：
+
+$$
+(g \circ f)(x) = g(x^2 + 5) = 3(x^2 + 5)^2 + 5 = 3(x^4 + 10x^2 + 25) + 5 = 3x^4 + 30x^2 + 80
+$$
+
+要是考场上心急算成了 $f(g(x)) = (3x^2+5)^2 + 5 = 9x^4 + 30x^2 + 30$，白白送上门的 2 分就飞了——可见函数复合一般**不满足交换律**（$f \circ g \neq g \circ f$），但满足结合律。
+
+- 最后看 **1c) 求 $h(x) = |x/2|$ 的值域 Range**：余域虽然声明的是全体实数 $\mathbb{R}$，但绝对值出来的数永远 $\ge 0$；反过来，随便你点名要哪个非负实数 $y \ge 0$，只要拿 $x = 2y$ 塞进去就能算出 $|2y/2| = y$。用上一节刚排过雷的规范写法写下 $[0, +\infty)$（或 $\{y \in \mathbb{R} \mid y \ge 0\}$），前 6 分稳稳落袋。
+
+可是紧接着第 **1d 题** 突然加码到了整整 **6 分**：如果现在有人拿着 $h(x) = |x/2|$ 算出来的结果 $1$，让你倒推出当初塞进去的 $x$ 到底是几，你答得上来吗？
+
+### 【考场真题落笔】Test 02 · Question 1a, 1b, 1c（6 marks）满分落笔示范
+
+Given $f(x)=x^2+5$, $g(x)=3x^2+5$, and $h(x)=|x/2|$ from $\mathbb{R}$ to $\mathbb{R}$:
+- **a) (2 marks)** $(g \circ f)(x) = g(f(x)) = g(x^2 + 5) = 3(x^2 + 5)^2 + 5 = 3(x^4 + 10x^2 + 25) + 5 = \mathbf{3x^4 + 30x^2 + 80}$.
+- **b) (2 marks)** $(f + g)(x) = f(x) + g(x) = (x^2 + 5) + (3x^2 + 5) = \mathbf{4x^2 + 10}$.
+- **c) (2 marks)** $\operatorname{Range}(h) = \mathbf{[0, +\infty)}$ (or $\{y \in \mathbb{R} \mid y \ge 0\}$, since $|x/2| \ge 0$ for all $x \in \mathbb{R}$ and for any $y \ge 0$, $h(2y) = y$).
+
+<details>
+<summary><strong>练习 · 反方向复合与位串函数的值域（Tutorial 04 Q12 & Q15）</strong></summary>
+
+1. 沿用 Test 02 第 1 题的 $f(x)=x^2+5$ 和 $g(x)=3x^2+5$，这次求 **$(f \circ g)(x)$**，和刚才的 $g \circ f$ 一样吗？
+2. 设函数 $L$ 把每一个 0-1 位串（bit string）映射为“把它每 8 位切成一字节后剩下的零头位数”，求 $L$ 的定义域和值域（Tutorial 04 Q12b）。
+
+<details>
+<summary>给我一点提示</summary>
+
+第 1 题这次是 $g$ 贴着 $x$ 先算，再塞进 $f$ 的平方里；第 2 题除以 8 的余数能取到哪些整数？
+
+</details>
+
+<details>
+<summary>对照考场满分写法</summary>
+
+1. $(f \circ g)(x) = f(g(x)) = (3x^2 + 5)^2 + 5 = 9x^4 + 30x^2 + 30 \neq 3x^4 + 30x^2 + 80$。
+2. **Domain**: the set of all bit strings；**Range**: $\{0, 1, 2, 3, 4, 5, 6, 7\}$（不超过 $7$ 的非负整数集）。
+
+</details>
+
+</details>
+
+## 03 两个输入撞上同一个结果时，怎么动手术让机器能原路倒推？
+
+*当场拿下 Test 02 Question 1d（6 分）*
+
+接着上一节最后的追问：机器 $h(x) = |x/2|$ 吐出了一个数字 $1$，问你刚才输进去的 $x$ 是谁。你没法给出唯一答案——因为输进 $x = 2$ 会算出 $|2/2| = 1$，输进 $x = -2$ 也会算出 $|-2/2| = 1$！更糟的是，如果别人指着余域 $\mathbb{R}$ 里的负数 $-1$ 让你倒推输入，根本没有任何实数能算出 $-1$。
+
+也就是说，原装的 $h: \mathbb{R} \to \mathbb{R}$ 想“原路倒推回去”会撞上两堵墙：**第一堵墙是“多对一撞车”（不同输入挤到了同一个结果上）；第二堵墙是“目标池里有没人认领的空位”**。
+
+数学家给成功避开这两堵墙的函数各起了一个非常传神的名字：
+- 如果**不同输入绝不撞车**——换句话说，只要看到输出结果相等 $f(a) = f(b)$，就能拍胸脯断定输入必定是同一个 $a = b$——就叫 **单射（one-to-one，也称 injective）**。画在坐标纸上，任何一条水平线横扫过去，最多只能撞见曲线 **1 次**。
+- 如果**余域里没有半个闲置空位**——换句话说，余域 $B$ 里的每一个元素 $y$ 都至少能找到一个原像 $x \in A$ 使 $f(x) = y$（即值域刚好铺满余域 $\operatorname{Range}(f) = B$）——就叫 **满射（onto，也称 surjective）**。
+- 既不撞车、又没空位（既是 one-to-one 又是 onto）的完美配对，就叫 **双射（one-to-one correspondence，也称 bijection）**。只有双射函数，才能把每根箭头稳稳掉过头来而不违反函数规矩，得到唯一的 **反函数（inverse function）** $f^{-1}: B \to A$（满足 $f^{-1}(y) = x \iff f(x) = y$，此时称 $f$ 可逆 invertible）。
+
+现在看 Test 02 **Question 1d（6 分）** 要你做什么：
+
+> *Discuss the restricted domain and codomain in which $h(x) = |x/2|$ is one-to-one correspondence. Discuss in detail.*
+
+既然原装的 $\mathbb{R} \to \mathbb{R}$ 两堵墙都撞了，怎么动最小的两刀手术把它改造成双射？
+
+在下面的交互面板里试一试：先拖动水平测试线看看 $y = 1.0$ 为什么会撞出两个红点，再亲手切换上方的 **Domain（限制定义域）** 和 **Codomain（限制余域）** 按钮，看看切成哪两块区间后三枚绿标会同时亮起？
+
+手术方案一眼就能看穿：
+1. **第一刀切余域救满射（Onto）**：负数反正永远算不出来，干脆把 **限制余域（restricted codomain）** 缩成真实值域 $B' = [0, +\infty)$，把没人认领的负半轴全裁掉！
+2. **第二刀切定义域救单射（One-to-One）**：V 字形折线左右两支对称撞车，沿着折点 $0$ 劈开，只留右半支单调递增区间 $A_1 = [0, +\infty)$（或者只留左半支单调递减区间 $A_2 = (-\infty, 0]$）作为 **限制定义域（restricted domain）**，同时检查一下留下的这一支依然能取遍 $[0, +\infty)$ 里的每一个高度！
+
+千万注意题干最后那三个词：**`Discuss in detail`（6 分！）**。如果卷面上只孤零零写一行“定义域 $[0, +\infty)$，余域 $[0, +\infty)$”，最多只能拿 2 分！阅卷人手里的满分评分表要看齐四件事：**① 举例说明原函数在 $\mathbb{R}\to\mathbb{R}$ 上为何不单射、不满射；② 明确写出限制后的定义域与余域；③ 代数证明限制后是 one-to-one；④ 代数证明限制后是 onto**。照着下面落笔框的四段话写，6 分稳拿。
+
+### 【考场真题落笔】Test 02 · Question 1d（6 marks）满分四段式英文作答模板
+
+**原题**：*Discuss the restricted domain and codomain in which $h(x) = |x/2|$ is one-to-one correspondence. Discuss in detail.*
+
+**Model Answer:**
+1. **Why $h: \mathbb{R} \to \mathbb{R}$ fails initially:** It is **not one-to-one** because $h(2) = 1 = h(-2)$ with $2 \neq -2$; it is **not onto** because $|x/2| \ge 0$ for all $x \in \mathbb{R}$, so $-1 \in \mathbb{R}$ has no preimage.
+2. **Restricted domain and codomain:** Restrict the codomain to $B' = [0, +\infty)$, and restrict the domain to $A_1 = [0, +\infty)$ *(or alternatively $A_2 = (-\infty, 0]$)*.
+3. **Proof of one-to-one on $A_1 = [0, +\infty)$:** On $[0, +\infty)$, $h(x) = x/2$. Assume $h(x_1) = h(x_2)$ for $x_1, x_2 \in [0, +\infty)$. Then $x_1 / 2 = x_2 / 2 \implies x_1 = x_2$. Thus $h$ is one-to-one.
+4. **Proof of onto $B' = [0, +\infty)$:** For any $y \in [0, +\infty)$, choose $x = 2y$. Since $y \ge 0$, we have $x = 2y \in [0, +\infty)$, and $h(x) = |2y / 2| = y$. Thus $h$ is onto.
+
+*(Note: Restricting the domain to $(-\infty, 0]$ and codomain to $[0, +\infty)$ gives $h(x) = -x/2$, which is also a one-to-one correspondence by taking $x = -2y \le 0$, with inverse $h^{-1}(y) = -2y$.)* Therefore, $h$ becomes a **one-to-one correspondence**.
+
+<details>
+<summary><strong>选读 · 恒等函数、严格单调与取整函数 ⌊x⌋ / ⌈x⌉（Tutorial 04 Q13）</strong></summary>
+
+- **恒等函数（identity function）**：$\iota_A(x) = x$（每个元素映回自己），天生是双射，反函数就是它自己。
+- **严格递增 / 递减（strictly increasing / decreasing）**：若对一切 $x < y$ 都有 $f(x) < f(y)$，那么 $x \neq y$ 时必定一左一右输出不等，所以严格单调函数**自动是单射（one-to-one）**（Tutorial 04 Q14 证 $e^x$ 单射直接用这一句即可）。
+- **向下取整（floor function $\lfloor x \rfloor$）与向上取整（ceiling function $\lceil x \rceil$）**：在整数到整数 $\mathbb{Z} \to \mathbb{Z}$ 上考察两个极易做错的例子（Tutorial 04 Q13c/d）：
+  - $f(n) = n^3$（$\mathbb{Z} \to \mathbb{Z}$）：是 **one-to-one**，但**不是 onto**！因为整数 $2 \in \mathbb{Z}$ 找不到整数立方根！（若换成 $\mathbb{R} \to \mathbb{R}$ 才是双射。）
+  - $f(n) = \lceil n/2 \rceil$（$\mathbb{Z} \to \mathbb{Z}$）：**不是 one-to-one**（$\lceil 1/2 \rceil = 1 = \lceil 2/2 \rceil$），但**是 onto**（任给整数 $k \in \mathbb{Z}$，取偶数 $n = 2k \in \mathbb{Z}$ 就有 $\lceil 2k/2 \rceil = k$）！
+
+</details>
+
+<details>
+<summary><strong>练习 · 模仿 Q1d 改造指数函数 e^x（Tutorial 04 Q14 原题）</strong></summary>
+
+说明为什么 $f(x) = e^x$ 从 $\mathbb{R}$ 到 $\mathbb{R}$ 不可逆（not invertible）；如果只允许改动定义域或余域其中之一，该怎么改才能让它可逆？写出反函数。
+
+<details>
+<summary>给我一点提示</summary>
+
+$e^x$ 在整个 $\mathbb{R}$ 上本来就已经严格递增（不撞车）了，它缺的是单射还是满射？注意 $0$ 能不能被 $e^x$ 取到？
+
+</details>
+
+<details>
+<summary>对照考场满分写法</summary>
+
+- **为何不可逆**：对任意 $x \in \mathbb{R}$ 恒有 $e^x > 0$，所以负数与 $0$（如 $0 \in \mathbb{R}$）没有原像，$f$ 不是 onto，故不可逆。
+- **改造与证明**：保持定义域 $\mathbb{R}$ 不变（因 $e^x$ 严格递增，已是 one-to-one），将**余域限制为正实数集 $\mathbb{R}^+ = (0, +\infty)$**（千万别含 $0$！）。对任意 $y \in (0, +\infty)$，取 $x = \ln y \in \mathbb{R}$，有 $e^{\ln y} = y$（onto）。故限制后可逆，反函数为 $f^{-1}(y) = \ln y\ (y > 0)$。
+
+</details>
+
+</details>
 
 ---
 
-## 1.4 容斥原理与计算机位串表示 Set Representation【概念速览】
+# 第 2 幕：一张 0-1 方格表，怎样算出所有直接与间接联系？（直指第 2 题（24 分））
 
-- **容斥原理 Principle of Inclusion-Exclusion（Slides 2.2 p23）**：
+> 摘掉函数“一输入只准连一输出”的限制，用一张填满 0 和 1 的方格表记录任意关系。箭头掉头、黑白反转、先走 R₁ 再走 R₂、以及用最少的新 1 打通中转路径，全在这一张表上完成。
 
-$$
-|A \cup B| = |A| + |B| - |A \cap B|
-$$
+## 04 允许一个对象连好几个目标以后，怎样用一张 0-1 方格表记账？
 
-$$
-|A \cup B \cup C| = |A| + |B| + |C| - |A\cap B| - |A\cap C| - |B\cap C| + |A\cap B\cap C|
-$$
+*当场拿下 Test 02 Question 2a, 2b, 2c（12 分）*
 
-- **位串表示集合 Computer Representation via Bit Strings（Slides 2.2 p24–p25）**：
-  固定全集元素顺序 $U = \{u_1, u_2, \dots, u_n\}$，子集 $A \subseteq U$ 对应长度为 $n$ 的 Bit String $b_1 b_2 \cdots b_n$（若 $u_i \in A$ 则 $b_i = 1$，否则为 $0$）。
-  - $\overline{A}$ = 按位取反 `NOT`；$A \cup B$ = 按位 `OR`；$A \cap B$ = 按位 `AND`；$A \oplus B$ = 按位 `XOR`！
+在第 1 幕里，“函数”管得非常严：每个输入**必须且只能**连向 1 个输出。可现实世界里大量的联系根本没这么死板——一个学生可以选修两门课，也可以一门都不选；集合 $\{1, 2, 3\}$ 里一个数可以整除好几个数。
 
----
+一旦我们把“每个输入恰有一个输出”这道紧箍咒彻底摘掉，允许 $A$ 里的元素连向 $B$ 里任意多个元素（包括 $0$ 个），得到的就是 **二元关系（binary relation）**。说到底，从 $A$ 到 $B$ 的一个二元关系 $R$，不过就是从笛卡尔积大画布 $A \times B$ 里随便挑出一批合格配对组成的子集 $R \subseteq A \times B$：配对 $(a, b) \in R$ 就记作 $a R b$（有关系），不在里面就记作 $a \not\mathrel{R} b$（没关系）。如果起点和终点都是同一个集合 $A$（即 $R \subseteq A \times A$），就叫 **集合 $A$ 上的关系（relation on a set）**。
 
-## 1.5 函数 Functions：定义、三禁区、单射/满射/双射与逆【高频必考】
+当集合只有三四个元素时，怎么把一份关系记在纸上最清楚？除了列一堆圆括号，我们有两种最趁手的账本：
 
-### A. 函数的严格定义与“何时不是函数”（Slides 2.3 p26–p30，Tutorial 04 Q11）
-设 $A, B$ 为非空集合。从 $A$ 到 $B$ 的函数 $f: A \to B$ 是给 $A$ 中**每一个**元素 $a$ 指派 $B$ 中 **恰好一个**（exactly one）元素 $b$ 的规则，记作 $f(a)=b$。
-- $A$ 叫 **Domain（定义域）**，$B$ 叫 **Codomain（余域）**；
-- 真正被射中的元素集合 $\operatorname{Range}(f) = \{f(a) \mid a \in A\} \subseteq B$ 叫 **Range（值域 / Image of $A$）**。
-- 若 $f(a)=b$，则 $b$ 是 $a$ 的 **image（像）**，$a$ 是 $b$ 的 **preimage（原像，课件有时称 coimage）**。
+1. **画箭头图——有向图（directed graph / digraph）**：每个元素画成一个小圆圈（顶点）；只要 $(a, b) \in R$，就从 $a$ 向 $b$ 拉一条带箭头的线；如果自己跟自己也有关系 $(a, a) \in R$，就在 $a$ 头顶绕一圈画个 **自环（loop）**。
+2. **填方格表——0-1 关系矩阵（zero-one matrix $M_R$）**：把元素按固定顺序排成行号和列号，有关系 $(a_i, b_j) \in R$ 的格子填 `1`，没关系的格子填 `0`。
 
-#### 【重点提示】Tutorial 04 Q11：判断“不是函数 (Not a Function)”的三大禁区
-
-问：为什么下列规则**不是**从 $\mathbb{R}$ 到 $\mathbb{R}$ 的函数？
-1. $f(x) = 1/x$ —— **漏定义**：$f(0)$ 未定义（$0 \in \mathbb{R}$ 没有输出像）！
-2. $f(x) = \sqrt{x}$ —— **定义域越界**：对 $x < 0$ 在实数余域 $\mathbb{R}$ 中没有实数值！
-3. $f(x) = \pm\sqrt{x^2+1}$ —— **一源多值**：每个 $x$ 被赋予了两个不同的值！
-- **放在 0-1 关系矩阵 / 有向图里看（Test 02 Q3 第 vi 问必考！）**：
-  关系 $R \subseteq A \times A$ 是函数 $\iff$ **矩阵每一行的元素之和都恰好等于 $1$**（每个顶点出度恒为 $1$）。只要有一行全是 $0$（漏定义）或有两个及以上的 $1$（如 Test 02 Q3a 中 $(3,1)\in R$ 且 $(3,2)\in R$），立刻判定 **Not a function**！
-
-### B. 单射、满射、双射与反函数总表（Slides 2.3 p31–p38，Tutorial 04 Q13–Q14）
-
-| 性质 | 形式逻辑定义 | 直观图像 / 矩阵判据 | 标准证明写法 | 标准否证（反例）写法 |
-|---|---|---|---|---|
-| **单射 One-to-One** (Injective) | $\forall a,b\in A\,(f(a)=f(b) \to a=b)$ <br/>等价逆否：$a\neq b \to f(a)\neq f(b)$ | 每个 $b\in B$ 入度 $\le 1$；连续图像通过水平线测试 | Assume $f(a)=f(b)$, 代入化简推出 $a=b$（或说明函数严格递增/递减） | 举具体 $a \neq b$ 算出 $f(a)=f(b)$（如 $f(x)=x^2$ 在 $\mathbb{Z}$ 上 $f(-1)=f(1)=1$） |
-| **满射 Onto** (Surjective) | $\forall b\in B\,\exists a\in A\,(f(a)=b)$ <br/>即 $\operatorname{Range}(f) = B$ | 每个 $b\in B$ 入度 $\ge 1$；值域铺满整个余域 | Take any $y\in B$, 反解出 $x = \dots$，**必须验证 $x \in A$** 且 $f(x)=y$！ | 举具体 $b_0 \in B$，说明方程 $f(x)=b_0$ 在**定义域 $A$ 内**无解 |
-| **双射 One-to-One Correspondence** (Bijection) | 既 **One-to-One** 又 **Onto** | 每个 $b\in B$ 入度 $= 1$；左右元素一一配对（有限集必有 $|A|=|B|$） | 分两段完整写出：(1) One-to-one; (2) Onto | 只要破坏单射或满射其一即非双射 |
-| **可逆 Invertible** 与 $f^{-1}$ | 存在 $f^{-1}: B \to A$ 使 $f^{-1}(b)=a \iff f(a)=b$ | **$f$ 可逆 $\iff f$ 是双射！** | 先证 $f$ 是双射，再由 $y=f(x)$ 解出 $x=f^{-1}(y)$ | 指出 $f$ 不是 one-to-one 或不是 onto，故 not invertible |
-
-> **Tutorial 04 Q13 经典对照（同样在 $\mathbb{Z} \to \mathbb{Z}$ 上）**：
-> - $f(n) = n - 1$：One-to-one ✓，Onto ✓（双射，$f^{-1}(m)=m+1$）
-> - $f(n) = n^2 + 1$：One-to-one ✗（$f(1)=f(-1)=2$），Onto ✗（$0$ 无原像）
-> - $f(n) = n^3$：One-to-one ✓（严格递增），Onto ✗（$2 \in \mathbb{Z}$ 没有**整数**立方根！注意若换成 $\mathbb{R}\to\mathbb{R}$ 则是双射！）
-> - $f(n) = \lceil n/2 \rceil$：One-to-one ✗（$f(1)=f(2)=1$），Onto ✓（对任意 $k\in\mathbb{Z}$，取 $n=2k\in\mathbb{Z}$ 即有 $\lceil 2k/2\rceil = k$）
-
----
-
-## 1.6 函数运算、复合与“限制定义域/余域构造双射”【Test 02 Q1 压轴考点】
-
-### A. 实值函数的加积与复合（Slides 2.3 p39–p41，Tutorial 04 Q15，Test 02 Q1a/b）
-- **逐点加/乘**：设 $f_1, f_2: A \to \mathbb{R}$，则 $(f_1 + f_2)(x) = f_1(x) + f_2(x)$，$(f_1 f_2)(x) = f_1(x) f_2(x)$。
-- **函数复合 Composition**：设 $g: A \to B$，$f: B \to C$（必须满足 $\operatorname{Range}(g) \subseteq \operatorname{Domain}(f)$），则 $f \circ g: A \to C$ 定义为：
-
-$$
-(f \circ g)(x) = f(g(x))
-$$
-
-- **记准方向**：靠近自变量 $x$ 的右边函数 $g$ **先算**，外层左边函数 $f$ **后算**！一般 $f \circ g \neq g \circ f$（不交换），但满足结合律 $h \circ (g \circ f) = (h \circ g) \circ f$。
-
-### B. 限制定义域与余域使函数变成双射（Slides p38，Tutorial 04 Q14，Test 02 Q1d）
-
-当原函数 $h: A \to B$ 不是双射时，标准改造手术只有两刀：
-1. **切 Codomain 救 Onto**：把余域 $B$ 直接缩小为函数的真实值域 $B' = \operatorname{Range}(h)$，消去所有没有原像的闲置目标点。
-2. **切 Domain 救 One-to-One**：沿着图像的对称轴/极值点切开定义域 $A$，只保留一个**单调分支** $A'$，并且必须确认缩小后的 $A'$ 仍然能射满刚才的 $B'$（即 $h(A') = B'$）！
-
-```mermaid
-flowchart LR
-  H["原函数 h: A → B 非双射"] --> S1["第 1 刀：切余域救满射<br/>令新余域 B' = Range(h)"]
-  S1 --> S2["第 2 刀：切定义域救单射<br/>取单调分支 A' ⊆ A 且保住 h(A') = B'"]
-  S2 --> S3["满分收尾（缺一不可）：<br/>① 证 A' 上 One-to-One<br/>② 证对 B' Onto（写出反解公式）"]
-```
-
----
-
-# 第 2 部分：二元关系、性质、矩阵与闭包（Ch9.1–9.3 / Slides 5.1–5.4）
-
-## 2.1 二元关系及其三种等价表示【高频必考】
-
-- **定义（Slides 5.1 p3–p8）**：
-  - 从集合 $A$ 到集合 $B$ 的 **二元关系**（binary relation）是笛卡尔积的任意子集 $R \subseteq A \times B$。$(a,b)\in R$ 记作 $aRb$。
-  - **集合 $A$ 上的关系（relation on a set $A$）**：特指 $A$ 到自身的关系 $R \subseteq A \times A$。
-  - **函数是关系的特例（Slides p2）**：函数 $f: A \to B$ 就是满足“每个 $a\in A$ 恰与一个 $b\in B$ 配对”的特殊二元关系。
-
-### 三种表示法的互译（Tutorial 05 Q1–Q2）
-1. **有序对集合**：直接列出所有满足条件的 $(a,b)$，或用描述法 $\{(x,y) \mid \dots\}$。
-2. **有向图 Directed Graph（Digraph，Slides p5–p6）**：顶点画 $A$ 的元素；若 $(a,b)\in R$ 画有向边 $a \to b$；若 $(a,a)\in R$ 画**自环（loop）**。
-3. **0-1 关系矩阵 Zero-One Matrix $M_R = [m_{ij}]$（Slides p7）**：固定元素顺序 $A=\{a_1,\dots,a_m\},\ B=\{b_1,\dots,b_n\}$，则 $m \times n$ 矩阵定义为：
-
-$$
-m_{ij} = \begin{cases} 1, & \text{if } (a_i, b_j) \in R \\ 0, & \text{if } (a_i, b_j) \notin R \end{cases}
-$$
-
----
-
-## 2.2 集合 $A$ 上关系的六大性质全对比表【每卷必考】
-
-设 $R$ 是**非空集合 $A$** 上的关系（$|A|=n$）。考场遇到性质判定题（如 Test 02 Q3、Tutorial 05 Q7），直接对照下表从“逻辑定义 / 有向图 / 0-1 矩阵”三重视角秒判：
-
-| 性质 | 形式逻辑定义（Slides 5.1 p10–p13） | 有向图特征 | 0-1 矩阵 $M_R$ 特征 | 长度为 $n$ 集合上的关系个数 |
-|---|---|---|---|---|
-| **自反 Reflexive** | $\forall a\in A\,((a,a)\in R)$ | **每个**顶点都有自环 | 主对角线**全为 $1$** | $2^{n(n-1)}$ |
-| **反自反 Irreflexive** | $\forall a\in A\,((a,a)\notin R)$ | **任何**顶点都无自环 | 主对角线**全为 $0$** | $2^{n(n-1)}$ |
-| **对称 Symmetric** | $\forall a,b\in A\,((a,b)\in R \to (b,a)\in R)$ | 异点间每条边必成对双向（自环任意） | $M_R = M_R^T$（沿主对角线对称） | $2^{n(n+1)/2}$ |
-| **反对称 Antisymmetric** | $\forall a,b\in A\,(((a,b)\in R \land (b,a)\in R) \to a=b)$ <br/>等价：$a\neq b \land (a,b)\in R \to (b,a)\notin R$ | **异点之间绝无双向边**（自环可有可无！） | $i\neq j$ 时 $m_{ij}$ 与 $m_{ji}$ **不同时为 $1$**（只许 $(0,0),(1,0),(0,1)$ 3 种） | $2^n \cdot 3^{n(n-1)/2}$ |
-| **非对称 Asymmetric** | $\forall a,b\in A\,((a,b)\in R \to (b,a)\notin R)$ | **既无双向边，也绝无自环**（= 反自反 + 反对称） | 主对角线全 $0$，且对称位置不同时为 $1$ | $3^{n(n-1)/2}$ |
-| **传递 Transitive** | $\forall a,b,c\in A\,(((a,b)\in R \land (b,c)\in R) \to (a,c)\in R)$ | 凡有两步路径 $a\to b\to c$，必有直达捷径 $a\to c$ | $M_R^{[2]} \le M_R$（平方里为 $1$ 的位置原矩阵必为 $1$） | 无封闭初等公式 |
-
-### 计数公式推导速记 + Tutorial 05 勘误
-
-- **任意二元关系总数**：$A \times A$ 有 $n^2$ 个格子，每格填 $0/1$，共 **$2^{n^2}$** 个。
-  - **【Tutorial 05 Q4a 答案勘误】**：当 $|A|=4$ 时，关系总数为 $2^{4^2} = 2^{16} = \mathbf{65536}$（Tutorial 答案误印成了 $2^{16}-1 = 65535$，考试务必写 $2^{16} = 65536$！）。
-- **对称 / 反对称 / 非对称怎么数不混**：把 $n\times n$ 矩阵拆成 **$n$ 个主对角线格** + **$\frac{n(n-1)}{2}$ 对上下对称格 $\{m_{ij}, m_{ji}\}$**：
-  - **Symmetric**：对角线 $n$ 格随便填（$2^n$），每对对称格捆绑同填 $00$ 或 $11$（$2$ 种）$\Rightarrow 2^n \cdot 2^{n(n-1)/2} = 2^{n(n+1)/2}$。
-  - **Antisymmetric**：对角线 $n$ 格随便填（$2^n$），每对对称格禁填 $11$，只剩 $00, 10, 01$（**$3$ 种**）$\Rightarrow 2^n \cdot 3^{n(n-1)/2}$。
-  - **Asymmetric**：对角线 $n$ 格强制全填 $0$（$1$ 种），每对对称格仍有 $00, 10, 01$（$3$ 种）$\Rightarrow 3^{n(n-1)/2}$。
-
-#### 【重点提示】考场必背四大性质认知陷阱（含 Tutorial 05 Q7g 答案勘误！）
-
-1. **“不自反” $\neq$ “反自反”**：对角线只要既有 $1$ 又有 $0$（例如 $A=\{1,2\},\ R=\{(1,1)\}$），它**既不是 reflexive，也不是 irreflexive**！
-2. **“对称”与“反对称”既不互斥也不互补**：
-   - 对角线子集（如恒等关系 $I_A = \{(1,1),(2,2),(3,3),(4,4)\}$，Tutorial 05 Q7c）**既是 symmetric 又是 antisymmetric**（因为根本没有 $a\neq b$ 的边，反对称前件空真！）；
-   - 而 $R=\{(1,2),(2,3),(3,2)\}$ **既不是 symmetric（缺 $(2,1)$），也不是 antisymmetric（有 $(2,3),(3,2)$ 双向边）**！
-3. **空真（Vacuously True）传递性**：若关系里根本找不到首尾相接的 $(a,b)\in R$ 与 $(b,c)\in R$（例如 $R=\{(1,3),(2,3)\}$），则传递性前件恒假，**自动是 transitive**！但注意双向边 $\{(2,4),(4,2)\}$（Tutorial 05 Q7b）**不传递**！因为 $(2,4)\in R$ 且 $(4,2)\in R$ 拼出了 $(2,2) \notin R$！
-4. **【Tutorial 05 Q7g 重要勘误】实数集 $\mathbb{R}$ 上的 $R = \{(x,y) \mid xy \ge 0\}$ 到底传不传递？**
-   - Tutorial 答案误写成了 `symmetric, transitive, reflexive`，但实际上它在 $\mathbb{R}$ 上**绝对不传递（NOT transitive）**！
-   - **铁证反例**：取 $x = -1,\ y = 0,\ z = 2$。因为 $(-1)\cdot 0 = 0 \ge 0 \Rightarrow (-1,0)\in R$，且 $0\cdot 2 = 0 \ge 0 \Rightarrow (0,2)\in R$；但 $(-1)\cdot 2 = -2 < 0 \Rightarrow (-1,2)\notin R$！元素 $0$ 充当了连接负数与正数的“桥梁”，直接击穿传递性！（注：若把定义域改为 $\mathbb{R}-\{0\}$，它才是等价关系。）
-
----
-
-## 2.3 关系的组合、复合与矩阵布尔运算【Test 02 Q2 核心 24 分】
-
-因为关系 $R_1, R_2 \subseteq A \times B$ 本身就是集合，所有集合运算均可直接套用，并在 0-1 矩阵上变成逐位布尔运算（Slides 5.1 p14–p29）：
-
-| 关系运算 | 集合/元素定义 | 0-1 矩阵算子 | 考场心算口诀 |
-|---|---|---|---|
-| 并 $R_1 \cup R_2$ | $(a,b)\in R_1 \lor (a,b)\in R_2$ | $M_{R_1} \lor M_{R_2}$（Join） | 同位置有 $1$ 就写 $1$ |
-| 交 $R_1 \cap R_2$ | $(a,b)\in R_1 \land (a,b)\in R_2$ | $M_{R_1} \land M_{R_2}$（Meet） | 同位置两个都是 $1$ 才写 $1$ |
-| 补 $\overline{R}$ | $(a,b) \notin R$ | $\overline{M_R}$ | 矩阵里所有 **$0 \leftrightarrow 1$ 互换** |
-| 差 $R_1 - R_2$ | $(a,b)\in R_1 \land (a,b)\notin R_2$ | $M_{R_1} \land \overline{M_{R_2}}$ | 把 $M_{R_1}$ 里与 $M_{R_2}$ 重叠的 $1$ 抹成 $0$ |
-| 对称差 $R_1 \oplus R_2$ | 恰属于 $R_1, R_2$ 之一 | $M_{R_1} \oplus M_{R_2}$ | 同位置**不同写 $1$，相同写 $0$** |
-| 逆关系 $R^{-1}$ | $\{(b,a) \mid (a,b)\in R\}$ | $M_R^T$（矩阵转置） | 第 $i$ 行变第 $i$ 列（沿主对角线翻折） |
-| 复合 $R_2 \circ R_1$ | $\{(a,c) \mid \exists b\,((a,b)\in R_1 \land (b,c)\in R_2)\}$ | **$M_{R_1} \odot M_{R_2}$**（布尔积） | **先走右边 $R_1$，再走左边 $R_2$！左放 $M_{R_1}$ 乘右放 $M_{R_2}$** |
-| 关系幂 $R^n$ | $R^1=R,\ R^{n+1}=R^n \circ R$ | $M_R^{[n]}$（布尔幂） | $(a,b)\in R^n \iff$ 有向图中存在从 $a$ 到 $b$ **长度为 $n$ 的有向路径**（Slides p25–p26 定理） |
-
-#### 【重点提示】最高优先级排雷：老师 PPT Slide 45 的复合矩阵符号顺序！
-
-在《Ch9.1–9.3》课件第 45 页（Slide 45），老师把 $R_2 \circ R_1$ 的矩阵记成了一个反序符号 "$M_{R_2} \circ M_{R_1}$"，**紧接着在下一行给出了它的元素级真实定义**：
-
-$$
-(M_{R_2 \circ R_1})_{ij} = \bigvee_{k=1}^{n} \Big[(M_{R_1})_{ik} \land (M_{R_2})_{kj}\Big]
-$$
-
-看清下标：**取第 $i$ 行的矩阵是 $M_{R_1}$，取第 $j$ 列的矩阵是 $M_{R_2}$**！
-也就是说，当你用线性代数熟悉的“左矩阵第 $i$ 行 $\times$ 右矩阵第 $j$ 列”手算布尔乘法（把乘法换 $\land$、加法换 $\lor$）时：
-- 求 **$R_2 \circ R_1$** $\Longrightarrow$ 草稿纸上**左边必须写 $M_{R_1}$、右边必须写 $M_{R_2}$**（即标准 Rosen 教材记法 $M_{R_2 \circ R_1} = M_{R_1} \odot M_{R_2}$）！
-- 如果你按字面顺序把 $M_{R_2}$ 摆左边乘 $M_{R_1}$，你算出来的其实是 $R_1 \circ R_2$，整道小题全错！
-
-### 重要性质保持定理（Slides p16–p17, p27–p29 & Test 02 Q4）
-- **传递性充要判据（Slides p27）**：集合 $A$ 上的关系 $R$ 是传递的 $\iff$ 对一切正整数 $n \ge 1$，都有 **$R^n \subseteq R$**（其实只需验证 $R^2 \subseteq R$）。
-- **哪些运算保性质（Prove or Disprove 高频题库）**：
-  - 若 $R_1, R_2$ 自反：则 $R_1\cup R_2,\ R_1\cap R_2,\ R_1^{-1},\ R_2\circ R_1$ **全自反**；而 $R_1 - R_2,\ R_1 \oplus R_2$ **必反自反**（Tutorial 05 Q6）！
-  - 若 $R_1, R_2$ 对称：则 $R_1\cup R_2,\ R_1\cap R_2$（**Test 02 Q4 原题**）、$R_1 - R_2,\ R_1\oplus R_2,\ \overline{R_1},\ R_1^{-1},\ R_1^n$ **全对称**！但 **$R_2 \circ R_1$ 未必对称**（反例：$R_1=\{(1,2),(2,1)\},\ R_2=\{(2,3),(3,2)\}$，则 $R_2\circ R_1=\{(1,3)\}$ 不对称）。
-  - 若 $R_1, R_2$ 传递：$R_1 \cap R_2$ **必传递**；但 **$R_1 \cup R_2$ 未必传递**（Slides p17 反例：$R_1=\{(1,2)\},\ R_2=\{(2,3)\}$，并集缺 $(1,3)$）！
-
----
-
-## 2.4 关系的闭包 Closures 与 Warshall 算法【Test 02 Q2e/f 必考】
-
-**闭包定义（Slides 5.4 p32–p36）**：给定性质 $P$，关系 $R$ 关于性质 $P$ 的闭包是**包含 $R$（$R \subseteq S$）且具有性质 $P$ 的最小关系 $S$**（往 $R$ 里补最少的边使之满足 $P$）。
-
-| 闭包类型 | 集合公式（$\Delta = \{(a,a)\mid a\in A\}$） | 0-1 矩阵做法 | 有向图做法 |
-|---|---|---|---|
-| **自反闭包 $r(R)$** | $r(R) = R \cup \Delta$ | 把主对角线所有 $0$ 改成 **$1$**（$M_R \lor I_n$） | 给没自环的顶点全部画上自环 |
-| **对称闭包 $s(R)$** | $s(R) = R \cup R^{-1}$ | **$M_R \lor M_R^T$**（若 $m_{ij}=1$ 则把 $m_{ji}$ 也置 $1$） | 把所有单向箭头补成双向箭头 |
-| **传递闭包 $t(R)$** | $t(R) = R^* = \bigcup_{k=1}^{n} R^k$（$|A|=n$） | $M_R \lor M_R^{[2]} \lor \cdots \lor M_R^{[n]}$ 或 **Warshall 算法** | 只要从 $a$ 到 $b$ 存在长度 $\ge 1$ 的有向路径，就补边 $a\to b$ |
-
-### Warshall 算法手算标准流程（Slides p43–p44，Tutorial 05 Q8）
-
-直接算 $M_R^{[2]}, \dots, M_R^{[n]}$ 需要 $O(n^4)$ 次位运算；**Warshall 算法**只需 $O(n^3)$，构造矩阵序列 $W_0, W_1, \dots, W_n$（其中 $W_0 = M_R$，$W_n = M_{t(R)}$），递推式为：
-
-$$
-w_{ij}^{[k]} = w_{ij}^{[k-1]} \lor \Big(w_{ik}^{[k-1]} \land w_{kj}^{[k-1]}\Big)
-$$
-
-**考场 10 秒“十字交叉补 1 法”（绝不出错）**：
-从 $W_{k-1}$ 推 $W_k$（允许使用第 $k$ 个顶点作中转站）：
-1. 把 $W_{k-1}$ 照抄一遍（原来是 $1$ 的永远保持 $1$）；
-2. 扫一眼**第 $k$ 列**，记下哪些行号 $i$ 的位置是 $1$（记作集合 $C_k = \{i \mid w_{ik}^{[k-1]}=1\}$）；
-3. 扫一眼**第 $k$ 行**，记下哪些列号 $j$ 的位置是 $1$（记作集合 $R_k = \{j \mid w_{kj}^{[k-1]}=1\}$）；
-4. 把所有交叉坐标 **$(i, j) \in C_k \times R_k$** 全部填成 **$1$**，即得 $W_k$！
-
-```mermaid
-flowchart LR
-  W0["W₀ = M_R"] -->|"k = 1..n 循环"| STEP["找第 k 列为 1 的行集合 C_k<br/>找第 k 行为 1 的列集合 R_k"]
-  STEP --> FILL["将 C_k × R_k 所有交叉格 (i, j) 置 1<br/>其余格保留 W_{k-1} 原值"]
-  FILL --> WN["重复至 W_n 即为传递闭包 M_{t(R)}"]
-```
-
-### 复合闭包顺序定理（Slides p46–p48，Ch9.5 p14–p15，Tutorial 05 Q10–Q12）
-- 若 $R$ 自反，则 $s(R)$ 与 $t(R)$ 仍自反（Tutorial 05 Q11）；若 $R$ 对称，则 $r(R)$ 与 $t(R)$ 仍对称（Tutorial 05 Q12）。
-- **但若 $R$ 传递，$s(R)$ 未必传递！** 例如 $R=\{(1,3),(2,3)\}$ 传递，其对称闭包 $s(R)=\{(1,3),(3,1),(2,3),(3,2)\}$ 缺 $(1,2)$ 不传递！
-- 因此求同时满足多种性质的最小闭包时，**传递闭包 $t(\cdot)$ 必须放在最外层最后做**：
-  - 最小自反传递关系（预序闭包）= $t(r(R))$；
-  - 最小对称传递关系 = $t(s(R))$（注意若某顶点孤立无任何边，$t(s(R))$ 不会给它加自环！）；
-  - **最小等价关系（等价闭包）** = **$t(s(r(R)))$**（先补对角线 $r$，再补对称边 $s$，最后连通分量内全打通 $t$）。
-
----
-
-## 2.5 n-ary Relations（$n$ 元关系）与关系型数据库【概念速览】
-
-- **定义（Slides 5.2 p30–p31）**：设 $A_1, A_2, \dots, A_n$ 为集合，子集 $R \subseteq A_1 \times A_2 \times \cdots \times A_n$ 称为 **$n$-ary relation**，$A_i$ 称为各域（domains），$n$ 称为度（degree）。
-- **关系数据库模型（Relational Data Model）**：
-  - 一张数据库表 = 一个 $n$ 元关系；每一列（字段 Attribute）对应一个域；每一行记录（Record）是一个 $n$ 元组（$n$-tuple）。
-  - **主键 Primary Key**：值在所有记录中互不重复、能唯一确定一条 $n$ 元组的属性域（例如学号 `Student_ID`；若单个属性不够，可用复合主键 Composite Key）。
-  - 三大基本关系运算：选择 Selection（按条件筛行）、投影 Projection（抽出指定列组成更低度关系并去重）、连接 Join（按公共属性值拼接两张表）。
-
----
-
-# 第 3 部分：等价关系、偏序集、Hasse 图与格（Ch9.5–9.6 / Slides 5.5–5.6）
-
-## 3.1 等价关系 Equivalence Relations：对“相等”的抽象【高频必考】
-
-- **定义（Slides 5.5 p2–p3）**：集合 $A$ 上的关系 $R$ 称为**等价关系（equivalence relation）**，当且仅当 $R$ 同时满足：
-  1. **自反 Reflexive**：$\forall a\in A,\ (a,a)\in R$
-  2. **对称 Symmetric**：$\forall a,b\in A,\ (a,b)\in R \to (b,a)\in R$
-  3. **传递 Transitive**：$\forall a,b,c\in A,\ (a,b)\in R \land (b,c)\in R \to (a,c)\in R$
-
-### 三大黄金模型（看到这种结构直接秒判是等价关系！）
-1. **函数等值核模型 $a R b \iff f(a) = f(b)$（Slides p6，Tutorial 06 Q2/Q3/Q5，Test 02 Q3b）**：
-   只要关系能翻译成“两个对象的**某个确定属性 $f(\cdot)$ 完全相等**”——例如：
-   - 字符串长度相同 $g(a)=g(b)$；比特串前 3 位相同（Tutorial 06 Q3）；
-   - 两人拥有完全相同的父母（Tutorial 06 Q1d）或**完全相同的朋友集合 $F(a)=F(b)$（Test 02 Q3b 原题！）**；
-   - 它**必然是等价关系**！其等价类就是原像集 $f^{-1}(y)$（Tutorial 06 Q5b）。
-   - 反面对照："$a$ 与 $b$ 认识 / 见过面（have met）"（Tutorial 06 Q1e）或 "有公共朋友 $F(a)\cap F(b)\neq\varnothing$" **不是**等价关系，因为**不传递**！
-2. **模 $m$ 同余 Congruence Modulo $m$（Slides p4, p8, p12）**：
-   设 $m$ 为正整数，整数集 $\mathbb{Z}$ 上定义 $a \equiv b \pmod m \iff m \mid (a - b) \iff \exists k\in\mathbb{Z}\,(a - b = km)$。
-   这是等价关系，把全体整数切分成恰好 **$m$ 个同余等价类**：$[0]_m, [1]_m, \dots, [m-1]_m$。
-3. **矩阵分块判别法（Tutorial 06 Q1f–i）**：
-   在有向图上，等价关系的每一个连通块都是**带全自环的完全子图（团 Clique）**；适当重排顶点顺序后，0-1 矩阵必呈**主对角线上的全 $1$ 方块阵（Block-Diagonal of All-1s）**！
-
----
-
-## 3.2 等价类 Equivalence Classes 与集合划分 Partition【高频必考】
-
-- **等价类定义（Slides 5.5 p7）**：设 $R$ 是 $A$ 上的等价关系，$a\in A$ 的等价类为：
-
-$$
-[a]_R = \{s \in A \mid (a, s) \in R\}
-$$
-
-其中任何 $b \in [a]_R$ 都可称为该等价类的**代表元（representative）**。
-
-### 等价类三大等价定理（Slides p9–p13，证明与大题核心）
-
-设 $R$ 是非空集合 $A$ 上的等价关系，则对任意 $a, b \in A$，以下三条**互相等价**：
-
-$$
-(i)\ (a,b) \in R \quad\Longleftrightarrow\quad (ii)\ [a]_R = [b]_R \quad\Longleftrightarrow\quad (iii)\ [a]_R \cap [b]_R \neq \varnothing
-$$
-
-> **核心推论**：两个等价类**要么一模一样（$[a]_R=[b]_R$），要么老死不相往来（$[a]_R\cap [b]_R=\varnothing$）**，绝不可能“只重叠一部分”！
-
-### 等价关系 $\longleftrightarrow$ 集合划分（Partition）双向一一对应
-集合族 $\{A_1, A_2, \dots, A_k\}$ 称为集合 $A$ 的一个**划分（Partition，Tutorial 06 Q4）**，当且仅当同时满足三件事：
-1. **每块非空**：$\forall i,\ A_i \neq \varnothing$；
-2. **两两不相交（Pairwise Disjoint）**：$i \neq j \implies A_i \cap A_j = \varnothing$；
-3. **并集铺满全集**：$\bigcup_i A_i = A$。
-
-- **正向（$R \Rightarrow$ 划分）**：等价关系 $R$ 的所有不同等价类自动构成 $A$ 的一个划分。
-- **反向（划分 $\Rightarrow R$，Slides p13）**：给定划分 $\{A_1, \dots, A_k\}$，定义 "$a R b \iff a, b$ 在同一个分块 $A_i$ 中"，则：
-
-$$
-R = (A_1 \times A_1) \cup (A_2 \times A_2) \cup \cdots \cup (A_k \times A_k)
-$$
-
-例如 $A_1=\{1,2,3\},\ A_2=\{4,5\}$ 诱导的等价关系共有 $3^2 + 2^2 = 9 + 4 = 13$ 个有序对！
-
----
-
-## 3.3 偏序关系 Partial Orderings、全序、字典序与良序【高频必考 + 概念速览】
-
-- **偏序定义（Slides 5.6 p17）**：集合 $S$ 上的关系 $R$（常记作 $\preceq$）称为**偏序（partial ordering / reflexive partial order）**，当且仅当满足：
-  1. **自反 Reflexive**：$a \preceq a$
-  2. **反对称 Antisymmetric**：$(a \preceq b \land b \preceq a) \to a = b$
-  3. **传递 Transitive**：$(a \preceq b \land b \preceq c) \to a \preceq c$
-  配对 $(S, \preceq)$ 称为**偏序集（poset）**。记严格小于 $a \prec b \iff (a \preceq b \land a \neq b)$。
-
-### 三大标准偏序模型与常见伪偏序陷阱（Tutorial 06 Q6–Q8）
-- **真偏序三巨头**：① 实数/整数上的 $(\mathbb{Z}, \le)$ 与 $(\mathbb{Z}, \ge)$；② 正整数上的**整除 $(\mathbb{Z}^+, \mid)$**；③ 幂集上的**包含 $(\mathcal{P}(S), \subseteq)$**；外加特例：相等关系 $(S, =)$ 既是等价关系也是偏序关系！
-- **对偶偏序集 Dual Poset（Tutorial 06 Q7–Q8）**：若 $(S, R)$ 是偏序集，则逆关系 **$(S, R^{-1})$ 必也是偏序集**（例如 $(\mathbb{Z}, \ge)$ 的对偶是 $(\mathbb{Z}, \le)$；Hasse 图直接上下倒置）。
-- **伪偏序反例**：
-  - "$a$ 比 $b$ 高（taller than）" 或 "$<$" —— **不自反**（是严格偏序，不是本课定义的自反偏序）；
-  - **全体整数 $\mathbb{Z}$** 上的整除 $|$ —— **不反对称**！因为 $2 \mid -2$ 且 $-2 \mid 2$，但 $2 \neq -2$！（正整数 $\mathbb{Z}^+$ 上才是偏序！）
-
-### 可比性、全序、字典序与良序集
-
-| 概念 | 考频 | 精确定义与判据（Slides 5.6 p19–p24, p29） |
-|---|---|---|
-| **可比 Comparable** | **高频必考** | $a \preceq b$ 或 $b \preceq a$ 至少成立一个；若都不成立（如整除中 $5\nmid 13$ 且 $13\nmid 5$），称 **不可比 Incomparable** |
-| **全序 Total / Linear Order (Chain)** | **高频必考** | 偏序集中**任意两个元素都可比**：$\forall a,b\in S\,(a\preceq b \lor b\preceq a)$。Hasse 图是一条无分叉竖直单链！ |
-| **字典序 Lexicographic Order** | 概念速览 | 在 $(A_1,\preceq_1)\times(A_2,\preceq_2)$ 上：$(a_1,a_2) \prec (b_1,b_2) \iff a_1 \prec_1 b_1$ 或 $(a_1=b_1 \land a_2 \prec_2 b_2)$。字符串若前缀相同，短词更小（如 `open < opened < opener < opera < operand`，Tutorial 06 Q10） |
-| **良序集 Well-Ordered Set** | 概念速览 | $(S, \preceq)$ 是**全序集**，且 $S$ 的**每一个非空子集都有最小元（least element）**。<br/>例：$(\mathbb{Z}^+, \le)$ 与 $(\mathbb{N}, \le)$ 是良序集；$(\mathbb{Z}, \le)$ 是全序但**非良序**（负整数集无最小元）；$([0,1], \le)$ **非良序**（开区间 $(0,1]$ 无最小元） |
-
----
-
-## 3.4 哈斯图 Hasse Diagram 与极值 / 上下界四组辨析【Test 02 Q5 20 分核心】
-
-### A. 画 Hasse 图的标准三步脱衣法（Slides 5.6 p25–p27，Tutorial 06 Q11）
-给定有限偏序集 $(A, \preceq)$：
-1. **脱自环**：因偏序必自反，擦掉所有顶点上的自环 $(a,a)$；
-2. **脱跨级传递边（只留覆盖关系 Covering Relation）**：若存在中间元素 $z$ 使 $x \prec z \prec y$，则擦掉直连边 $(x,y)$。留下的边全是 **$y$ covers $x$**（紧挨着的直接上下级）；
-3. **脱箭头定高低**：把所有满足 $x \prec y$ 的 $y$ 画在 $x$ 的**上方**，擦掉向上的箭头，只留无向线段！
-
-> **从 Hasse 图反读偏序关系**：在 Hasse 图中 $a \preceq b \iff a = b$，或者能从 $a$ 出发**一路顺着连线只往上爬**到达 $b$！
-
-### B. 极小/最小/极大/最大元 vs 上界/LUB/下界/GLB 终极对照表
-
-设 $(A, \preceq)$ 是偏序集，**$B \subseteq A$ 是题目指定的子集**（当题目没写子集时默认 $B = A$）：
-
-| 概念对 | 候选人必须在哪个范围找？ | 精确定义与 Hasse 图读法 | 个数规律 |
-|---|---|---|---|
-| **极小元 Minimal** of $B$ | **必须在子集 $B$ 内部** ($m \in B$) | $B$ 中没有元素排在 $m$ 下方（$\neg\exists x\in B,\ x \prec m$） | 有限非空 $B$ **至少 1 个，可有多个** |
-| **最小元 Least** of $B$ | **必须在子集 $B$ 内部** ($l \in B$) | $l$ 排在 $B$ 中**所有**元素下方（$\forall x\in B,\ l \preceq x$） | **至多 1 个**！若有 $\ge 2$ 个极小元，则最小元 **None（不存在）** |
-| **极大元 Maximal** of $B$ | **必须在子集 $B$ 内部** ($m \in B$) | $B$ 中没有元素排在 $m$ 上方（$\neg\exists x\in B,\ m \prec x$） | 有限非空 $B$ **至少 1 个，可有多个** |
-| **最大元 Greatest** of $B$ | **必须在子集 $B$ 内部** ($g \in B$) | $g$ 排在 $B$ 中**所有**元素上方（$\forall x\in B,\ x \preceq g$） | **至多 1 个**！若有 $\ge 2$ 个极大元，则最大元 **None（不存在）** |
-| **上界 Upper Bounds** of $B$ | **在全集 $A$ 中找** ($u \in A$，可不在 $B$ 内！) | 在 Hasse 图上，能从 $B$ 的**每一个**元素往上爬到的公共汇合点 $u$ | 可有 0 个、1 个或多个 |
-| **最小上界 LUB** ($\sup B$) | 上界集合 $U(B)$ 内部 | 所有上界 $U(B)$ 当中的 **Least element**（最矮但统领其余所有上界的那个） | **至多 1 个**（即唯一上确界） |
-| **下界 Lower Bounds** of $B$ | **在全集 $A$ 中找** ($l \in A$，可不在 $B$ 内！) | 在 Hasse 图上，往上爬能到达 $B$ 的**每一个**元素的公共源头 $l$ | 可有 0 个、1 个或多个 |
-| **最大下界 GLB** ($\inf B$) | 下界集合 $L(B)$ 内部 | 所有下界 $L(B)$ 当中的 **Greatest element**（最高且在其余下界之上的那个） | **至多 1 个**（即唯一下确界） |
-
-#### 【重点提示】Test 02 Q5c & Q5g 两大夺命陷阱（90% 同学在这两处丢分！）
-
-1. **陷阱一（Q5c）：把“全集里的上界”误当成“子集的最大元 Greatest”！**
-   - 题问：在 $A=\{1,5,10,13,65,650\}$ 上，求子集 $B=\{5, 10, 65\}$ 的 **greatest element**。
-   - 错误脑回路：看到 $650$ 能被 $5, 10, 65$ 整除就填 $650$ —— **0 分**！因为 $650 \notin \{5,10,65\}$！Greatest element 必须是子集 $B$ 自己的成员！而在 $B$ 内部，$10 \nmid 65$ 且 $65 \nmid 10$（有两个极大元 $10, 65$），所以答案是 **Does not exist (None)**！
-2. **陷阱二（Q5g 神坑）：在有限子集整除偏序里盲套数论 $\operatorname{lcm}$ 误判不是 Lattice！**
-   - 在全体正整数 $(\mathbb{Z}^+, \mid)$ 上，确实有 $\text{lub}\{a,b\} = \operatorname{lcm}(a,b)$、$\text{glb}\{a,b\} = \gcd(a,b)$。
-   - 但在**残缺的有限子集** $A=\{1,5,10,13,65,650\}$ 上，考察元素对 $\{10, 13\}$：数论最小公倍数是 $\operatorname{lcm}(10,13) = 130$，而 **$130$ 根本不在集合 $A$ 里**！
-   - 那 $\{10, 13\}$ 在 $A$ 里还有没有 LUB？**有！！** 按定义在 $A$ 里找同时是 $10$ 和 $13$ 倍数的上界，只有唯一一个元素 **$650$**！上界集合 $\{650\}$ 的最小元当然就是 **$650$**！所以 $\text{lub}_A\{10,13\} = 650$ 完全存在！整张偏序集 **依然是一个 Lattice（格）**！永远按 Hasse 图找公共上界，绝不盲背 $\operatorname{lcm}$！
-
----
-
-## 3.5 格 Lattice、有界格与有补格【Test 02 Q5g 压轴 + 概念速览】
-
-### A. 格 Lattice 的定义与反例判别法（Slides 5.6 p31–p33）【高频必考】
-- **定义**：若偏序集 $(L, \preceq)$ 中**每一对元素** $a, b \in L$ 都**同时拥有**最小上界 $\text{lub}\{a,b\}$（记作并运算 $a \lor b$）和最大下界 $\text{glb}\{a,b\}$（记作交运算 $a \land b$），则称 $(L, \preceq)$ 是一个**格（lattice）**。
-- **考场如何快速判断一张有限 Hasse 图是不是格？**
-  1. **一票否决 1（缺顶或缺底）**：若整张有限图有 $\ge 2$ 个极大元（没有全集最大元，如 Tutorial 06 Q12 的 $24$ 和 $45$）或有 $\ge 2$ 个极小元（没有全集最小元，如 Q12 的 $3$ 和 $5$），立刻断定 **NOT a lattice**（直接拿那两个极大元做反例：它们没有公共上界！）。
-  2. **一票否决 2（蝴蝶结 Bowtie 结构）**：虽然有全集最大元和最小元，但存在底部两点 $\{a,b\}$ 同时连向中部两个互不可比的点 $\{c,d\}$ —— 此时 $\{a,b\}$ 的上界包含 $c, d$，但 $c, d$ 谁也不比谁小，导致**上界集合无最小元（无唯一 LUB）** $\Rightarrow$ **NOT a lattice**！
-  3. 若所有**不可比元素对**逐一核查都既有唯一 LUB 又有唯一 GLB（可比对 $a\preceq b$ 自动有 $\text{glb}=a,\ \text{lub}=b$ 不用查！），则 **IS a lattice**！
-
-### B. 格的代数性质、有界格与有补格（Slides 5.6 p32–p35）【概念速览】
-- **格的四组代数定律（定理，Slides p32）**：在任意格 $(L, \lor, \land)$ 中，$\lor$（lub）与 $\land$（glb）满足：
-  1. **幂等律 Idempotent**：$a \lor a = a,\quad a \land a = a$
-  2. **交换律 Commutative**：$a \lor b = b \lor a,\quad a \land b = b \land a$
-  3. **结合律 Associative**：$(a\lor b)\lor c = a\lor(b\lor c),\quad (a\land b)\land c = a\land(b\land c)$
-  4. **吸收律 Absorption**：$a \lor (a \land b) = a,\quad a \land (a \lor b) = a$
-- **有界格 Bounded Lattice（Slides p34）**：存在全集最小元 $0$（bottom，$\forall x,\ 0\preceq x$）和全集最大元 $1$（top，$\forall x,\ x\preceq 1$）的格。**定理：任何有限格必是有界格**。
-- **有补格 Complemented Lattice（Slides p35）**：在有界格中，若对**每一个**元素 $x \in L$，都存在至少一个补元 $y \in L$ 使得：
-
-$$
-x \lor y = 1 \qquad\text{且}\qquad x \land y = 0
-$$
-
-则称为有补格。
-  - 典型例子：幂集格 $(\mathcal{P}(S), \subseteq)$ 是有界有补格（$0=\varnothing,\ 1=S$，$X$ 的补元就是集合补 $\overline{X} = S - X$，满足 $X \cup \overline{X} = S$ 且 $X \cap \overline{X} = \varnothing$）；
-  - 反例：全序链 $(\{1, 2, 3\}, \le)$ 是有界格（$0=1,\ 1=3$），但**不是有补格**，因为中间元素 $2$ 找不到 $y$ 同时满足 $\max(2,y)=3$ 且 $\min(2,y)=1$！
-
----
-
-# 第 4 部分：Midterm Test 02 原题双语对照与审题要点
-
-## 怎么用这一页
-
-- 左栏是 **Midterm Test 02 英文原卷**（一字不改），右栏是逐句中文翻译；建议重点留意加粗的英文核心术语。
-- 每题下方的“读题与审题要点”把试卷里的英文动作词直接翻译成“阅卷老师按什么给分”。
-
-> **考试信息**：Discrete Mathematics – Test 02（Semester 1, 2025–2026 · Date: November-2025 · **Total Marks: 76**）  
-> **考试范围**：Ch2.1–2.3 Sets and Functions · Ch9.1–9.3 Relations and Properties · Ch9.5–9.6 Equivalence and Partial Orderings.
-
----
-
-## Question 1 (12 marks)
-
-#### 英文原题（Original English）
-
-Given $f(x)=x^2+5$, $g(x)=3x^2+5$ and $h(x)=|x/2|$, are functions from $\mathbb{R}$ to $\mathbb{R}$.
-
-a) Find $g\circ f$ **(2 marks)**
-
-b) Find $f+g$ **(2 marks)**
-
-c) Range of $h(x)$ **(2 marks)**
-
-d) Discuss the restricted domain and codomain in which $h(x)$ is one-to-one correspondence. Discuss in detail. **(6 marks)**
-
-#### 中文逐句对照（Chinese Translation）
-
-已知 $f(x)=x^2+5$，$g(x)=3x^2+5$ 以及 $h(x)=|x/2|$ 都是从实数集 $\mathbb{R}$ 到 $\mathbb{R}$ 的函数。
-
-a) 求复合函数 $g\circ f$ **（2 分）**
-
-b) 求和函数 $f+g$ **（2 分）**
-
-c) 求 $h(x)$ 的值域（Range） **（2 分）**
-
-d) 讨论在怎样的限制定义域（restricted domain）与限制余域（restricted codomain）下，$h(x)$ 成为一一对应（双射）。请详细讨论并证明。 **（6 分）**
-
-#### 【重点提示】读题要点（第 1 题）
-
-- **$g \circ f$** $\to$ 注意顺序是 $g(f(x))$（把 $f(x)$ 整体代进 $g$ 的自变量），不是 $f(g(x))$！
-- **Range of $h(x)$** $\to$ 写成规范集合/区间 $[0, +\infty)$ 或 $\{y\in\mathbb{R}\mid y\ge 0\}$，切忌写成 $\{\mathbb{R}^+, 0\}$。
-- **one-to-one correspondence** = **Bijection（双射 = 单射 + 满射）**；**Discuss in detail（6 分）** $\to$ 只写区间最多拿 2 分！必须：① 指出原函数在 $\mathbb{R}\to\mathbb{R}$ 上为何非单射、非满射；② 写出限制后的 domain 与 codomain；③ 分别证明限制后是 one-to-one 且 onto。
-
----
-
-## Question 2 (24 marks)
-
-#### 英文原题（Original English）
-
-Let $R_1$ and $R_2$ be relations on a set $A$ represented by the matrices
-
-$$
-M_{R_1}=
-\begin{bmatrix}
-0 & 1 & 1\\
-1 & 0 & 0\\
-0 & 1 & 1
-\end{bmatrix}
-\quad\text{and}\quad
-M_{R_2}=
-\begin{bmatrix}
-1 & 0 & 1\\
-1 & 0 & 0\\
-0 & 1 & 1
-\end{bmatrix}
-$$
-
-Find the matrices that represent:
-
-a) $R_1^{-1}$
-
-b) $\overline{R_1}$
-
-c) $R_1\oplus R_2$
-
-d) $R_2\circ R_1$
-
-e) transitive closure of $R_1$
-
-f) symmetric closure of $R_2$
-
-#### 中文逐句对照（Chinese Translation）
-
-设 $R_1$ 和 $R_2$ 是集合 $A$ 上的两个二元关系，其表示矩阵分别为：
-
-$$
-M_{R_1}=
-\begin{bmatrix}
-0 & 1 & 1\\
-1 & 0 & 0\\
-0 & 1 & 1
-\end{bmatrix}
-\quad\text{与}\quad
-M_{R_2}=
-\begin{bmatrix}
-1 & 0 & 1\\
-1 & 0 & 0\\
-0 & 1 & 1
-\end{bmatrix}
-$$
-
-求表示下列关系的矩阵（共 6 小问，平均每问 4 分）：
-
-a) 逆关系 $R_1^{-1}$
-
-b) 补关系 $\overline{R_1}$
-
-c) 对称差（异或）关系 $R_1\oplus R_2$
-
-d) 复合关系 $R_2\circ R_1$
-
-e) $R_1$ 的传递闭包（transitive closure）
-
-f) $R_2$ 的对称闭包（symmetric closure）
-
-#### 【重点提示】读题要点（第 2 题 · 全卷分值最高 24 分！）
-
-- a) 转置 $M_{R_1}^T$；b) 0/1 全部取反；c) 同位不同写 $1$、相同写 $0$；f) $M_{R_2} \lor M_{R_2}^T$。
-- **d) 最大陷阱 $R_2 \circ R_1$**：先走 $R_1$ 再走 $R_2$，所以布尔矩阵乘法必须**左放 $M_{R_1}$、右放 $M_{R_2}$**（算 $M_{R_1} \odot M_{R_2}$）！
-- **e) transitive closure of $R_1$**：4 分小问建议写出 Warshall 算法 $W_0 \to W_1 \to W_2 \to W_3$ 或 $M_{R_1} \lor M_{R_1}^{[2]} \lor M_{R_1}^{[3]}$ 的中间过程，稳拿步骤分。
-
----
-
-## Question 3 (12 marks)
-
-#### 英文原题（Original English）
-
-Determine whether the following relation $R$ whether it is i) symmetric, ii) antisymmetric, iii) transitive, iv) irreflexive, v) reflexive, vi) a function, vii) an equivalence relation, viii) a reflexive partial order relation.
-
-a) $\{(1,2),(3,1),(5,4),(2,3),(3,2),(4,5)\}$ on set $\{1,2,3,4,5\}$ **(4 marks)**
-
-b) “Person a and Person b have the same friends” on the set of all persons **(4 marks)**
-
-c) $\{(x,y)\mid x^2\geq y\text{ on the set of integers }\}$ **(4 marks)**
-
-#### 中文逐句对照（Chinese Translation）
-
-判断下列每一个关系 $R$ 是否满足：i) 对称的，ii) 反对称的，iii) 传递的，iv) 反自反的，v) 自反的，vi) 是函数，vii) 是等价关系，viii) 是自反偏序关系。
-
-a) 集合 $\{1,2,3,4,5\}$ 上的关系 $\{(1,2),(3,1),(5,4),(2,3),(3,2),(4,5)\}$ **（4 分）**
-
-b) 所有人组成的集合上的关系：“$a$ 与 $b$ 拥有相同的朋友” **（4 分）**
-
-c) **整数集**上的关系 $\{(x,y)\mid x^2\geq y\}$ **（4 分）**
-
-#### 【重点提示】读题要点（第 3 题）
-
-- 每一道小题 a)、b)、c) 都要完整回答 **i) 到 viii) 共 8 个小标签**（建议在答卷上列一张 $3\times 8$ 或 $8\times 3$ 表格并附简短理由，绝不漏项！）。
-- 先判前五项基本性质：自动锁死 **vii) 等价关系 = v) 自反 + i) 对称 + iii) 传递**，以及 **viii) 自反偏序 = v) 自反 + ii) 反对称 + iii) 传递**！
-- **vi) a function**：检查定义域每个元素是否**恰好对应唯一一个 $y$**。
-- **c) 盯紧题干最后四个词 `on the set of integers`**：在 $\mathbb{Z}$ 上 $x^2 \ge x$ 恒成立，所以 **v) reflexive 为 Yes**！
-
----
-
-## Question 4 (8 marks)
-
-#### 英文原题（Original English）
-
-Suppose that $R$ and $S$ are symmetric relation on a set $A$. Prove or disprove $S\cap R$ is symmetric.
-
-#### 中文逐句对照（Chinese Translation）
-
-设 $R$ 和 $S$ 是集合 $A$ 上的对称关系。证明或否证：$S \cap R$ 也是对称关系。
-
-#### 【重点提示】读题要点（第 4 题）
-
-- **Prove or disprove**：第一步必须先写明确结论 **"True. $S \cap R$ is symmetric."**，然后再写 `Proof:`。
-- 标准证明骨架：任取 $(a,b)\in S\cap R$ $\to$ 按交集定义拆成 $(a,b)\in S \land (a,b)\in R$ $\to$ 对 $S, R$ 分别用对称定义得 $(b,a)\in S \land (b,a)\in R$ $\to$ 合回 $(b,a)\in S\cap R$。
-
----
-
-## Question 5 (20 marks)
-
-#### 英文原题（Original English）
-
-Given a relation $R$ “divisibility” on the set $\{1,5,10,13,65,650\}$.
-
-a) Draw the Hasse diagram **(6 marks)**
-
-b) Find the minimal elements of $\{5,10,13\}$ **(2 marks)**
-
-c) Find the greatest elements of $\{5,10,65\}$ **(2 marks)**
-
-d) Find the upper bounds of $\{13,65\}$ **(2 marks)**
-
-e) Find the greatest lower bound of $\{10,65\}$ **(2 marks)**
-
-f) Is $R$ a total order? Explain why. **(3 marks)**
-
-g) Is $R$ a lattice? Explain why. **(3 marks)**
-
-#### 中文逐句对照（Chinese Translation）
-
-给定集合 $\{1,5,10,13,65,650\}$ 上的“整除（divisibility，$a \mid b$）”关系 $R$。
-
-a) 画出其哈斯图（Hasse diagram） **（6 分）**
-
-b) 求子集 $\{5,10,13\}$ 的极小元（minimal elements） **（2 分）**
-
-c) 求子集 $\{5,10,65\}$ 的最大元（greatest element） **（2 分）**
-
-d) 求子集 $\{13,65\}$ 的所有上界（upper bounds） **（2 分）**
-
-e) 求子集 $\{10,65\}$ 的最大下界（greatest lower bound，GLB） **（2 分）**
-
-f) $R$ 是全序（total order）吗？解释原因。 **（3 分）**
-
-g) $R$ 是格（lattice）吗？解释原因。 **（3 分）**
-
-#### 【重点提示】读题要点（第 5 题 · 20 分压轴大题）
-
-- **a) Hasse 图三不画**：不画自环、不画跨级边（如 $1\to 10, 1\to 65, 5\to 650, 13\to 650$ 全擦掉！）、不画箭头（$1$ 在最底、$650$ 在最顶）。
-- **b) c) vs d) e)**：b) 的 minimal 和 c) 的 greatest **只能在括号给的子集里面找**（c 中 $650$ 不在子集内，故 greatest **不存在**！）；d) 的 upper bounds 和 e) 的 GLB **在全集 $\{1,5,10,13,65,650\}$ 里找**！
-- **f) g) Explain why（各 3 分）**：只写 Yes / No 最多得 1 分，必须写明定义与元素级验证！
-
----
-
-# 第 5 部分：Midterm Test 02（76 分）逐题精讲与满分示范
-
-## Question 1（12 marks）：函数复合、和函数、值域与限制域构造双射
-
-### 题目回顾
-
-Given $f(x)=x^2+5$, $g(x)=3x^2+5$ and $h(x)=|x/2|$ are functions from $\mathbb{R}$ to $\mathbb{R}$.
-- a) Find $g\circ f$ (2 marks)　b) Find $f+g$ (2 marks)　c) Range of $h(x)$ (2 marks)
-- d) Discuss the restricted domain and codomain in which $h(x)$ is one-to-one correspondence. Discuss in detail. (6 marks)
-
----
-
-### 1a）求复合函数 $g \circ f$（2 分）
-
-- **核心公式（Slides 2.3 p40）**：$(g \circ f)(x) = g(f(x))$ —— **右边的 $f$ 先作用，把 $f(x)$ 整体填进 $g(\square)$ 的框里**！
-- **计算过程**：
-
-$$
-(g \circ f)(x) = g(f(x)) = g(x^2 + 5) = 3(x^2 + 5)^2 + 5 = 3(x^4 + 10x^2 + 25) + 5 = 3x^4 + 30x^2 + 80
-$$
-
-- **常见失误**：算反成 $(f \circ g)(x) = (3x^2+5)^2 + 5 = 9x^4 + 30x^2 + 30$（直接 0 分！）。
-
----
-
-### 1b）求和函数 $f + g$（2 分）
-
-- **核心公式（Slides 2.3 p39）**：$(f + g)(x) = f(x) + g(x)$（定义域仍为 $\mathbb{R} \to \mathbb{R}$）。
-
-$$
-(f + g)(x) = (x^2 + 5) + (3x^2 + 5) = 4x^2 + 10
-$$
-
----
-
-### 1c）求 $h(x) = |x/2|$ 的值域 Range（2 分）
-
-- **分析**：
-  1. 对任意 $x \in \mathbb{R}$，绝对值非负：$|x/2| \ge 0$，故 $\operatorname{Range}(h) \subseteq [0, +\infty)$；
-  2. 反过来，对任意非负实数 $y \ge 0$，取 $x = 2y \in \mathbb{R}$，都有 $h(2y) = |2y/2| = |y| = y$，说明每一个非负实数都能被取到。
-- **标准答案写法（任选一种规范记法）**：
-
-$$
-\operatorname{Range}(h) = [0, +\infty) = \{y \in \mathbb{R} \mid y \ge 0\} = \mathbb{R}^+ \cup \{0\}
-$$
-
-#### 【重点提示】卷面手写附注纠偏：为什么不要写 {ℝ⁺, 0}？
-
-原卷手写附注写成了 $\{\mathbb{R}^+, 0\}$。在严格集合论里（Tutorial 04 Q3/Q4 专门考过！），花括号 $\{A, b\}$ 表示**由两个元素组成的二元集合**——第一个元素是“集合 $\mathbb{R}^+$ 这个整体”，第二个元素是数字 $0$（所以 $3 \notin \{\mathbb{R}^+, 0\}$！）。
-想把正实数集与单点 $0$ 合并，务必使用**并集符号** $\mathbb{R}^+ \cup \{0\}$ 或区间记号 $[0, +\infty)$！
-
----
-
-### 1d）讨论使 $h(x)$ 成为双射（One-to-One Correspondence）的限制定义域与限制余域（6 分）
-
-**阅卷给分点拆解（6 分大题写出“四段式”稳拿满分）**：
-1. **说明原函数为何不是双射（1.5 分）**：用反例指出既不 one-to-one 也不 onto；
-2. **明确给出限制后的 Domain 与 Codomain（1.5 分）**：给出两种对称方案 $[0,+\infty)\to[0,+\infty)$ 或 $(-\infty,0]\to[0,+\infty)$；
-3. **严格证明限制后是 One-to-One（1.5 分）**；
-4. **严格证明限制后是 Onto（1.5 分）**。
-
-#### 【标准证明 / 作答示范】
-
-**Model Answer（考场满分英文模板）：**
-
-On the original domain $\mathbb{R}$ and codomain $\mathbb{R}$, $h(x) = |x/2|$ is **neither one-to-one nor onto**:
-- **Not one-to-one:** $h(2) = |2/2| = 1$ and $h(-2) = |-2/2| = 1$, where $2 \neq -2$.
-- **Not onto:** Since $|x/2| \ge 0$ for all $x \in \mathbb{R}$, negative numbers such as $-1 \in \mathbb{R}$ have no preimage.
-
-To make $h(x)$ a **one-to-one correspondence (bijection)**:
-1. **Restrict the codomain** to its range $B' = [0, +\infty)$ so that every element in the codomain is hit.
-2. **Restrict the domain** to a single monotonic branch: **Case 1:** $A_1 = [0, +\infty)$, or **Case 2:** $A_2 = (-\infty, 0]$.
-
-**Verification for Case 1: $h: [0, +\infty) \to [0, +\infty)$, where $h(x) = |x/2| = x/2$:**
-- **One-to-one:** Assume $h(x_1) = h(x_2)$ for $x_1, x_2 \in [0, +\infty)$. Then $x_1 / 2 = x_2 / 2$, which implies $x_1 = x_2$. Hence $h$ is one-to-one.
-- **Onto:** For any $y \in [0, +\infty)$, choose $x = 2y$. Since $y \ge 0$, we have $x = 2y \in [0, +\infty)$, and $h(x) = |2y / 2| = y$. Hence $h$ is onto.
-
-*(Similarly, for Case 2: $h: (-\infty, 0] \to [0, +\infty)$, $h(x) = -x/2$. If $h(x_1)=h(x_2)$, then $-x_1/2=-x_2/2 \Rightarrow x_1=x_2$ (one-to-one); for any $y\in[0,+\infty)$, choosing $x=-2y\in(-\infty,0]$ gives $h(-2y)=|-y|=y$ (onto).)*
-
-Therefore, $h$ is a one-to-one correspondence from $[0, +\infty)$ to $[0, +\infty)$ (or from $(-\infty, 0]$ to $[0, +\infty)$), with inverse $h^{-1}(y) = 2y$ (or $h^{-1}(y) = -2y$, respectively). ∎
-
-> **拓展思考**：除了 $[0,+\infty)$ 和 $(-\infty,0]$，其实把每个非零绝对值配对 $\{a, -a\}$ 任选其一（如 $[0,1)\cup(-\infty,-1]$）也能造出双射，但考场上永远优先写**连续单调区间** $[0,+\infty)$ 与 $(-\infty,0]$，最直观且最好证！
-
----
-
-## Question 2（24 marks）：0-1 关系矩阵运算、复合顺序与闭包
-
-### 题目回顾
+一换成 `0` 和 `1` 的方格表，Test 02 全卷分值最高的 **Question 2（整整 24 分，6 小问每问 4 分！）** 的前 12 分几乎当场白送！来看题目给的两张 $3 \times 3$ 矩阵：
 
 $$
 M_{R_1}=
@@ -834,14 +276,9 @@ M_{R_2}=
 \end{bmatrix}
 $$
 
-求表示下列 6 个关系的 0-1 矩阵：a) $R_1^{-1}$　b) $\overline{R_1}$　c) $R_1\oplus R_2$　d) $R_2\circ R_1$　e) transitive closure of $R_1$　f) symmetric closure of $R_2$。
+先一口气收下 **a)、b)、c)** 三道小题（12 分）：
 
----
-
-### 2a）逆关系 $R_1^{-1}$（4 分）
-
-- **公式**：$M_{R_1^{-1}} = M_{R_1}^T$（矩阵转置：第 $i$ 行变第 $i$ 列）。
-  - $M_{R_1}$ 第 1 行 $[0\ 1\ 1]$ 竖着写成第 1 列；第 2 行 $[1\ 0\ 0]$ 写成第 2 列；第 3 行 $[0\ 1\ 1]$ 写成第 3 列：
+- **2a) 求逆关系 $R_1^{-1}$ 的矩阵**：所谓 **逆关系（inverse relation）** $R_1^{-1} = \{(b, a) \mid (a, b) \in R_1\}$，就是把所有有向边的箭头原地掉头！（注意：前面说过只有双射函数才有“反函数”，但**任何关系都永远有逆关系**，哪怕掉头后一源多箭也照样是合法的关系！）原来第 $i$ 行第 $j$ 列的 `1`，掉头后自然跑到了第 $j$ 行第 $i$ 列——也就是把矩阵做一次 **转置 $M_{R_1}^T$**（把第 1、2、3 行顺次竖起来写成第 1、2、3 列）：
 
 $$
 M_{R_1^{-1}} = M_{R_1}^T =
@@ -852,11 +289,7 @@ M_{R_1^{-1}} = M_{R_1}^T =
 \end{bmatrix}
 $$
 
----
-
-### 2b）补关系 $\overline{R_1}$（4 分）
-
-- **公式**：$M_{\overline{R_1}} = \overline{M_{R_1}}$（所有 $0 \to 1$，$1 \to 0$）：
+- **2b) 求补关系 $\overline{R_1}$ 的矩阵**：所谓 **补关系（complementary relation）** $\overline{R_1} = (A \times A) - R_1$，就是“原来没连边的全连上，原来连了边的全掐断”——把 $M_{R_1}$ 里所有的 `0` 改成 `1`、`1` 改成 `0` 就完事了：
 
 $$
 M_{\overline{R_1}} =
@@ -867,12 +300,7 @@ M_{\overline{R_1}} =
 \end{bmatrix}
 $$
 
----
-
-### 2c）异或（对称差）$R_1 \oplus R_2$（4 分）
-
-- **公式**：$(M_{R_1 \oplus R_2})_{ij} = (M_{R_1})_{ij} \oplus (M_{R_2})_{ij}$（对应位置**不同为 $1$，相同为 $0$**）。
-- 对比 $M_{R_1}$ 与 $M_{R_2}$：第 2 行同为 $[1\ 0\ 0]$，第 3 行同为 $[0\ 1\ 1]$，全抵消为 $0$！只有第 1 行 $[0\ 1\ 1] \oplus [1\ 0\ 1] = [1\ 1\ 0]$：
+- **2c) 求对称差（异或）$R_1 \oplus R_2$ 的矩阵**：还记得第 01 节月牙形的对称差吗？一个配对**恰在 $R_1$ 和 $R_2$ 其中之一出现**才留下来，两边都有或两边都没有的全填 `0`（同位**不同填 1，相同填 0**）。瞄一眼题目那两张表：第 2 行一模一样都是 `[1 0 0]`，第 3 行一模一样都是 `[0 1 1]`，全抵消成 `0`！只有第 1 行 `[0 1 1]` 与 `[1 0 1]` 前两格不同：
 
 $$
 M_{R_1 \oplus R_2} =
@@ -883,14 +311,72 @@ M_{R_1 \oplus R_2} =
 \end{bmatrix}
 $$
 
----
+不到两分钟，12 分已经稳稳揣进兜里了。接下来第 **2d 题** 要算 $R_2 \circ R_1$——先别急着把两张矩阵往一块儿乘！这里埋着整门课最大的一颗地雷。
 
-### 2d）复合关系 $R_2 \circ R_1$（4 分 · 最大易错点！）
+### 【考场真题落笔】Test 02 · Question 2a, 2b, 2c（12 marks）标准答案
 
-#### 【重点提示】先核对矩阵顺序：R₂ ∘ R₁ 是先走 R₁、后走 R₂！
+Given $M_{R_1}=\begin{bmatrix}0&1&1\\1&0&0\\0&1&1\end{bmatrix}$ and $M_{R_2}=\begin{bmatrix}1&0&1\\1&0&0\\0&1&1\end{bmatrix}$:
 
-根据定义 $(a,c)\in R_2\circ R_1 \iff \exists b\,((a,b)\in R_1 \land (b,c)\in R_2)$，以及课件 Slide 45 公式 $(M_{R_2\circ R_1})_{ij} = \bigvee_{k=1}^3 ((M_{R_1})_{ik} \land (M_{R_2})_{kj})$：
-**左矩阵放 $M_{R_1}$（取行），右矩阵放 $M_{R_2}$（取列）！**
+$$
+\text{a) } M_{R_1^{-1}} = M_{R_1}^T = \begin{bmatrix}0 & 1 & 0\\1 & 0 & 1\\1 & 0 & 1\end{bmatrix}, \qquad
+\text{b) } M_{\overline{R_1}} = \begin{bmatrix}1 & 0 & 0\\0 & 1 & 1\\1 & 0 & 0\end{bmatrix}, \qquad
+\text{c) } M_{R_1 \oplus R_2} = \begin{bmatrix}1 & 1 & 0\\0 & 0 & 0\\0 & 0 & 0\end{bmatrix}
+$$
+
+<details>
+<summary><strong>练习 · 在有向图度数与 0-1 矩阵之间一眼互读（Tutorial 05 Q2–Q3）</strong></summary>
+
+在集合 $A = \{a, b, c\}$ 上给定关系 $R = \{(a,b), (a,c), (b,c), (c,b)\}$。写出它的 $3 \times 3$ 关系矩阵 $M_R$，并直接从矩阵说出顶点 $b$ 的 **出度**（out-degree）和 **入度**（in-degree）各是多少。
+
+<details>
+<summary>给我一点提示</summary>
+
+出度就是从 $b$ 发出去几根箭（看第 $b$ 行有几个 1）；入度就是有几根箭射向 $b$（看第 $b$ 列有几个 1）。
+
+</details>
+
+<details>
+<summary>对照考场满分写法</summary>
+
+按 $a, b, c$ 顺序排列，$M_R = \begin{bmatrix}0 & 1 & 1\\0 & 0 & 1\\0 & 1 & 0\end{bmatrix}$。
+
+第 2 行（$b$ 行）有 $1$ 个 `1`，故 $b$ 的 **out-degree = 1**；第 2 列（$b$ 列）有 $2$ 个 `1`（来自 $a\to b$ 和 $c\to b$），故 $b$ 的 **in-degree = 2**。
+
+</details>
+
+</details>
+
+## 05 先走 R₁ 再走 R₂，两张矩阵相乘时谁该站在左边？
+
+*当场拿下 Test 02 Question 2d（4 分 · Slide 45 最大陷阱）*
+
+现在盯住 Test 02 **Question 2d（4 分）**：求复合关系 **$R_2 \circ R_1$** 的表示矩阵。
+
+考场上至少有一半没提前排过雷的同学，看到符号 $R_2 \circ R_1$ 里 $R_2$ 写在左边、$R_1$ 写在右边，草稿纸上顺手就把 $M_{R_2}$ 摆在左边、$M_{R_1}$ 摆在右边做起了矩阵乘法——结果整道题 4 分全扣光！
+
+为什么会全错？回到我们在第 02 节串接两台函数机器 $(g \circ f)(x) = g(f(x))$ 时的顺序：**写在右边的 $R_1$ 是第一程，写在左边的 $R_2$ 是第二程！**
+
+用交朋友打个比方：什么叫起点 $a$ 和终点 $c$ 满足复合关系 $(a, c) \in R_2 \circ R_1$？意思是**能找到某个中间人 $b$，使得第一程 $(a, b) \in R_1$ 走得通，紧接着第二程 $(b, c) \in R_2$ 也走得通**：
+
+$$
+a \;\xrightarrow{\text{第 1 步 } R_1}\; b \;\xrightarrow{\text{第 2 步 } R_2}\; c
+$$
+
+现在把这两步翻译回矩阵格子上，看看谁提供“行”、谁提供“列”：
+- 第一步 $(a_i, b_k) \in R_1$，查的是 **$M_{R_1}$ 的第 $i$ 行** 第 $k$ 列；
+- 第二步 $(b_k, c_j) \in R_2$，查的是 **$M_{R_2}$ 的第 $k$ 行第 $j$ 列**！
+
+只要至少存在一个中转点 $k \in \{1, 2, 3\}$ 让这两步同时是 `1`，从 $i$ 到 $j$ 就算打通了（填 `1`）。写成元素公式就是：
+
+$$
+(M_{R_2 \circ R_1})_{ij} = \bigvee_{k=1}^{n} \Big((M_{R_1})_{ik} \land (M_{R_2})_{kj}\Big)
+$$
+
+看清括号里的先后位置了吗？在我们习惯的“左矩阵取第 $i$ 行 $\times$ 右矩阵取第 $j$ 列”的规则下，**左边站着的必须是先出发的 $M_{R_1}$，右边站着的才是后到达的 $M_{R_2}$**，记作 **布尔矩阵乘积（boolean product）** $M_{R_1} \odot M_{R_2}$（把普通矩阵乘法的乘号换成 $\land$、加号换成有 1 即 1 的 $\lor$）！
+
+> **特别提醒老师课件 Slide 45 的符号习惯**：Dr. Patrick Chan 在课件第 45 页曾把复合矩阵写成一个反序记号 "$M_{R_2} \circ M_{R_1}$"，但紧接着在下一行给出的下标定义仍然是上面那条 $\bigvee_k ((M_{R_1})_{ik} \land (M_{R_2})_{kj})$！所以在草稿纸上列竖式手算 $R_2 \circ R_1$ 时，牢记八字口诀：**“右边先走，矩阵站左！”**
+
+马上拿 Test 02 第 2d 题的两张矩阵实战一遍（左摆 $M_{R_1}$，右摆 $M_{R_2}$）：
 
 $$
 M_{R_2 \circ R_1} = M_{R_1} \odot M_{R_2} =
@@ -907,79 +393,81 @@ M_{R_2 \circ R_1} = M_{R_1} \odot M_{R_2} =
 \end{bmatrix}
 $$
 
-**超快“按行选行相或”心算法**（如果左矩阵第 $i$ 行在第 $k$ 列有 $1$，就把右矩阵的第 $k$ 行抓出来求并 $\lor$！）：
-- **第 1 行** $[0\ 1\ 1]$：抓 $M_{R_2}$ 的**第 2 行 $\lor$ 第 3 行** $= [1\ 0\ 0] \lor [0\ 1\ 1] = [1\ 1\ 1]$；
-- **第 2 行** $[1\ 0\ 0]$：只抓 $M_{R_2}$ 的**第 1 行** $= [1\ 0\ 1]$；
-- **第 3 行** $[0\ 1\ 1]$：抓 $M_{R_2}$ 的**第 2 行 $\lor$ 第 3 行** $= [1\ 0\ 0] \lor [0\ 1\ 1] = [1\ 1\ 1]$。
+教你一个考场 **5 秒不出错的“按行抓行求或”心算法**：左矩阵第 $i$ 行在哪些列有 `1`，就直接把右矩阵对应的那几行抓出来叠在一起（有 `1` 就写 `1`）！
+- $M_{R_1}$ **第 1 行**是 `[0 1 1]`（第 2、3 个位置是 `1`）$\implies$ 抓 $M_{R_2}$ 的**第 2 行与第 3 行求或**：`[1 0 0] ∨ [0 1 1] = [1 1 1]`；
+- $M_{R_1}$ **第 2 行**是 `[1 0 0]`（只有第 1 个位置是 `1`）$\implies$ 直接照抄 $M_{R_2}$ 的**第 1 行**：`[1 0 1]`；
+- $M_{R_1}$ **第 3 行**也是 `[0 1 1]` $\implies$ 同样抓 $M_{R_2}$ 的**第 2 行与第 3 行求或**：`[1 1 1]`！
+
+合起来就是标准答案 $\begin{bmatrix}1&1&1\\1&0&1\\1&1&1\end{bmatrix}$。如果自己跟自己复合 $n$ 次，记作 $R^n$（矩阵算 $M_R^{[n]}$），意思就更直白了：**$(a, b) \in R^n$ 当且仅当在有向图上存在一条从 $a$ 走到 $b$、恰好走 $n$ 步的路径**！下一节我们就顺着这些多步路径，把第 2 题最后 8 分收进口袋。
+
+### 【考场真题落笔】Test 02 · Question 2d（4 marks）满分步骤与矩阵答案
+
+**d) Matrix for $R_2 \circ R_1$:** Since $(a, c) \in R_2 \circ R_1 \iff \exists b\,((a, b) \in R_1 \land (b, c) \in R_2)$, $R_1$ is applied first and $R_2$ second:
 
 $$
-M_{R_2 \circ R_1} =
-\begin{bmatrix}
-1 & 1 & 1\\
-1 & 0 & 1\\
-1 & 1 & 1
-\end{bmatrix}
+M_{R_2 \circ R_1} = M_{R_1} \odot M_{R_2} =
+\begin{bmatrix}0 & 1 & 1\\1 & 0 & 0\\0 & 1 & 1\end{bmatrix}
+\odot
+\begin{bmatrix}1 & 0 & 1\\1 & 0 & 0\\0 & 1 & 1\end{bmatrix}
+=
+\begin{bmatrix}1 & 1 & 1\\1 & 0 & 1\\1 & 1 & 1\end{bmatrix}
 $$
 
-> **反面警示**：若误把 $M_{R_2}$ 放左边乘 $M_{R_1}$，会算出 $\begin{bmatrix}0&1&1\\0&1&1\\1&1&1\end{bmatrix}$（那是 $M_{R_1 \circ R_2}$！）。
+<details>
+<summary><strong>练习 · 对比算一次 R₁ ∘ R₂，并判断 Rⁿ 何时停住不变</strong></summary>
 
----
+用同一对矩阵算一算反过来的 **$M_{R_1 \circ R_2}$**，看看跟刚才的 $M_{R_2 \circ R_1}$ 差在哪几格？
 
-### 2e）$R_1$ 的传递闭包 Transitive Closure $t(R_1)$（4 分）
+<details>
+<summary>给我一点提示</summary>
 
-**方法一：标准 Warshall 算法（推荐写在卷面上，步骤最清晰）**
+求 $R_1 \circ R_2$ 时右边是 $R_2$ 先走，所以这回轮到 $M_{R_2}$ 站左边、$M_{R_1}$ 站右边了！
 
-令 $W_0 = M_{R_1}$：
+</details>
 
-$$
-W_0 =
-\begin{bmatrix}
-0 & 1 & 1\\
-1 & 0 & 0\\
-0 & 1 & 1
-\end{bmatrix}
-$$
-
-- **$k = 1$（以顶点 1 作中转）**：第 1 列为 $1$ 的行 $C_1 = \{2\}$；第 1 行为 $1$ 的列 $R_1 = \{2, 3\}$。将交叉位置 $(2,2), (2,3)$ 置 $1$：
+<details>
+<summary>对照考场满分写法</summary>
 
 $$
-W_1 =
-\begin{bmatrix}
-0 & 1 & 1\\
-1 & \mathbf{1} & \mathbf{1}\\
-0 & 1 & 1
-\end{bmatrix}
+M_{R_1 \circ R_2} = M_{R_2} \odot M_{R_1} =
+\begin{bmatrix}1 & 0 & 1\\1 & 0 & 0\\0 & 1 & 1\end{bmatrix}
+\odot
+\begin{bmatrix}0 & 1 & 1\\1 & 0 & 0\\0 & 1 & 1\end{bmatrix}
+=
+\begin{bmatrix}0 & 1 & 1\\0 & 1 & 1\\1 & 1 & 1\end{bmatrix}
 $$
 
-- **$k = 2$（以顶点 2 作中转）**：在 $W_1$ 中，第 2 列为 $1$ 的行 $C_2 = \{1, 2, 3\}$（全列是 $1$！）；第 2 行为 $1$ 的列 $R_2 = \{1, 2, 3\}$（全行是 $1$！）。交叉集合 $C_2 \times R_2$ 覆盖全部 $9$ 个格子！
+前两行全都不同！可见在考场上一旦把左右矩阵摆反，9 个数字里能错 5 个。
+
+</details>
+
+#### 再改一个条件
+
+在集合 $\{1, 2, 3, 4\}$ 上给定链条关系 $R = \{(1,1), (2,1), (3,2), (4,3)\}$（课件 Slide 43 例题）。不用乘四次矩阵，凭“走 $n$ 步路径”的图直觉直接写出 $R^3$ 和 $R^{100}$！
+
+<details>
+<summary>对照变式推理</summary>
+
+因为 $1$ 有自环 $1\to 1$：从 $1, 2, 3, 4$ 任一点出发走 $3$ 步（或任意 $\ge 3$ 步），全都会抵达终点 $1$ 并在 $1$ 的自环上打转！所以对一切 $n \ge 3$，都有 $R^3 = R^4 = \cdots = R^{100} = \{(1,1), (2,1), (3,1), (4,1)\}$。
+
+</details>
+
+</details>
+
+## 06 想让单行道变双向、转车变直达，最少要补哪几个 1？
+
+*当场拿下 Test 02 Question 2e, 2f（8 分 · 第 2 题 24 分全满！）*
+
+Test 02 第 2 题还剩最后两问：**2f) 求 $R_2$ 的对称闭包（symmetric closure）**，以及 **2e) 求 $R_1$ 的传递闭包（transitive closure）**（共 8 分）。
+
+“闭包”听着玄乎，翻译成日常话说穿了只有半句：**原关系缺某条规矩时，往里面补上“最少的新边”，刚好让它守规矩为止**，这个最小扩充版就叫 **闭包（closure）**。
+
+常见的补边需求一共就三种：
+1. 如果嫌有些点没有自环（主对角线有 `0`），把主对角线上的 `0` 全补成 `1`，叫 **自反闭包（reflexive closure）**，记作 $r(R) = R \cup \Delta$（其中 $\Delta = \{(a,a)\mid a\in A\}$ 是 **对角线关系 diagonal relation**）。
+2. 如果嫌图里有“有去无回”的单行道——比如 **2f) 问的对称闭包 $s(R_2)$**——怎么补最少的新边让每条路都能双向走？当然是哪条边 $(a, b)$ 缺了返程票 $(b, a)$，就单独给它补一张返程票！写成集合就是把原关系和它的逆关系并起来：$s(R_2) = R_2 \cup R_2^{-1}$；落在矩阵上，就是把 $M_{R_2}$ 和它的转置 $M_{R_2}^T$ 叠在一起求或：
 
 $$
-W_2 =
-\begin{bmatrix}
-1 & 1 & 1\\
-1 & 1 & 1\\
-1 & 1 & 1
-\end{bmatrix}
-\implies
-M_{t(R_1)} = W_3 =
-\begin{bmatrix}
-1 & 1 & 1\\
-1 & 1 & 1\\
-1 & 1 & 1
-\end{bmatrix}
-$$
-
-**方法二：有向图秒验（草稿纸 3 秒验证）**：
-$R_1$ 的边有 $1 \to 2,\ 1 \to 3,\ 2 \to 1,\ 3 \to 2,\ 3 \to 3$。形成大双向连通环 $3 \to 2 \leftrightarrow 1 \to 3$，任何顶点出发都能走到任意顶点（包括走回自己），故全矩阵必为全 $1$！（与卷面手写附注完全一致 ✓）
-
----
-
-### 2f）$R_2$ 的对称闭包 Symmetric Closure $s(R_2)$（4 分）
-
-- **公式**：$M_{s(R_2)} = M_{R_2} \lor M_{R_2}^T$（只要 $(i,j)$ 或 $(j,i)$ 有一个是 $1$，对称两边都填 $1$）：
-
-$$
-M_{s(R_2)} =
+M_{s(R_2)} = M_{R_2} \lor M_{R_2}^T =
 \begin{bmatrix}
 1 & 0 & 1\\
 1 & 0 & 0\\
@@ -999,183 +487,364 @@ M_{s(R_2)} =
 \end{bmatrix}
 $$
 
-> 检查细节：$(2,2)$ 原来是 $0$，转置后仍是 $0$，对称闭包**绝不乱补对角线**，中间一格保持 $0$！（与卷面手写附注完全一致 ✓）
+留意正中间第 $(2,2)$ 格：原来是 `0`，翻折后还是 `0`——对称闭包只管给单行道修返程，**绝不会手多去填对角线上的 `0`**！
 
----
+3. 那 **2e) 问的传递闭包 $t(R_1)$** 又要补什么呢？它要求“凡是能顺着箭头倒几趟车走到的地方，统统开通一步直达航班”！在有 $n$ 个顶点的图里，只要两点之间能走到，最短路径绝不需要绕超过 $n$ 步（否则肯定原地兜了圈子），所以 $t(R_1) = R_1 \cup R_1^2 \cup \cdots \cup R_1^n$。
 
-## Question 3（12 marks）：三道典型关系的 8 项性质全判定
+要是真去连乘 $n$ 次矩阵未免太累了。计算机科学家提出了一套极其聪明的 **Warshall 传递闭包算法（Warshall's algorithm）**：每次只开放**一个**顶点当作“允许借道的中转机场”，从初态 $W_0 = M_R$ 一路更新出 $W_1, W_2, \dots, W_n$。
 
-### 题目回顾
+怎么从上一张表 $W_{k-1}$ 写出开放第 $k$ 号顶点中转后的新表 $W_k$？记住这个 **十字交叉补 1 法**：
+- 盯住 $W_{k-1}$ 的**第 $k$ 列**，找出哪些行 $i$ 是 `1`（说明 $i$ 能飞进中转站 $k$）；
+- 再盯住 $W_{k-1}$ 的**第 $k$ 行**，找出哪些列 $j$ 是 `1`（说明从中转站 $k$ 能飞往 $j$）；
+- 把这两组行列交叉出来的每一个坐标 $(i, j)$ 统统填成 **`1`**（式子写作 $w_{ij}^{[k]} = w_{ij}^{[k-1]} \lor (w_{ik}^{[k-1]} \land w_{kj}^{[k-1]})$）！
 
-判断下列三个关系 $R$ 是否满足：
-- i) symmetric　ii) antisymmetric　iii) transitive　iv) irreflexive　v) reflexive　vi) a function　vii) an equivalence relation　viii) a reflexive partial order relation。
+拿 **2e)** 的 $W_0 = M_{R_1} = \begin{bmatrix}0&1&1\\1&0&0\\0&1&1\end{bmatrix}$ 试两步：
+- **开放 1 号点中转（求 $W_1$）**：第 1 列只有第 `2` 行是 `1`；第 1 行在第 `2, 3` 列是 `1`。十字交叉把 $(2,2)$ 和 $(2,3)$ 补成 `1`，第 2 行瞬间变成全 `1`：$W_1 = \begin{bmatrix}0&1&1\\1&\mathbf{1}&\mathbf{1}\\0&1&1\end{bmatrix}$！
+- **开放 2 号点中转（求 $W_2$）**：看 $W_1$ 的第 2 列——第 `1, 2, 3` 行**全是 `1`**！再看第 2 行——第 `1, 2, 3` 列**也全是 `1`**！全行交叉全列，整张 $3 \times 3$ 矩阵 9 个格子瞬间全部变成 `1`！再到 $W_3$ 当然还是全 `1`。
 
-> **卷面手写附注黄金捆绑公式**：
-> - **vii) Equivalence relation** $\iff$ **i) symmetric + iii) transitive + v) reflexive**（三者全 Yes 才 Yes，缺一即 No！）
-> - **viii) Reflexive partial order** $\iff$ **ii) antisymmetric + iii) transitive + v) reflexive**（三者全 Yes 才 Yes，缺一即 No！）
+在下面的沙盘里切换体验一下刚算完的 `d) 复合`、`e) Warshall 步进` 和 `f) 对称闭包`，也可以点上方切换按钮加载 `Tutorial 05 Q8` 的 $4 \times 4$ 矩阵逐步播放：
 
----
+到这里，Test 02 分值最重的第 2 大题 **24 分** 已经一分不剩全被你收下了！
 
-### 三道题 24 项结论速览总表（考卷上这样画表最受改卷老师欢迎！）
+### 【考场真题落笔】Test 02 · Question 2e & 2f（8 marks）满分落笔示范
 
-| 待判性质 | **a)** $\{(1,2),(3,1),(5,4),(2,3),(3,2),(4,5)\}$ on $\{1..5\}$ | **b)** “$a$ and $b$ have the same friends” on all persons | **c)** $\{(x,y)\mid x^2\ge y\}$ on **integers $\mathbb{Z}$** |
-|---|---|---|---|
-| **i) Symmetric** | **No** | **Yes** | **No** |
-| **ii) Antisymmetric** | **No** | **No** | **No** |
-| **iii) Transitive** | **No** | **Yes** | **No** |
-| **iv) Irreflexive** | **Yes** | **No** | **No** |
-| **v) Reflexive** | **No** | **Yes** | **Yes**（注意整数域！） |
-| **vi) A function** | **No** | **No** | **No** |
-| **vii) Equivalence** | **No** | **Yes** | **No** |
-| **viii) Reflexive partial order** | **No** | **No** | **No** |
-
----
-
-### 3a）有限集合 $\{1,2,3,4,5\}$ 上的显式有序对集合（4 分）
-
-先把有序对按起点分组看清结构：$1\to 2$；$2\to 3$；$3\to 1,\ 3\to 2$；$4\leftrightarrow 5$（互指）。没有任何形如 $(a,a)$ 的对角线元素。
-
-- **i) Symmetric — No**：$(1,2)\in R$，但 $(2,1)\notin R$。
-- **ii) Antisymmetric — No**：$(2,3)\in R$ 且 $(3,2)\in R$，但 $2\neq 3$（同理 $(4,5),(5,4)$ 也是反例）。
-- **iii) Transitive — No**：$(1,2)\in R$ 且 $(2,3)\in R$，但 $(1,3)\notin R$（或用双向边必杀技：$(4,5)\in R$ 且 $(5,4)\in R$，但 $(4,4)\notin R$！）。
-- **iv) Irreflexive — Yes**：对所有 $a\in\{1,2,3,4,5\}$，均有 $(a,a)\notin R$。
-- **v) Reflexive — No**：$(1,1)\notin R$。
-- **vi) A function — No**：输入 $3$ 同时对应了两个不同输出 $(3,1)\in R$ 与 $(3,2)\in R$，违反单值性！（细心观察：$1,2,4,5$ 其实都各自只有一个输出，唯独 $3$ 藏了两个输出专门考你！）
-- **vii) Equivalence relation — No**（不自反、不对称、不传递）。
-- **viii) Reflexive partial order — No**（不自反、不反对称、不传递）。
-
----
-
-### 3b）所有人集合上：“Person $a$ and Person $b$ have the same friends”（4 分）
-
-**第一性原理建模**：设 $F(x)$ 表示人 $x$ 的朋友集合，则题干精确翻译为函数等值核：
+**e) Transitive closure of $R_1$ (via Warshall's algorithm):**
 
 $$
-(a, b) \in R \iff F(a) = F(b)
+W_0 = M_{R_1} = \begin{bmatrix}0&1&1\\1&0&0\\0&1&1\end{bmatrix} \;\Longrightarrow\;
+W_1 = \begin{bmatrix}0&1&1\\1&1&1\\0&1&1\end{bmatrix} \;\Longrightarrow\;
+W_2 = W_3 = M_{t(R_1)} = \begin{bmatrix}1&1&1\\1&1&1\\1&1&1\end{bmatrix}
 $$
 
-一旦写成 $F(a) = F(b)$，所有性质迎刃而解：
-- **i) Symmetric — Yes**：若 $F(a)=F(b)$，则必有 $F(b)=F(a)$。
-- **ii) Antisymmetric — No**：两个不同的人 $a \neq b$ 完全可以拥有相同的朋友集合（例如 $a, b$ 都是刚入学、暂时没有朋友的新生，此时 $F(a)=F(b)=\varnothing$，$(a,b)\in R \land (b,a)\in R$ 但 $a\neq b$）。
-- **iii) Transitive — Yes**：若 $F(a)=F(b)$ 且 $F(b)=F(c)$，由集合相等的传递性必有 $F(a)=F(c)$。（注意不要跟“$a$ 是 $b$ 的朋友”混了！“是朋友”不传递，但“拥有完全相同的朋友圈”严格传递！）
-- **iv) Irreflexive — No**：对任何人 $a$，$F(a)=F(a)$ 恒成立，即 $(a,a)\in R$。
-- **v) Reflexive — Yes**：每个人与自己的朋友集合当然完全相同，$\forall a,\ F(a)=F(a)$。
-- **vi) A function — No**：首先每个人至少与自己相关 $(a,a)\in R$；只要存在两个不同的人朋友集合相同，一人就会对应多个元素，故不是函数。
-- **vii) Equivalence relation — Yes**（满足 v 自反 + i 对称 + iii 传递）。
-- **viii) Reflexive partial order — No**（不满足反对称）。
+**f) Symmetric closure of $R_2$:**
+
+$$
+M_{s(R_2)} = M_{R_2} \lor M_{R_2}^T = \begin{bmatrix}1&0&1\\1&0&0\\0&1&1\end{bmatrix} \lor \begin{bmatrix}1&1&0\\0&0&1\\1&0&1\end{bmatrix} = \begin{bmatrix}1&1&1\\1&0&1\\1&1&1\end{bmatrix}
+$$
+
+<details>
+<summary><strong>选读 · 同时要求好几条性质时闭包按什么顺序套？以及课件里的 n 元数据库关系</strong></summary>
+
+1. **复合闭包的先后顺序（Tutorial 05 Q10 & 课件 Ch9.5 p14）**：
+   如果题目让你求“包含 $R$ 的最小等价关系（既自反、又对称、又传递）”，必须**把传递闭包 $t(\cdot)$ 留到最后一步做**，即算 **$t(s(r(R)))$**！
+   为什么不能先算传递再算对称 $s(t(R))$？试想 $R = \{(1,3), (2,3)\}$：它本来就已经传递了（$t(R)=R$），如果你最后才补对称边变成 $\{(1,3),(3,1),(2,3),(3,2)\}$，刚补出来的 $1\to 3\to 2$ 立刻又缺了直达边 $(1,2)$，把传递性重新弄坏了！而先把自反和对称补好，最后做一次传递闭包 $t$，前面修好的自反与对称绝对不会被破坏（Tutorial 05 Q11–Q12）。
+2. **n 元关系（n-ary relation）与关系型数据库（课件 Slides 5.2 p30–p31）**：
+   把有序二元组推广到 $n$ 个集合的笛卡尔积子集 $R \subseteq A_1 \times A_2 \times \cdots \times A_n$，就叫 **n-ary relation**——这正是现代 SQL 数据库里一张二维表的数学真身：每一列是一个属性域，每一行记录是一个 $n$ 元组；如果某一列（比如 `Student_ID`）的值在全表绝不重复、能唯一认出每一行，这一列就叫 **主键（primary key）**。
+
+</details>
+
+<details>
+<summary><strong>练习 · 完整手算一遍 4×4 Warshall 算法（Tutorial 05 Q8c 原题）</strong></summary>
+
+在 $\{0, 1, 2, 3\}$ 上给定关系 $R = \{(0,1), (1,1), (1,2), (2,0), (2,2), (3,0)\}$。请按顶点 $0, 1, 2, 3$ 的顺序写出初态 $W_0$ 以及每一步的 $W_1, W_2, W_3, W_4$，标出每一步新补上的有序对。
+
+<details>
+<summary>给我一点提示</summary>
+
+注意顶点从 `0` 开始编号！第 1 步（$W_1$）中转的是顶点 `0`（看第 1 列与第 1 行）；最后一步（$W_4$）中转顶点 `3` 时，看看第 4 列有没有 `1`？
+
+</details>
+
+<details>
+<summary>对照考场满分写法</summary>
+
+- 初态：$W_0 = \begin{bmatrix}0&1&0&0\\0&1&1&0\\1&0&1&0\\1&0&0&0\end{bmatrix}$
+- $k=1$（中转顶点 `0`）：顶点 `0` 列为 `1` 的行是 $\{2,3\}$，顶点 `0` 行为 `1` 的列是 $\{1\}$，新补 $(2,1),(3,1)$ 得 $W_1 = \begin{bmatrix}0&1&0&0\\0&1&1&0\\1&\mathbf{1}&1&0\\1&\mathbf{1}&0&0\end{bmatrix}$；
+- $k=2$（中转顶点 `1`）：列 `1` 全为 `1`，行 `1` 在 $\{1,2\}$ 为 `1`，新补 $(0,2),(3,2)$ 得 $W_2 = \begin{bmatrix}0&1&\mathbf{1}&0\\0&1&1&0\\1&1&1&0\\1&1&\mathbf{1}&0\end{bmatrix}$；
+- $k=3$（中转顶点 `2`）：列 `2` 全为 `1`，行 `2` 在 $\{0,1,2\}$ 为 `1`，新补 $(0,0),(1,0)$ 得 $W_3 = \begin{bmatrix}\mathbf{1}&1&1&0\\\mathbf{1}&1&1&0\\1&1&1&0\\1&1&1&0\end{bmatrix}$；
+- $k=4$（中转顶点 `3`）：第 4 列全为 `0`（没人能飞进 `3`），无新增边，故 **$W_4 = W_3$**。
+
+</details>
+
+</details>
 
 ---
 
-### 3c）整数集 $\mathbb{Z}$ 上的 $R = \{(x,y) \mid x^2 \ge y\}$（4 分 · 含全卷最隐蔽论域坑！）
+# 第 3 幕：怎么给关系做体检，又怎么写出滴水不漏的英文证明？（直指第 3、4 题（20 分））
 
-#### 【重点提示】先看 v) Reflexive：为什么在整数集 ℤ 上是 Yes？！
+> 面对一串配对、一条整数不等式和一句日常描述，怎样快准狠地查清它的全部脾气？当考官不给任何具体数字时，怎样用五行标准英文拿下证明满分？
 
-自反性问的是：**对所有整数 $x \in \mathbb{Z}$，是否有 $x^2 \ge x$？**
-把全体整数分成两半检查：
-- 若 $x \le 0$（负整数或 $0$）：$x^2 \ge 0 \ge x$ 恒成立！
-- 若 $x \ge 1$（正整数 $1, 2, 3, \dots$）：两边乘正数 $x$，由 $x \ge 1$ 得 $x^2 \ge x$ 恒成立！
-因为整数集 $\mathbb{Z}$ 里**根本没有 $(0, 1)$ 之间的小数**（如 $0.5$），所以 $\forall x\in\mathbb{Z},\ x^2 \ge x$ **百分之百为真**！这就是原卷手写附注特意圈出“**整数**”二字的原因！
+## 07 拿到一串配对名单，哪几项检查能摸清它的全部脾气？
 
-逐项验证其余性质（教你在考场上如何系统解不等式找反例）：
-- **i) Symmetric — No**：要找整数 $x, y$ 使得 $x^2 \ge y$ 但 $y^2 < x$。只需挑 $y=1, x=2$：
-  - $(2, 1) \in R$，因为 $2^2 = 4 \ge 1$；
-  - $(1, 2) \notin R$，因为 $1^2 = 1 < 2$。
-- **ii) Antisymmetric — No**：要找 $x \neq y$ 使得 $x^2 \ge y$ **且** $y^2 \ge x$。随便挑两个大于 $1$ 且差距不大的整数，如 $x=2, y=3$：
-  - $(2, 3) \in R$（因 $2^2 = 4 \ge 3$）且 $(3, 2) \in R$（因 $3^2 = 9 \ge 2$），但 $2 \neq 3$！
-- **iii) Transitive — No**：顺着平方放大的趋势挑三元链 $x=2,\ y=4,\ z=10$：
-  - $(2, 4) \in R$（因 $2^2 = 4 \ge 4$），且 $(4, 10) \in R$（因 $4^2 = 16 \ge 10$）；
-  - 但 $(2, 10) \notin R$（因 $2^2 = 4 < 10$）！
-- **iv) Irreflexive — No**：例如 $(1,1) \in R$（因 $1^2 \ge 1$）。
-- **v) Reflexive — Yes**（见上方证明：$\forall x\in\mathbb{Z},\ x^2-x = x(x-1) \ge 0$）。
-- **vi) A function — No**：对 $x=0$，所有满足 $y \le 0$ 的整数（如 $(0,0), (0,-1), (0,-2),\dots$）都在 $R$ 中，一个输入对应无穷多个输出。
-- **vii) Equivalence relation — No**（不对称、不传递）。
-- **viii) Reflexive partial order — No**（不反对称、不传递）。
+*当场拿下 Test 02 Question 3a（4 分）*
+
+来到第 3 幕。Test 02 **Question 3（12 分）** 摆出了三份风格迥异的关系，要求你像拿着体检表一样，对每一份关系逐项勾出它满不满足 i) 到 viii) 共八项指标。我们先拿第一份关系 **3a)** 当活体标本，把前面六项指标一次性摸透：
+
+> **3a)** 集合 $\{1, 2, 3, 4, 5\}$ 上的关系 $R = \{(1,2), (3,1), (5,4), (2,3), (3,2), (4,5)\}$。
+
+拿到一串眼花缭乱的圆括号，第一步先按起点理顺谁指向了谁：$1 \to 2$；$2 \to 3$；$3$ 号同时发出了两根箭 $3 \to 1$ 和 $3 \to 2$；$4$ 和 $5$ 互相指着对方 $4 \leftrightarrow 5$。
+
+现在我们一项一项来问，每看清一种现象再记住它的英文体检名：
+
+1. **看自己跟自己（主对角线）—— v) 自反 vs iv) 反自反**：
+   - 如果集合里的**每一个**元素都指了自己（$\forall a \in A, (a,a) \in R$，矩阵主对角线**全是 `1`**），叫 **自反的（reflexive）**。3a 里连 $(1,1)$ 都没有，所以 **v) reflexive 是 No**。
+   - 如果集合里的**任何一个**元素都没指自己（$\forall a \in A, (a,a) \notin R$，主对角线**全是 `0`**），叫 **反自反的（irreflexive）**。检查 3a 的六个括号，确实没有任何形如 $(a,a)$ 的配对，所以 **iv) irreflexive 是 Yes**！
+   - 先停一下防个坑：要是某个集合 $\{1, 2\}$ 上只有 $(1,1)$ 没有 $(2,2)$，对角线有 `1` 也有 `0` 呢？那它**既不是自反，也不是反自反**——千万别把“不自反”当成“反自反”！
+
+2. **看不同点之间的来回箭头—— i) 对称 vs ii) 反对称**：
+   - 如果每一根箭头都“有去必有回”（$\forall a,b, (a,b)\in R \to (b,a)\in R$，矩阵沿对角线对称 $M = M^T$），叫 **对称的（symmetric）**。3a 里有 $(1,2)$ 却没有 $(2,1)$，单行道被抓了现行，**i) symmetric 是 No**。
+   - 如果规矩反过来：**绝对禁止两个不同的点互相指**（也就是说，只要 $(a,b)\in R$ 且 $(b,a)\in R$，就逼得 $a$ 和 $b$ 只能是同一个点 $a=b$；注意自环 $(a,a)$ 完全合法！），这叫 **反对称的（antisymmetric）**。3a 里既有 $(2,3)$ 又有 $(3,2)$（而且 $4,5$ 也互指），当场违规，**ii) antisymmetric 也是 No**！
+   - 顺手再防一个经典误区：对称和反对称也不是非此即彼！如果一张图只有对角线自环 $\{(1,1),(2,2)\}$，不同点之间一根箭都没连，那它**既是对称的，同时也是反对称的**！（课件里还会提一个更狠的词叫 **非对称的 asymmetric**：既禁异点互指、连自环也一并禁止，等价于“反自反 + 反对称”。）
+
+3. **看能不能搭桥跳过去—— iii) 传递**：
+   - 如果凡是能两步接力走到的 $a \to b \to c$，图里原本就已经铺好了直达边 $a \to c$（$\forall a,b,c, (a,b)\in R \land (b,c)\in R \to (a,c)\in R$），叫 **传递的（transitive）**。看 3a：$1 \to 2$ 且 $2 \to 3$，可名单里压根没有 $(1,3)$！（或者看 $4 \to 5 \to 4$ 却没有自环 $(4,4)$！）所以 **iii) transitive 是 No**。
+   - 不过万一遇到一个关系像 $\{(1,3), (2,3)\}$，从头到尾根本拼不出任何首尾相接的两步链条呢？还记得第 1 章的承诺规则吗——前件从未发生，蕴含式自动 **空真（vacuously true）**，它反而是传递的！
+
+4. **最后看一眼 vi) 它算不算一个函数（a function）？**
+   - 翻回第 02 节：函数要求集合里的每个输入**有且仅有 1 个输出**（矩阵每一行加起来都恰好等于 `1`）。在 3a 里，$1,2,4,5$ 倒是很老实各指了一个数，偏偏 **$3$ 号同时指向了 $1$ 和 $2$**（一源双箭）！所以 **vi) a function 是 No**。
+
+至于最后两项 **vii) 等价关系**（要求同时集齐：自反 + 对称 + 传递）和 **viii) 自反偏序关系**（要求同时集齐：自反 + 反对称 + 传递），既然前面连自反和传递都没过关，这两项在 3a 上自然也全是 **No**。
+
+### 【考场真题落笔】Test 02 · Question 3a（4 marks）八项指标标准判定
+
+For $R = \{(1,2),(3,1),(5,4),(2,3),(3,2),(4,5)\}$ on $\{1,2,3,4,5\}$:
+- **i) symmetric:** **No** — $(1,2) \in R$ but $(2,1) \notin R$.
+- **ii) antisymmetric:** **No** — $(2,3) \in R$ and $(3,2) \in R$ with $2 \neq 3$.
+- **iii) transitive:** **No** — $(1,2) \in R$ and $(2,3) \in R$, but $(1,3) \notin R$.
+- **iv) irreflexive:** **Yes** — $(a,a) \notin R$ for all $a \in \{1,2,3,4,5\}$.
+- **v) reflexive:** **No** — $(1,1) \notin R$.
+- **vi) a function:** **No** — element $3$ is mapped to two distinct outputs: $(3,1) \in R$ and $(3,2) \in R$.
+- **vii) an equivalence relation:** **No** (fails reflexive, symmetric, and transitive).
+- **viii) a reflexive partial order:** **No** (fails reflexive, antisymmetric, and transitive).
+
+<details>
+<summary><strong>选读 · n 个元素的集合上到底能造出多少种关系？（含 Tutorial 05 Q4a 答案勘误！）</strong></summary>
+
+期末填空或简答很喜欢问“在含有 $n$ 个元素的集合 $A$ 上，满足某性质的关系一共有多少个？”——不用死记，直接对着 $n \times n$ 矩阵数格子就行（把矩阵拆成 **$n$ 个主对角线格** + **$\frac{n(n-1)}{2}$ 对上下对称格 $\{m_{ij}, m_{ji}\}$**）：
+- **任意二元关系总数**：$n^2$ 个格子每格填 `0` 或 `1`，共 **$2^{n^2}$** 个。
+  - *【Tutorial 05 Q4a 勘误提醒】*：当 $n = 4$ 时，总数是 $2^{4^2} = 2^{16} = \mathbf{65536}$（Tutorial 答案误印成了 `65535`，考场上务必写 $2^{16} = 65536$！）。
+- **自反 / 反自反关系数**：对角线 $n$ 格被锁死（全填 `1` 或全填 `0`，只有 $1$ 种选法），其余 $n(n-1)$ 格随便填 $\implies \mathbf{2^{n(n-1)}}$。
+- **对称（symmetric）关系数**：对角线 $n$ 格随便填（$2^n$），每对对称格必须同填 `00` 或 `11`（$2$ 种）$\implies 2^n \cdot 2^{n(n-1)/2} = \mathbf{2^{n(n+1)/2}}$。
+- **反对称（antisymmetric）关系数**：对角线 $n$ 格随便填（$2^n$），每对对称格只禁止 `11`，剩下 `00, 10, 01` 共 **$3$ 种**合法填法 $\implies \mathbf{2^n \cdot 3^{n(n-1)/2}}$。
+- **非对称（asymmetric）关系数**：对角线强制全填 `0`（$1$ 种），每对对称格仍有 `00, 10, 01` 共 $3$ 种 $\implies \mathbf{3^{n(n-1)/2}}$。
+
+</details>
+
+<details>
+<summary><strong>练习 · 测一测空真与极端矩阵：全 0 空关系与单位矩阵各满足哪几项？</strong></summary>
+
+在非空集合 $A = \{1, 2, 3\}$ 上：(1) 如果关系 $R = \varnothing$（全 `0` 矩阵），它在自反、反自反、对称、反对称、传递里满足哪几项？(2) 如果 $R = \{(1,1),(2,2),(3,3)\}$（单位矩阵 $I_3$）呢？
+
+<details>
+<summary>给我一点提示</summary>
+
+凡是“如果 $(a,b)\in R$ 则……”的句式，在 $\varnothing$ 里前件永远为假！可以在上一节的矩阵沙盘里点“清空 R₁ 为全 0”现场核对。
+
+</details>
+
+<details>
+<summary>对照考场满分写法</summary>
+
+1. **空关系 $R = \varnothing$**（$A$ 非空）：**不自反**（缺 $(1,1)$），但**反自反、对称、反对称、非对称、传递全部为真（空真 vacuously true）**！
+2. **恒等关系 $I_3$**：**自反、对称、反对称、传递、函数、等价关系、自反偏序全部为真**（唯一既是等价关系又是偏序关系的特例！），仅反自反与非对称为假。
+
+</details>
+
+</details>
+
+## 08 只把候选范围换成“整数”，同一条不等式为什么突然改了答案？
+
+*当场拿下 Test 02 Question 3c（4 分 · 整数域陷阱）*
+
+掌握了体检指标，来看 Test 02 **Question 3c（4 分）**。这道题字数极短，却在考场上绊倒了无数老手：
+
+> **3c)** $\{(x, y) \mid x^2 \ge y \text{ on the set of integers }\}$
+
+先别往下看，凭第一直觉猜猜第 v) 项：这个关系是 **自反的（reflexive）** 吗？
+
+很多人脑子里立刻闪出一个数字：$x = 0.5$！因为 $0.5^2 = 0.25 < 0.5$，$(0.5, 0.5)$ 不满足 $x^2 \ge x$，于是兴冲冲地在卷面上写下“No, not reflexive”。
+
+写完这一笔，分就丢了。再读一遍题干最后那四个英文词：**`on the set of integers`（在整数集 $\mathbb{Z}$ 上）**！在当年的真实考卷旁，有同学专门用笔重重圈出了“**整数**”两个大字。
+
+把候选池子锁死在整数 $\dots, -2, -1, 0, 1, 2, 3, \dots$ 以后，$(0, 1)$ 之间那些会让平方越乘越小的小数全被挡在了门外！我们来检验任意一个整数 $x \in \mathbb{Z}$ 满不满足自反条件 $x^2 \ge x$：
+- 如果 $x \le 0$（负整数或 $0$）：左边 $x^2 \ge 0$，右边 $x \le 0$，当然 $x^2 \ge x$；
+- 如果 $x \ge 1$（正整数 $1, 2, 3, \dots$）：两边同乘正数 $x$，由 $x \ge 1$ 直接得到 $x^2 \ge x$！
+
+每一个整数跟自己配对 $(x, x)$ 全都在 $R$ 里面！所以 **v) reflexive 是板上钉钉的 Yes**（随之 **iv) irreflexive 自然是 No**，比如 $(1,1)\in R$）。
+
+那其余几项怎么飞快找出反例推翻呢？在考场上千万别乱撞数字，顺着不等式的脾气挑就行：
+- **查 i) symmetric（对称吗？）**：想让 $x^2 \ge y$ 成立，掉过头来 $y^2 \ge x$ 却**不成立**（即 $y^2 < x$）。只要挑一个很小的 $y=1$，再挑一个比 $1^2$ 大的 $x=2$：$(2, 1) \in R$（因为 $2^2 = 4 \ge 1$），但 $(1, 2) \notin R$（因为 $1^2 = 1 < 2$）——一枪毙命，**No**！
+- **查 ii) antisymmetric（反对称吗？）**：想找两个不同的整数 $x \neq y$，让 $x^2 \ge y$ 和 $y^2 \ge x$ **同时成立**。随便挑两个靠得近的大于 $1$ 的整数，比如 $x=2, y=3$：$2^2 = 4 \ge 3$ 所以 $(2,3)\in R$；反过来 $3^2 = 9 \ge 2$ 所以 $(3,2)\in R$，但 $2 \neq 3$——双向边抓到了，**No**！
+- **查 iii) transitive（传递吗？）**：第一跳让 $y$ 刚好卡在 $x^2$ 的上限，第二跳再让 $z$ 卡在 $y^2$ 的上限，一步当然够不着！取 $x=2 \implies y=4 \implies z=10$：$(2, 4) \in R$（$4 \ge 4$），$(4, 10) \in R$（$16 \ge 10$），可回头一看 $2^2 = 4 < 10$，$(2, 10) \notin R$——**No**！
+- **查 vi) a function**：取 $x = 0$，所有满足 $0^2 \ge y$ 的整数 $y = 0, -1, -2, \dots$ 全是它的输出，一个输入连向无穷多个结果——**No**！
+- 既然不对称、不反对称也不传递，**vii) 等价关系** 和 **viii) 自反偏序** 当然也都是 **No**。
+
+你看，整道 3c 题告诉我们一个贯穿全书的道理（和第 1 门课第 03 节完全呼应）：**脱离了候选池子（domain）空谈性质，十有八九会掉进坑里。**
+
+### 【考场真题落笔】Test 02 · Question 3c（4 marks）八项指标标准判定
+
+For $R = \{(x, y) \mid x^2 \ge y\}$ on the set of **integers $\mathbb{Z}$**:
+- **i) symmetric:** **No** — $(2, 1) \in R$ since $2^2 = 4 \ge 1$, but $(1, 2) \notin R$ since $1^2 = 1 < 2$.
+- **ii) antisymmetric:** **No** — $(2, 3) \in R$ ($4 \ge 3$) and $(3, 2) \in R$ ($9 \ge 2$), with $2 \neq 3$.
+- **iii) transitive:** **No** — $(2, 4) \in R$ ($4 \ge 4$) and $(4, 10) \in R$ ($16 \ge 10$), but $(2, 10) \notin R$ ($4 < 10$).
+- **iv) irreflexive:** **No** — $(1, 1) \in R$ since $1^2 \ge 1$.
+- **v) reflexive:** **Yes** — for every integer $x \in \mathbb{Z}$, if $x \le 0$ then $x^2 \ge 0 \ge x$, and if $x \ge 1$ then $x^2 \ge x$; hence $(x,x) \in R$.
+- **vi) a function:** **No** — $(0, 0) \in R$ and $(0, -1) \in R$, so $0$ does not have a unique image.
+- **vii) an equivalence relation:** **No** (not symmetric, not transitive).
+- **viii) a reflexive partial order:** **No** (not antisymmetric, not transitive).
+
+<details>
+<summary><strong>练习 · 抓出 Tutorial 05 Q7g 答案里的著名隐藏错误：实数上 xy ≥ 0 真的传递吗？</strong></summary>
+
+在全体实数集 $\mathbb{R}$ 上定义关系 $R = \{(x, y) \mid xy \ge 0\}$。Tutorial 05 参考答案把它写成了 `reflexive, symmetric, transitive`——请你找出三个具体实数，当场推翻它的传递性！
+
+<details>
+<summary>给我一点提示</summary>
+
+正数乘负数小于 0（没关系），但谁跟任何正数、负数相乘都等于 0（都有关系）？拿这个“万能桥梁数”放中间！
+
+</details>
+
+<details>
+<summary>对照考场满分写法</summary>
+
+**$xy \ge 0$ 在 $\mathbb{R}$ 上绝不传递（NOT transitive）！** 反例：取 $x = -1,\ y = 0,\ z = 2$。
+- $(-1, 0) \in R$，因为 $(-1) \times 0 = 0 \ge 0$；
+- $(0, 2) \in R$，因为 $0 \times 2 = 0 \ge 0$；
+- 但 $(-1, 2) \notin R$，因为 $(-1) \times 2 = -2 < 0$！
+数字 $0$ 把负半轴和正半轴悄悄搭了桥，直接击穿传递性。（只有把 $0$ 踢出论域、改成非零实数 $\mathbb{R} - \{0\}$ 时，同号关系 $xy > 0$ 才是真正的等价关系！）
+
+</details>
+
+</details>
+
+## 09 从“拥有相同的朋友圈”到证明“交集仍对称”：英文证明怎么下笔？
+
+*当场拿下 Test 02 Question 3b（4 分）与 Question 4（8 分）*
+
+第 3 题还剩中间那道日常语言小题 **3b)**（4 分）：
+
+> **3b)** 所有人组成的集合上，关系 $R$ 定义为：*“Person $a$ and Person $b$ have the same friends”*（$a$ 和 $b$ 拥有完全相同的朋友）。
+
+如果题目说的是“$a$ 是 $b$ 的朋友”，它传递吗？不传递——你认识室友，室友认识他高中同桌，你未必认识那位同桌。
+
+可这道题写的偏偏不是“是朋友”，而是 **拥有完全相同的朋友圈**！把每个人 $x$ 的朋友名单记成一个集合 $F(x)$，那句话翻译成数学式子只有短短一个等号：
+
+$$
+(a, b) \in R \;\Longleftrightarrow\; F(a) = F(b)
+$$
+
+只要你看到一个关系的底层是个**等号**（“某项确定属性完全相等”），三道绿灯就会齐刷刷亮起：
+- **v) 自反 Reflexive — Yes**：每个人的朋友名单当然跟自己的一模一样，$F(a) = F(a)$（于是 **iv) irreflexive 是 No**）。
+- **i) 对称 Symmetric — Yes**：如果 $F(a) = F(b)$，掉过来自然 $F(b) = F(a)$。
+- **iii) 传递 Transitive — Yes**：如果 $a$ 的朋友名单等于 $b$ 的（$F(a)=F(b)$），$b$ 的又等于 $c$ 的（$F(b)=F(c)$），那 $a$ 和 $c$ 的朋友名单当然丝毫不差（$F(a)=F(c)$）！
+
+那 **ii) 反对称** 呢？两个**不同的人** $a \neq b$ 有没有可能拥有完全相同的朋友圈？太有可能了（比如两位刚报到、谁都不认识的新生，两人的朋友圈都是空集 $\varnothing$；或者一对形影不离的双胞胎共同认识同一批人）！这时 $(a,b)\in R$ 且 $(b,a)\in R$ 但 $a \neq b$，所以 **ii) antisymmetric 是 No**（**vi) 函数** 和 **viii) 自反偏序** 也随之是 **No**）。
+
+集齐了**自反 + 对称 + 传递**这三颗龙珠的关系，就是数学上专门用来把“相等”推广成“归为一类”的核心工具——**等价关系（equivalence relation）**！所以在 3b 上，**vii) an equivalence relation 稳稳填 Yes**。一旦有了等价关系，所有互相有关系的人就会自动抱成一个个互不重叠的小团体，每个团体叫作一个 **等价类（equivalence class）**，记作 $[a]_R = \{s \in A \mid (a,s) \in R\}$，把整个大集合切分成不重不漏的 **划分（partition）**。
+
+趁热打铁，紧接着的 **Question 4（8 分）** 让你亲自上阵写一段关于“对称性”的证明：
+
+> *Suppose that $R$ and $S$ are symmetric relations on a set $A$. Prove or disprove $S \cap R$ is symmetric.*
+
+很多零基础同学一看见证明题心里就发慌：“连个矩阵和数字都没给，我怎么写？”
+
+其实恰恰因为没有数字，写法反而死板得像填空题！想想什么叫“证明 $S \cap R$ 是对称的”？按定义，你只需要证明一句话：**随便抓一对元素 $(a, b)$，只要它在 $S \cap R$ 里面，掉过头来的 $(b, a)$ 也一定在 $S \cap R$ 里面。**
+
+顺着这根绳子一步步拆包装、再装回去：
+1. 先亮明态度：**True.** $S \cap R$ is symmetric.
+2. 任取元素并假设前件：`Let a, b ∈ A be arbitrary, and assume (a, b) ∈ S ∩ R.`
+3. 拆开交集 $\cap$ 的定义：既然在交集里，那就两边都在——`so (a, b) ∈ S and (a, b) ∈ R.`
+4. 分别用题目白送的条件“$S$ 对称、$R$ 对称”：由 $(a,b)\in S$ 得 `(b, a) ∈ S`；由 $(a,b)\in R$ 得 `(b, a) ∈ R`。
+5. 重新合上交集 $\cap$ 的包装：既然 $(b,a)$ 两边都在，那自然 `(b, a) ∈ S ∩ R`！
+
+五行英文写完，8 分一分不少全拿到手。
+
+### 【考场真题落笔】Test 02 · Question 3b（4 marks）& Question 4（8 marks）满分英文示范
+
+**Question 3b** (*“Person $a$ and Person $b$ have the same friends”* on the set of all persons; let $F(x)$ be the set of friends of $x$, so $aRb \iff F(a)=F(b)$):
+- **i) symmetric:** **Yes** ($F(a)=F(b) \implies F(b)=F(a)$).
+- **ii) antisymmetric:** **No** (two distinct people $a \neq b$ can have the exact same set of friends, e.g., both having no friends $F(a)=F(b)=\varnothing$).
+- **iii) transitive:** **Yes** ($F(a)=F(b) \land F(b)=F(c) \implies F(a)=F(c)$).
+- **iv) irreflexive:** **No** ($F(a)=F(a)$ for every person $a$).
+- **v) reflexive:** **Yes** ($F(a)=F(a)$ for every person $a$).
+- **vi) a function:** **No** (a person is related to themselves and to any other person sharing the same friend set).
+- **vii) an equivalence relation:** **Yes** (reflexive, symmetric, and transitive).
+- **viii) a reflexive partial order:** **No** (not antisymmetric).
 
 ---
 
-## Question 4（8 marks）：对称关系交集仍对称的证明与同类题汇总
+**Question 4 (8 marks)** (*Suppose $R$ and $S$ are symmetric relations on $A$. Prove or disprove $S \cap R$ is symmetric.*):
 
-### 题目回顾
+**Claim:** **True**; $S \cap R$ is symmetric.
 
-Suppose that $R$ and $S$ are symmetric relations on a set $A$. Prove or disprove $S \cap R$ is symmetric. **(8 marks)**
+**Proof:** Let $a, b \in A$ be arbitrary elements and assume $(a, b) \in S \cap R$.
+By the definition of intersection, $(a, b) \in S$ and $(a, b) \in R$.
+Since $S$ is symmetric on $A$ and $(a, b) \in S$, we have $(b, a) \in S$.
+Similarly, since $R$ is symmetric on $A$ and $(a, b) \in R$, we have $(b, a) \in R$.
+Therefore, $(b, a) \in S$ and $(b, a) \in R$, which means $(b, a) \in S \cap R$ by the definition of intersection.
+Hence, $S \cap R$ is symmetric. $\square$
 
----
+<details>
+<summary><strong>选读 · 模 m 同余、等价类的三条互推铁律与集合划分的双向还原</strong></summary>
 
-### 第一步：先定真假，再定骨架
+课件 Ch9.5 与 Tutorial 06 Q1–Q5 围绕等价关系还有两组高频小题：
+1. **模 $m$ 同余（congruence modulo m）**：在整数 $\mathbb{Z}$ 上定义 $a \equiv b \pmod m \iff m \mid (a - b)$（除以正整数 $m$ 余数相同）。它是最经典的等价关系，把全体整数切成恰好 **$m$ 个等价类**：$[0]_m, [1]_m, \dots, [m-1]_m$。
+2. **等价类与划分（partition）的双向对应**：
+   - 任意两个等价类要么**完全重合**，要么**毫无交集**：$(a,b) \in R \iff [a]_R = [b]_R \iff [a]_R \cap [b]_R \neq \varnothing$。
+   - 检查一组子集 $\{A_1, A_2, \dots, A_k\}$ 算不算 $A$ 的合法划分，只核对三条：① 每块非空 $A_i \neq \varnothing$；② 两两不相交 $A_i \cap A_j = \varnothing$；③ 并起来等于全集 $\bigcup A_i = A$（Tutorial 06 Q4）。
+   - 反过来，给你划分 $A_1 = \{1,2,3\},\ A_2 = \{4,5\}$，它诱导出的等价关系就是每块自己跟自己做笛卡尔积再并起来：$R = (A_1 \times A_1) \cup (A_2 \times A_2)$，矩阵重排后正是主对角线上的两个全 `1` 方块！
 
-- **直觉判断**：对称 = “每条边有去必有回”。如果一条边既在 $S$ 里（在 $S$ 里有回程票），又在 $R$ 里（在 $R$ 里也有回程票），那它的回程票当然同时在 $S$ 和 $R$ 里！所以结论必为 **True（成立）**。
-- **证明题满分四步曲（Element-Chasing 模板）**：
-  1. **下结论**：先写明确判定 "$S \cap R$ is symmetric."
-  2. **任取前件**：设任意 $a, b \in A$，假设 $(a,b) \in S \cap R$（目标：推出 $(b,a) \in S \cap R$）。
-  3. **拆集合定义 + 用已知性质**：按 $\cap$ 定义拆成两个命题，分别套用 $S$ 和 $R$ 的 symmetric 定义。
-  4. **合回集合定义收尾**：合并得 $(b,a) \in S \cap R$，引用定义宣布证毕。
+</details>
 
-#### 【标准证明 / 作答示范】
+<details>
+<summary><strong>练习 · 期末变式防偷袭：如果把 Q4 的交集 ∩ 换成并集 ∪ 或复合 ∘ 呢？</strong></summary>
 
-**Model Answer（考场满分英文标准答案）：**
+Prove or disprove：
+1. 若 $R, S$ 都是集合 $A$ 上的**传递关系**，则 $R \cup S$ 也是传递关系。
+2. 若 $R, S$ 都是集合 $A$ 上的**对称关系**，则 $S \circ R$ 也是对称关系。
 
-**Claim:** The statement is **true**; $S \cap R$ is symmetric.
+<details>
+<summary>给我一点提示</summary>
 
-**Proof:**
-Let $a, b \in A$ be arbitrary elements, and assume that $(a, b) \in S \cap R$.
-By the definition of set intersection, we have $(a, b) \in S$ and $(a, b) \in R$.
-Since $S$ is a symmetric relation on $A$ and $(a, b) \in S$, it follows by the definition of symmetry that $(b, a) \in S$.
-Similarly, since $R$ is a symmetric relation on $A$ and $(a, b) \in R$, we also have $(b, a) \in R$.
-Therefore, $(b, a) \in S$ and $(b, a) \in R$, which by the definition of intersection means $(b, a) \in S \cap R$.
-Since $\forall a, b \in A\,((a, b) \in S \cap R \to (b, a) \in S \cap R)$ holds, $S \cap R$ is symmetric. ∎
+两道题都先在三元小集合 $A = \{1, 2, 3\}$ 上让 $R$ 只管 $1$ 和 $2$、让 $S$ 只管 $2$ 和 $3$ 试试看！
 
-> **第二种超简洁证法（逆关系代数法，Slides 5.1 p16 风格）**：
-> 定理：$T$ 对称 $\iff T = T^{-1}$。已知 $S = S^{-1}$ 且 $R = R^{-1}$。
-> 因为 $(S \cap R)^{-1} = S^{-1} \cap R^{-1} = S \cap R$，故 $S \cap R$ 对称！（考场上推荐写上面的元素法，完全不依赖额外引理，改卷绝不扣步骤分。）
+</details>
 
----
+<details>
+<summary>对照考场满分写法</summary>
 
-### 同类题举一反三（期末必背：把“对称 + 交”换成别的组合还成立吗？）
+两道全都是 **False（不成立）**！考场极简反例：
+1. 设 $A = \{1,2,3\}$，取 $R = \{(1,2)\}$，$S = \{(2,3)\}$（两者都没有两步链条，各自空真传递）。但 $R \cup S = \{(1,2), (2,3)\}$ 里有 $(1,2)$ 和 $(2,3)$，却没有 $(1,3)$，故 $R \cup S$ **不传递**！（课件 Slide 17 经典反例）
+2. 设 $A = \{1,2,3\}$，取对称关系 $R = \{(1,2),(2,1)\}$，$S = \{(2,3),(3,2)\}$。先走 $R$ 再走 $S$ 得 $S \circ R = \{(1,3)\}$，里面有 $(1,3)$ 却没有 $(3,1)$，故 $S \circ R$ **不对称**！
 
-期末极爱把这道 8 分题微调一个符号（比如改成 $R \cup S$ 传递？$S \circ R$ 对称？$R - S$ 对称？）。背熟下面这张表，考到任何变体都是送分题：
+</details>
 
-| 前提（$R, S$ 均满足） | 待证运算结果 | 成立吗？ | 一句话证明思路 / 最小反例（$A=\{1,2,3\}$） |
-|---|---|---|---|
-| $R, S$ **symmetric** | $R \cap S$ symmetric | **True** | 本题原题：$(a,b)\in R\land S \Rightarrow (b,a)\in R\land S$ |
-| $R, S$ **symmetric** | $R \cup S$ symmetric | **True** | 分情况：若 $(a,b)\in R$ 则 $(b,a)\in R\subseteq R\cup S$；在 $S$ 同理 |
-| $R, S$ **symmetric** | $R - S$ symmetric | **True** | $(a,b)\in R \land (a,b)\notin S \Rightarrow (b,a)\in R$ 且 $(b,a)\notin S$（否则由 $S$ 对称推出 $(a,b)\in S$ 矛盾！） |
-| $R, S$ **symmetric** | $S \circ R$ symmetric | **False ✗** | 反例：$R=\{(1,2),(2,1)\},\ S=\{(2,3),(3,2)\}$，则 $S\circ R=\{(1,3)\}$，但 $(3,1)\notin S\circ R$！（注：充要条件是 $S\circ R = R\circ S$） |
-| $R, S$ **transitive** | $R \cap S$ transitive | **True** | $(a,b),(b,c)\in R\cap S \Rightarrow$ 在 $R$ 中得 $(a,c)\in R$，在 $S$ 中得 $(a,c)\in S$ |
-| $R, S$ **transitive** | $R \cup S$ transitive | **False ✗** | 反例（Slides 5.1 p17）：$R=\{(1,2)\},\ S=\{(2,3)\}$ 各自空真传递，但 $R\cup S=\{(1,2),(2,3)\}$ 缺 $(1,3)$！ |
-| $R, S$ **equivalence** | $R \cap S$ equivalence | **True** | 自反、对称、传递对 $\cap$ 全部封闭！ |
-| $R, S$ **equivalence** | $R \cup S$ equivalence | **False ✗** | 自反、对称保住，但**传递性破裂**（取 $R$ 合并 $\{1,2\}$，$S$ 合并 $\{2,3\}$） |
+</details>
 
 ---
 
-## Question 5（20 marks）：整除偏序 Hasse 图、极值上下界、全序与格（Lattice）判定
+# 第 4 幕：把整除关系脱成层级图：谁垫底、谁封顶、算不算“格”？（直指第 5 题（20 分））
 
-### 题目回顾
+> 擦掉所有能靠常识脑补的自环、箭头和跨级连线，把偏序集变成一目了然的哈斯图。只要守住“小圈子内找极值、大池子里找上下界”的边界，压轴 20 分唾手可得。
 
-Given a relation $R$ “divisibility” ($a \mid b$) on the set $A = \{1, 5, 10, 13, 65, 650\}$.
-- a) Draw the Hasse diagram **(6 marks)**
-- b) Find the minimal elements of $\{5, 10, 13\}$ **(2 marks)**
-- c) Find the greatest elements of $\{5, 10, 65\}$ **(2 marks)**
-- d) Find the upper bounds of $\{13, 65\}$ **(2 marks)**
-- e) Find the greatest lower bound of $\{10, 65\}$ **(2 marks)**
-- f) Is $R$ a total order? Explain why. **(3 marks)**
-- g) Is $R$ a lattice? Explain why. **(3 marks)**
+## 10 既然偏序也是排上下级，为什么要擦掉自环、箭头和跨级连线？
 
----
+*当场拿下 Test 02 Question 5a（6 分）*
 
-### 5a）画出 Hasse 图（6 分）
+上一节我们看到，“自反 + **对称** + 传递”是在模仿等号 $=$，用来把同类元素抱成一团。如果把中间的“对称”换成截然相反的“**反对称**”——也就是**自反 + 反对称 + 传递**——又是在模仿什么呢？
 
-**第一步：质因数分解 + 集合内最长整除链定层（考场防漏边绝招！）**
-先把每个元素写成质因数乘积（质因子重数和 $\Omega(n)$ 严格递增：若 $a \mid b$ 且 $a \neq b$，必有 $\Omega(a) < \Omega(b)$，故 $\Omega$ 相同的元素必互不整除！再按集合 $A$ 内部的最长整除链排定 Hasse 层高）：
-- 第 0 层（底，$\Omega=0$）：$1$
-- 第 1 层（$\Omega=1$，素数）：$5$，$13$
-- 第 2 层（$\Omega=2$）：$10 = 2 \times 5$，$65 = 5 \times 13$
-- 第 3 层（顶，$\Omega=4$，在 $A$ 内最长链 $1\mid 5\mid 10\mid 650$ 长度为 3）：$650 = 2 \times 5^2 \times 13 = 10 \times 65$
+看看我们最熟悉的三个例子：数字的“小于等于 $\le$”、集合的“包含于 $\subseteq$”、以及正整数之间的 **整除（divisibility，$a \mid b$ 表示 $b$ 是 $a$ 的整数倍）**。在正整数里，每个数都能整除自己（自反）；如果 $a \mid b$ 同时 $b \mid a$，那只可能是 $a = b$（反对称，绝不允许两个不同的正整数互相整除绕成圈！）；如果 $a \mid b$ 且 $b \mid c$，那自然 $a \mid c$（传递）。
 
-**第二步：只连紧邻的覆盖边（Covering Edges，共 7 条无向边，底小顶大、无自环、无箭头）**：
-- 从 $1$ 往上：$1 \mid 5$，$1 \mid 13$（注意 $1\mid 10$ 因中间隔了 $5$ **不画**！$1\mid 65$ 因隔了 $5, 13$ **不画**！）
-- 从 $5$ 往上：$5 \mid 10$，$5 \mid 65$（$5\mid 650$ 隔了 $10, 65$ **不画**！）
-- 从 $13$ 往上：$13 \mid 65$（注意 **$13 \nmid 10$**！且 $13\mid 650$ 隔了 $65$ **不画**！）
-- 从第 2 层往上：$10 \mid 650$，$65 \mid 650$（注意 $10 \nmid 65$ 且 $65 \nmid 10$！）
+像这样用来排“先后辈分”（同时允许有些同辈分的人互不隶属）的关系，就叫 **偏序关系（partial ordering，试卷上也写 reflexive partial order relation）**，配上那个集合 $(A, \preceq)$ 就叫 **偏序集（poset）**。
+
+这就把我们直接带到了整张考卷的压轴大题 **Question 5（20 分）** 的第一问 **5a)（6 分）**：
+
+> 在集合 $A = \{1, 5, 10, 13, 65, 650\}$ 上给定整除关系 $R$（即 $a \mid b$）。**a) Draw the Hasse diagram（画出它的哈斯图）。**
+
+假如你把这 6 个数之间所有的整除关系老老实实画成第 04 节的有向图，会发生什么？每个点头顶都顶着一个自环（6 条），$1$ 要向其余 5 个数全拉上箭头，$5$ 要连向 $10, 65, 650$……整张图足足有 **19 条带箭头的线**，乱得像一团蜘蛛网！
+
+德国数学家 Hasse 想出了一个极简的“三步脱衣法”——既然大家都心知肚明这是一个偏序集，那**凡是能靠偏序规矩自动脑补出来的线，一根都别画！**
+
+1. **第一步脱自环**：既然偏序必定自反，每个点当然整除自己，把 6 个自环全擦掉！
+2. **第二步脱跨级捷径（只留紧邻上下级）**：既然偏序必定传递，只要画出了 $1$ 连 $5$、$5$ 连 $10$，傻子也看得出来 $1$ 能整除 $10$！所以那根跨过 $5$ 直接从 $1$ 飞向 $10$ 的长线（同理还有 $1 \to 65$、$1 \to 650$、$5 \to 650$、$13 \to 650$）统统擦掉！留下的每一根线 $(x, y)$，都满足“$x \prec y$ 且在集合 $A$ 里再也塞不进第三个中间人 $z$ 使 $x \prec z \prec y$”——这叫 **覆盖关系（covering relation，$y$ covers $x$）**。
+3. **第三步脱箭头定高低**：约定小的数画在底下、它的倍数画在头顶上方，所有线默认都是“一路往上爬”，于是连向上的箭头尖也省掉了，只剩干净利落的直线段！这样画出来的极简骨架图，就是 **哈斯图（Hasse diagram）**。
+
+考场上怎么保证画 $\{1, 5, 10, 13, 65, 650\}$ 时既不漏线、也不多画冤枉线？先把每个数拆成质因数乘积排排坐（质因子总个数越多的数肯定只能往高处站，个数相同的两个数绝对不可能互相整除！）：
+- 最底层（底）：$1$
+- 第二层（单个素数）：$5$ 和 $13$ —— 从 $1$ 往上拉两条线连向 **$5$** 和 **$13$**；
+- 第三层（两个素数相乘）：$10 = 2 \times 5$ 和 $65 = 5 \times 13$ —— 检查第二层的谁能整除它们：$5$ 既整除 $10$ 又整除 $65$（拉两条线 **$5 - 10$**、**$5 - 65$**）；$13$ 只整除 $65$、**不整除 $10$**（拉一条线 **$13 - 65$**）；
+- 最顶层：$650 = 2 \times 5^2 \times 13 = 10 \times 65$ —— 第三层的 $10$ 和 $65$ 都能整除 $650$（拉最后两条线 **$10 - 650$**、**$65 - 650$**）。
 
 ```mermaid
 graph BT
@@ -1188,185 +857,203 @@ graph BT
   N65 --- N650
 ```
 
-> 考卷手绘提醒：务必把 `650` 画在最顶层、`10` 和 `65` 画在中间层、`5` 和 `13` 画在次底层、`1` 画在最底层，用**不带箭头的直线段**连接上述 7 对顶点即可拿满 6 分！
+一共只有清清爽爽 **7 条无向线段**（手绘在答卷上时，一定记得把 `650` 摆在最上面、`1` 摆在最底下，千万别加箭头和自环），6 分稳稳到手！
 
----
+### 【考场真题落笔】Test 02 · Question 5a（6 marks）哈斯图连线核对清单
 
-### 5b–5e）极值与上下界四连问（每问 2 分，共 8 分）
-
-- **5b）Minimal elements of $B_1 = \{5, 10, 13\}$**：
-  - 候选人只能在 $\{5, 10, 13\}$ 里选！
-  - 检查谁底下没有 $B_1$ 的其他元素：$5 \mid 10$（故 $10$ 在 $5$ 上方，排除 $10$）；$5$ 与 $13$ 互不整除，底下都没有 $B_1$ 的元素。
-  - **标准答案**：**$5$ and $13$**。（顺带一提：若问 least element 则是 None！）
-
-- **5c）Greatest element of $B_2 = \{5, 10, 65\}$**：
-  - 候选人**必须在子集 $\{5, 10, 65\}$ 内部**！全集顶部的 $650 \notin B_2$，绝对没有参赛资格！
-  - 在 $B_2$ 内部：$5 \mid 10$ 且 $5 \mid 65$，但 **$10 \nmid 65$ 且 $65 \nmid 10$**（$10$ 和 $65$ 都是 maximal elements，谁也统领不了谁）。
-  - **标准答案**：**None / Does not exist**（不存在，因为 $10$ 与 $65$ 在 $\{5,10,65\}$ 内不可比，无唯一最大元）。
-
-- **5d）Upper bounds of $B_3 = \{13, 65\}$**：
-  - 上界在**全集 $A = \{1, 5, 10, 13, 65, 650\}$** 中找满足 $13 \mid u$ **且** $65 \mid u$ 的所有 $u \in A$。
-  - 逐个核对：$65$（$13\mid 65$ 且 $65\mid 65$ ✓），$650$（$13\mid 650$ 且 $65\mid 650$ ✓）。（千万别漏掉 $65$ 自己！因为偏序是自反的，$65 \mid 65$！）
-  - **标准答案**：**$65$ and $650$**（或写作 $\{65, 650\}$；若追问 LUB 则是 $65$）。
-
-- **5e）Greatest lower bound (GLB) of $B_4 = \{10, 65\}$**：
-  - 第一步先找全集 $A$ 中的所有公共下界（同时整除 $10$ 和 $65$ 的元素）：$1$（$1\mid 10, 1\mid 65$）与 $5$（$5\mid 10, 5\mid 65$），即下界集合为 $\{1, 5\}$。
-  - 第二步在下界集合 $\{1, 5\}$ 中找 greatest element：因为 $1 \mid 5$，最大者为 **$5$**。
-  - **标准答案**：**$5$**。
-
----
-
-### 5f）Is $R$ a total order? Explain why.（3 分）
-
-#### 【标准证明 / 作答示范】
-
-**Model Answer：**
-**No**, $(A, \mid)$ is **not a total order**.
-A poset is a total order if and only if every pair of elements in $A$ is comparable. Here, $5, 13 \in A$, but $5 \nmid 13$ and $13 \nmid 5$ (similarly, $10 \nmid 65$ and $65 \nmid 10$). Since there exist incomparable elements, $R$ is not a total order. ∎
-
----
-
-### 5g）Is $R$ a lattice? Explain why.（3 分 · 全卷最精彩压轴题！）
-
-#### 【重点提示】千万别掉进 lcm(10, 13) = 130 ∉ A 的假反例陷阱！
-
-很多同学背了“整除关系下 $\text{lub}(a,b)=\operatorname{lcm}(a,b)$”，一算 $\operatorname{lcm}(10,13)=130 \notin A$，就草率写“No, not a lattice”——**这是错的！**
-回到 Lattice 的第一性原理定义：我们只在给定集合 $A=\{1,5,10,13,65,650\}$ 里找上界！
-在 $A$ 里同时被 $10$ 和 $13$ 整除的元素集合是 $\{650\}$，它的最小元（LUB）就是 **$650$**！
-
-**严谨核查方法**：在 6 元偏序集中，任何**可比元素对** $a \mid b$ 自动满足 $\text{glb}\{a,b\}=a,\ \text{lub}\{a,b\}=b$。因此只需逐一检查图中全部 **3 对不可比元素**：
-
-| 不可比元素对 | 在 $A$ 中的公共下界集合 | **GLB** | 在 $A$ 中的公共上界集合 | **LUB** |
-|---|---|---|---|---|
-| $\{5, 13\}$ | $\{1\}$ | **$1$** | $\{65, 650\}$（且 $65\mid 650$） | **$65$** |
-| $\{10, 13\}$ | $\{1\}$ | **$1$** | $\{650\}$ | **$650$** |
-| $\{10, 65\}$ | $\{1, 5\}$（且 $1\mid 5$） | **$5$** | $\{650\}$ | **$650$** |
-
-三对不可比元素全都同时拥有唯一的 LUB 和唯一的 GLB！
-
-#### 【标准证明 / 作答示范】
-
-**Model Answer（考场满分英文答案）：**
-**Yes**, $(A, \mid)$ **is a lattice**.
-A poset is a lattice if every pair of elements has both a least upper bound (LUB) and a greatest lower bound (GLB) in $A$:
-- For any comparable pair $a, b \in A$ with $a \mid b$, $\operatorname{glb}\{a, b\} = a$ and $\operatorname{lub}\{a, b\} = b$.
-- For the three incomparable pairs in $A$:
-  - $\{5, 13\}$: lower bounds $= \{1\} \Rightarrow \operatorname{glb} = 1$; upper bounds $= \{65, 650\} \Rightarrow \operatorname{lub} = 65$ (since $65 \mid 650$).
-  - $\{10, 13\}$: lower bounds $= \{1\} \Rightarrow \operatorname{glb} = 1$; upper bounds $= \{650\} \Rightarrow \operatorname{lub} = 650$.
-  - $\{10, 65\}$: lower bounds $= \{1, 5\} \Rightarrow \operatorname{glb} = 5$ (since $1 \mid 5$); upper bounds $= \{650\} \Rightarrow \operatorname{lub} = 650$.
-
-Since every pair of elements in $A$ has both a unique LUB and a unique GLB, $(A, \mid)$ is a lattice. ∎
-
----
-
-# 第 6 部分：题型通用答题模板、易错勘误表与期末自测
-
-## 6.1 八大必考题型通用英文答题模板（直接背上考场）
-
-期末考试关于集合、函数与关系的大题，几乎 100% 落在这八套标准 SOP 中。请像填空一样使用下面的英文句式：
-
-```mermaid
-flowchart TD
-  START["拿到集合 / 函数 / 关系题目"] --> QTYPE{"判断题目类型"}
-  QTYPE -->|"证集合恒等式"| T1["模板 1：双向包含 x∈A ⇔ x∈B"]
-  QTYPE -->|"双射 / 限制域造双射"| T2["模板 2：切余域=Range，切定义域=单调支"]
-  QTYPE -->|"0-1 矩阵与 Warshall"| T3["模板 3：复合左R₁右R₂ · Warshall 十字补 1"]
-  QTYPE -->|"证等价关系 / 等价类"| T4["模板 4：自反 + 对称 + 传递三段式"]
-  QTYPE -->|"证偏序关系 Poset"| T5["模板 5：自反 + 反对称 + 传递三段式"]
-  QTYPE -->|"否证性质 / 关系运算证明"| T6["模板 6：反例句式 & 关系运算元素追逐法"]
-  QTYPE -->|"Hasse 图极值与上下界"| T7["模板 7：极值限子集内 · 上下界查全集"]
-  QTYPE -->|"判全序与格 Lattice"| T8["模板 8：全序找不可比对 · 格查所有不可比对"]
-```
-
-### 模板 1：证明集合恒等式 $A = B$（Element Argument）
-> **Proof:** To show $A = B$, we show $A \subseteq B$ and $B \subseteq A$.  
-> ($\subseteq$) Let $x \in A$ be arbitrary. By definition of …, …, so $x \in B$.  
-> ($\supseteq$) Conversely, let $x \in B$ be arbitrary. …, so $x \in A$.  
-> Therefore, $A = B$. $\square$
-
-### 模板 2：证明（或限制定义域后证明）函数 $f: A \to B$ 是双射（Bijection）
-> - **One-to-one:** Assume $f(x_1) = f(x_2)$ for $x_1, x_2 \in A$. Then [代入化简] $\implies x_1 = x_2$. Hence $f$ is one-to-one.  
-> - **Onto:** Let $y \in B$ be arbitrary. Choose $x = \text{[用 } y \text{ 解出的表达式]}$. Since $y \in B$, we have $x \in A$ [务必验明 $x$ 落在定义域内！], and $f(x) = \dots = y$. Hence $f$ is onto.  
-> Since $f$ is both one-to-one and onto, $f$ is a one-to-one correspondence (invertible). $\square$
-
-### 模板 3：复合矩阵 $M_{R_2 \circ R_1}$ 与 Warshall 传递闭包
-- 写 $M_{R_2 \circ R_1}$ 前先默念：**右边先走放左边** $\implies M_{R_2 \circ R_1} = M_{R_1} \odot M_{R_2}$。
-- 写 Warshall 传递闭包：先令 $W_0 = M_R$，每步标出第 $k$ 个中转顶点所在列为 $1$ 的行 $C_k$ 与所在行为 $1$ 的列 $R_k$，将 $C_k \times R_k$ 置 $1$，依次写出 $W_1, W_2, \dots, W_n$。
-
-### 模板 4：证明 $R$ 是等价关系（并求等价类）
-> - **Reflexive:** For every $a \in A$, [验证 $(a,a)\in R$], so $R$ is reflexive.  
-> - **Symmetric:** For all $a, b \in A$, assume $(a,b) \in R$. Then …, so $(b,a) \in R$.  
-> - **Transitive:** For all $a, b, c \in A$, assume $(a,b) \in R$ and $(b,c) \in R$. Then …, so $(a,c) \in R$.  
-> Thus $R$ is an equivalence relation. The equivalence class of $a$ is $[a]_R = \{x \in A \mid (a,x) \in R\} = \dots$
-
-### 模板 5：证明 $R$ 是偏序关系（Poset）
-> 同上分三段写 **Reflexive**、**Antisymmetric**（Assume $(a,b)\in R$ and $(b,a)\in R \implies \dots \implies a = b$）、**Transitive**。
-
-### 模板 6：否证（Disprove）反例句式 & 关系运算性质 Prove/Disprove（如 Test 02 Q4）
-- **成立时（Element-Chasing）**：先写 `True.`，再写 `Let a, b ∈ A and assume (a, b) ∈ S ∩ R ...`，拆集合运算定义 $\to$ 分别套用 $R, S$ 的已知性质 $\to$ 合回目标集合定义。
-- **不成立时（Counterexample）**：先写 `False.`，再在 $A=\{1,2,3\}$ 上给最小反例并点明缺哪一对：
-  - Not reflexive: `"Since 1 ∈ A and (1,1) ∉ R, R is not reflexive."`
-  - Not symmetric: `"Since (1,2) ∈ R but (2,1) ∉ R, R is not symmetric."`
-  - Not antisymmetric: `"Since (2,3) ∈ R and (3,2) ∈ R with 2 ≠ 3, R is not antisymmetric."`
-  - Not transitive: `"Since (2,4) ∈ R and (4,10) ∈ R, but (2,10) ∉ R, R is not transitive."`
-
-### 模板 7：Hasse 图极值与上下界防错检查单
-1. 圈出题目问的是哪个子集 $B$；
-2. 问 **minimal / maximal / least / greatest** $\to$ 先把不属于 $B$ 的点全部遮住！有 $\ge 2$ 个 minimal 则 least 必写 `None`；有 $\ge 2$ 个 maximal 则 greatest 必写 `None`；
-3. 问 **upper / lower bounds / LUB / GLB** $\to$ 在全集 $A$ 里找能包住整个 $B$ 的公共上/下界，别漏掉 $B$ 自己的边界元素（因自反性 $65\mid 65$）！
-
-### 模板 8：判断偏序集是否为全序（Total Order）与格（Lattice）
-- **Total order**: 找一对不可比元素 $a,b\in A$（$a\npreceq b \land b\npreceq a$）即可证 **No**；若成单链则 **Yes**。
-- **Lattice**: 只查图中所有**不可比元素对** $\{a,b\}$：若每一对在全集 $A$ 中都有唯一 LUB 和唯一 GLB 则 **Yes**；只要抓出一对无公共上/下界，或上界无最小元（蝴蝶结），立即举该对证 **No**。
-
----
-
-## 6.2 高频易错点与勘误汇总表（考前最后 5 分钟扫视）
-
-| 易错重灾区 | 错误直觉 / 常见废案 | 正确结论与防坑铁律 |
-|---|---|---|
-| 空集与套壳空集 | 以为 $\{\varnothing\}$ 是空集，或 $\{\varnothing\}\notin\{\{\varnothing\}\}$ | $|\varnothing|=0$，而 $|\{\varnothing\}|=1$（装了一个空盒的盒子） |
-| 集合并集记号 | 把非负实数写成 $\{\mathbb{R}^+, 0\}$（Test 02 Q1c 手写瑕疵） | 写 $[0,+\infty)$ 或 $\mathbb{R}^+\cup\{0\}$；花括号里放集合名会变成“集合的集合” |
-| 函数满射与论域 | 以为 $f(n)=n^3$ 在 $\mathbb{Z}\to\mathbb{Z}$ 上像实数一样是双射 | 在 $\mathbb{Z}\to\mathbb{Z}$ 上 $2$ 没有整数立方根，**不是 onto**！ |
-| 复合矩阵左右顺序 | 算 $M_{R_2\circ R_1}$ 时左放 $M_{R_2}$ 乘右放 $M_{R_1}$ | **先作用的 $R_1$ 必须在左边**：$M_{R_2\circ R_1} = M_{R_1} \odot M_{R_2}$ |
-| 关系计数笔误 | 照抄 Tutorial 05 Q4a 误印的 $2^{16}=65535$ | $2^{16} = \mathbf{65536}$；反对称是 $2^n\cdot 3^{n(n-1)/2}$，非对称是 $3^{n(n-1)/2}$ |
-| 实数上 $xy\ge 0$ | 照抄 Tutorial 05 Q7g 误判为传递 | **不传递**！$(-1,0)\in R$ 且 $(0,2)\in R$，但 $(-1,2)\notin R$（$0$ 搭桥破传递） |
-| 整数上 $x^2\ge y$ | 受 $0.5^2 < 0.5$ 误导判为不自反 | 题干限定 **integers $\mathbb{Z}$**，对一切整数 $x^2\ge x$ 恒真，**是自反的**！ |
-| 子集最大元越界 | 求 $\{5,10,65\}$ 的 greatest element 填了 $650$ | Greatest 必须属于该子集！$650\notin\{5,10,65\}$，应填 **None** |
-| 有限整除偏序判格 | 见 $\operatorname{lcm}(10,13)=130\notin A$ 就判不是 Lattice | 在 $A$ 内 $\{10,13\}$ 的上界为 $\{650\}$，故 $\text{lub}_A\{10,13\}=650$ 存在，**是 Lattice**！ |
-
----
-
-## 6.3 期末通关自测 10 题（先独立作答，再点击展开核对答案）
-
-1. 判断真假并说明理由：(a) $\varnothing \subseteq \{\varnothing\}$；(b) $\varnothing \in \varnothing$；(c) $\{\varnothing\} \subseteq \{\varnothing, \{\varnothing\}\}$；(d) $|\mathcal{P}(\mathcal{P}(\varnothing))| = 4$。
-2. 解释为什么 $A \times B \times C$ 与 $(A \times B) \times C$（$A,B,C\neq\varnothing$）不相等。
-3. 设 $f: \mathbb{Z} \to \mathbb{Z},\ f(n) = \lceil n/2 \rceil$；$g: \mathbb{Z} \to \mathbb{Z},\ g(n) = 2n + 1$。分别判断 $f, g$ 是否为 one-to-one、onto、invertible；并求 $(f \circ g)(n)$ 与 $(g \circ f)(n)$。
-4. 设 $f(x) = e^x$ 是从 $\mathbb{R}$ 到 $\mathbb{R}$ 的函数。说明为何 $f$ 不可逆，并给出使 $f$ 可逆的限制定义域/余域及反函数 $f^{-1}$（Tutorial 04 Q14）。
-5. 设 $|A| = 3$。求 $A$ 上：(a) 二元关系总数；(b) 自反关系数；(c) 对称关系数；(d) 反对称关系数；(e) 非对称关系数；(f) 既是自反又是反对称的关系数。
-6. 设 $R$ 在 $\{0,1,2,3\}$ 上由有序对 $\{(0,1),(1,1),(1,2),(2,0),(2,2),(3,0)\}$ 给出。用 Warshall 算法完整写出 $W_0, W_1, W_2, W_3, W_4$ 求传递闭包（Tutorial 05 Q8c）。
-7. **Prove or disprove**：若 $R_1, R_2$ 是集合 $A$ 上的传递关系，则 $R_1 \cup R_2$ 也是传递关系。
-8. 设 $A$ 为非空集合，$f: A \to B$ 为任意函数，在 $A$ 上定义 $(x,y)\in R \iff f(x)=f(y)$。证明 $R$ 是等价关系，并写出其等价类集合构成的划分（Tutorial 06 Q5）。
-9. 证明：若 $(S, R)$ 是偏序集，则其对偶 $(S, R^{-1})$ 也是偏序集（Tutorial 06 Q7）。
-10. 对偏序集 $(\{3, 5, 9, 15, 24, 45\}, \mid)$（Tutorial 06 Q12）：求全集的极小元、极大元、最小元、最大元；求 $\{3,5\}$ 的 LUB、$\{15,45\}$ 的 GLB；并判断它是否为格（Lattice）。
+On $A = \{1, 5, 10, 13, 65, 650\}$ under divisibility ($a \mid b$), place vertices upward by level and draw **exactly 7 undirected line segments** (covering relations only, no loops, no arrows):
+- Level 0 (bottom): `1` $\longrightarrow$ connects upward to `5` and `13`.
+- Level 1: `5` connects upward to `10` and `65`; `13` connects upward **only** to `65` (since $13 \nmid 10$).
+- Level 2: `10` and `65` both connect upward to `650` (Level 3, top).
 
 <details>
-<summary><strong>点击展开 / 收起：自测 1–10 标准参考答案与得分点</strong></summary>
+<summary><strong>选读 · 对偶偏序集（Dual）、字典序（Lexicographic Order）与良序集（Well-Ordered Set）</strong></summary>
 
-1. **(a) True**（空集是任何集合的子集）；**(b) False**（空集无元素）；**(c) True**（元素 $\varnothing$ 在右集合中）；**(d) False**！因为 $|\mathcal{P}(\varnothing)| = 2^0 = 1$（即 $\{\varnothing\}$），再套一层 $|\mathcal{P}(\{\varnothing\})| = 2^1 = \mathbf{2}$（即 $\{\varnothing, \{\varnothing\}\}$），套三层 $|\mathcal{P}(\mathcal{P}(\mathcal{P}(\varnothing)))| = 2^2 = 4$！
-2. $A\times B\times C$ 的元素是有序三元组 $(a,b,c)$，而 $(A\times B)\times C$ 的元素是第一分量为二元组的有序二元组 $((a,b),c)$，元素结构不同故不相等。
-3. $f(n)=\lceil n/2\rceil$：**非单射**（$f(1)=f(2)=1$）、**满射**（对任意 $k\in\mathbb{Z}$ 取 $n=2k$）、不可逆；$g(n)=2n+1$：**单射**（$2n_1+1=2n_2+1\Rightarrow n_1=n_2$）、**非满射**（偶数 $0$ 无整数原像）、不可逆。复合：$(f\circ g)(n) = \lceil (2n+1)/2 \rceil = \lceil n + 0.5 \rceil = n + 1$（是双射！）；$(g\circ f)(n) = 2\lceil n/2 \rceil + 1$。
-4. 因对一切 $x\in\mathbb{R}$ 有 $e^x > 0$，负数与 $0$ 无原像，故 $\mathbb{R}\to\mathbb{R}$ 非满射不可逆。保持定义域 $\mathbb{R}$ 不变（$e^x$ 严格递增故已是单射），将余域限制为 $\mathbb{R}^+ = (0, +\infty)$，即成为双射，反函数为 $f^{-1}(y) = \ln y\ (y > 0)$。
-5. $n=3$ 时：(a) $2^9 = 512$；(b) $2^{3\times 2} = 64$；(c) $2^{3\times 4/2} = 64$；(d) $2^3 \cdot 3^3 = 8 \times 27 = 216$；(e) $3^3 = 27$；(f) 对角线强制全 $1$（$1$ 种），3 对异点各 $3$ 种 $\Rightarrow 3^3 = 27$。
-6. 行列按顶点 $0,1,2,3$ 顺序编号：
-   - 初态：$W_0 = \begin{bmatrix}0&1&0&0\\0&1&1&0\\1&0&1&0\\1&0&0&0\end{bmatrix}$；
-   - $k=1$（中转顶点 `0`）：顶点 `0` 列为 $1$ 的行 $C_1=\{2,3\}$，顶点 `0` 行为 $1$ 的列 $R_1=\{1\}$，新补 $(2,1),(3,1)$ 得 $W_1 = \begin{bmatrix}0&1&0&0\\0&1&1&0\\1&\mathbf{1}&1&0\\1&\mathbf{1}&0&0\end{bmatrix}$；
-   - $k=2$（中转顶点 `1`）：$C_2=\{0,1,2,3\},\ R_2=\{1,2\}$，新补 $(0,2),(3,2)$（其余原本已是 $1$）得 $W_2 = \begin{bmatrix}0&1&\mathbf{1}&0\\0&1&1&0\\1&1&1&0\\1&1&\mathbf{1}&0\end{bmatrix}$；
-   - $k=3$（中转顶点 `2`）：$C_3=\{0,1,2,3\},\ R_3=\{0,1,2\}$，新补 $(0,0),(1,0)$ 得 $W_3 = \begin{bmatrix}\mathbf{1}&1&1&0\\\mathbf{1}&1&1&0\\1&1&1&0\\1&1&1&0\end{bmatrix}$；
-   - $k=4$（中转顶点 `3`）：顶点 `3` 所在第 4 列全为 $0$（$C_4=\varnothing$），无新增边，故 $W_4 = W_3 = \begin{bmatrix}1&1&1&0\\1&1&1&0\\1&1&1&0\\1&1&1&0\end{bmatrix}$。
-7. **Disprove (False)**：在 $A=\{1,2,3\}$ 上取 $R_1=\{(1,2)\}$，$R_2=\{(2,3)\}$，两者均空真传递；但 $R_1\cup R_2=\{(1,2),(2,3)\}$ 含 $(1,2),(2,3)$ 却不含 $(1,3)$，不传递。
-8. 自反：$f(x)=f(x)$；对称：$f(x)=f(y)\Rightarrow f(y)=f(x)$；传递：$f(x)=f(y)\land f(y)=f(z)\Rightarrow f(x)=f(z)$。等价类划分即 $\{f^{-1}(\{b\}) \mid b \in \operatorname{Range}(f)\}$。
-9. 自反：$(a,a)\in R \Rightarrow (a,a)\in R^{-1}$；反对称：$(a,b)\in R^{-1}\land (b,a)\in R^{-1} \Rightarrow (b,a)\in R \land (a,b)\in R \Rightarrow a=b$；传递：$(a,b)\in R^{-1}\land (b,c)\in R^{-1} \Rightarrow (c,b)\in R \land (b,a)\in R \Rightarrow (c,a)\in R \Rightarrow (a,c)\in R^{-1}$。
-10. 极小元：$3, 5$；极大元：$24, 45$；最小元：None；最大元：None；$\operatorname{lub}\{3,5\} = 15$（上界 $\{15,45\}$）；$\operatorname{glb}\{15,45\} = 15$（下界 $\{3,5,15\}$）；**不是格（Not a lattice）**，例如 $\{24, 45\}$ 在集合中无公共上界，$\{3, 5\}$ 在集合中也无公共下界！
+课件 Ch9.6 与 Tutorial 06 Q7–Q10 还介绍了三种给偏序集变形或排序的方式：
+1. **对偶偏序集（dual poset）**：若 $(S, R)$ 是偏序集，把所有大小方向倒过来的逆关系 **$(S, R^{-1})$ 依然是偏序集**（比如 $(\mathbb{Z}, \ge)$ 的对偶就是 $(\mathbb{Z}, \le)$，哈斯图直接上下颠倒，Tutorial 06 Q7–Q8）。
+2. **字典序（lexicographic order）**：两个偏序集拼成有序对 $(a_1, a_2) \prec (b_1, b_2)$ 时，先比第一坐标 $a_1 \prec_1 b_1$；第一坐标打平时再比第二坐标 $a_2 \prec_2 b_2$。查英文词典完全同理（短前缀排在前面，如 `open < opened < opener < opera < operand`，Tutorial 06 Q10）。
+3. **良序集（well-ordered set，课件 Slide 29）**：如果 $(S, \preceq)$ 既是全序集，而且它的**每一个非空子集都能找出最小元（least element）**，就叫良序集（数学归纳法的根基）。
+   - 经典对比：正整数 $(\mathbb{Z}^+, \le)$ 和自然数 $(\mathbb{N}, \le)$ **是**良序集；全体整数 $(\mathbb{Z}, \le)$ 虽然是全序，但**不是**良序集（负整数集没有最小元）；实数区间 $([0, 1], \le)$ 也**不是**良序集（开子集 $(0, 1]$ 没有最小元）。
+
+</details>
+
+<details>
+<summary><strong>练习 · 画一画含 8 个数的整除哈斯图（Tutorial 06 Q11b 原题）</strong></summary>
+
+在集合 $\{1, 2, 3, 6, 12, 24, 36, 48\}$ 上按整除关系 $|$ 列出每一层的元素和所有覆盖边（即哈斯图里真正要画的连线）。
+
+<details>
+<summary>给我一点提示</summary>
+
+按质因子重数 $\Omega(n)$ 分层：$1$（0 个）$\to 2,3$（1 个）$\to 6$（2 个）$\to 12$（3 个）$\to 24, 36$（4 个）$\to 48$（5 个）。特别小心：$36$ 能整除 $48$ 吗？
+
+</details>
+
+<details>
+<summary>对照考场满分写法</summary>
+
+- 层级：$L_0: \{1\}$；$L_1: \{2, 3\}$；$L_2: \{6\}$；$L_3: \{12\}$；$L_4: \{24, 36\}$；$L_5: \{48\}$。
+- 全部覆盖边（共 7 条）：`1—2`, `1—3`, `2—6`, `3—6`, `6—12`, `12—24`, `12—36`, 以及 **`24—48`**（共 8 条边；千万注意 $36 \nmid 48$，所以 `36` 头顶没有任何连线，这个偏序集有两个极大元 `36` 和 `48`！）。
+
+</details>
+
+</details>
+
+## 11 “没人比我小”和“我比所有人都小”，为什么换个词答案就变成不存在？
+
+*当场拿下 Test 02 Question 5b, 5c, 5d, 5e（8 分）*
+
+画好了 $\{1, 5, 10, 13, 65, 650\}$ 的哈斯图，紧接着 **Question 5b, 5c, 5d, 5e（共 8 分，每问 2 分）** 连珠炮似地问了四个词：
+
+- **b)** Find the **minimal elements** of $\{5, 10, 13\}$
+- **c)** Find the **greatest elements** of $\{5, 10, 65\}$
+- **d)** Find the **upper bounds** of $\{13, 65\}$
+- **e)** Find the **greatest lower bound** of $\{10, 65\}$
+
+这四个词长得太像了，考场上稍一走神就会张冠李戴。其实只要守住**两条铁打的规矩**，这 8 分比做加减法还稳。
+
+### 第一条规矩：问“极值 / 最值”（b 问和 c 问），候选人**只能在括号给的小圈子内部挑**！
+
+先把括号外面那些无关的数用手遮住！
+
+看 **5b) 子集 $B_1 = \{5, 10, 13\}$ 的极小元（minimal elements）**。
+什么叫“极小元”？用大白话说就是 **在这个小圈子里，我的脚底下已经没有别人了**。看圈子里的三个数：$10$ 的脚底下踩着 $5$（因为 $5 \mid 10$），所以 $10$ 淘汰；而 $5$ 和 $13$ 互不整除，在 $\{5, 10, 13\}$ 这个圈子里谁脚底下都没人！所以 **minimal elements 是 $5$ 和 $13$**（极小元完全可以并列好几个！）。
+
+再看 **5c) 子集 $B_2 = \{5, 10, 65\}$ 的最大元（greatest element）**——这是整张卷子最阴险的一道 2 分陷阱！
+很多同学抬头看了一眼哈斯图，发现最顶上的 $650$ 同时是 $5, 10, 65$ 的倍数，顺手就填了个 `650`——**当场零分！**
+为什么？因为 **$650$ 根本不在小圈子 $\{5, 10, 65\}$ 里面**！这就好比问“你们宿舍三个人里谁是最高的人”，你却指着隔壁楼的姚明说他是你们宿舍最高的！
+
+把 $650$ 遮掉，只看 $\{5, 10, 65\}$ 内部：要是问 **极大元（maximal elements，“头顶上没有圈内其他人”）**，$10$ 和 $65$ 互不整除，它俩都是极大元；可题目偏偏问的是 **最大元（greatest element，“必须属于圈内，而且独自站在圈内所有人的头顶上”）**！既然 $10 \nmid 65$ 且 $65 \nmid 10$，谁也统领不了谁，唯一的正确答案就是：**None（不存在 / Does not exist）**！（同理，极小元 minimal 可以有多个，但最小元 **least element** 必须独自垫在所有人脚下，只要有 $\ge 2$ 个极小元，最小元就必定不存在！）
+
+---
+
+### 第二条规矩：问“上界 / 下界”（d 问和 e 问），视野放开到**整个大集合 $A = \{1, 5, 10, 13, 65, 650\}$**！
+
+这回考官终于允许请圈外的外援了！
+
+- 看 **5d) 求 $\{13, 65\}$ 的所有上界（upper bounds）**：
+  所谓子集 $B$ 的 **上界（upper bound）**，就是在全集 $A$ 里找一个“公共天花板” $u \in A$，使得 $B$ 里的每一个数都能往上爬到 $u$（在这里就是 $13 \mid u$ **且** $65 \mid u$）。把全集 6 个数挨个过一遍：$650$ 当然合格（$13 \mid 650$ 且 $65 \mid 650$）；还有谁容易漏掉？**$65$ 自己！** 别忘了偏序是自反的，$65 \mid 65$ 完全成立！所以 **upper bounds 是 $65$ 和 $650$**。（如果顺嘴追问一句谁是 **最小上界 least upper bound / LUB**，也就是所有天花板里最矮的那块，在 $\{65, 650\}$ 里选最小的，就是 $65$。）
+
+- 看 **5e) 求 $\{10, 65\}$ 的最大下界（greatest lower bound，简称 GLB）**：
+  分两步走，绝不跳步：
+  1. 先在全集 $A$ 里找出 $\{10, 65\}$ 的所有 **下界（lower bounds）**，也就是能同时整除 $10$ 和 $65$ 的公共地基：$1$ 可以，$5$ 也可以，所以全部下界组成集合 $\{1, 5\}$；
+  2. 再从下界集合 $\{1, 5\}$ 里挑出最高的那个 **最大元（greatest）**：因为 $1 \mid 5$，答案稳稳就是 **$5$**！
+
+### 【考场真题落笔】Test 02 · Question 5b, 5c, 5d, 5e（8 marks）标准答案速核
+
+On $(\{1, 5, 10, 13, 65, 650\}, \mid)$:
+- **b) Minimal elements of $\{5, 10, 13\}$:** **$5, 13$** *(neither is divisible by another element in $\{5, 10, 13\}$, while $5 \mid 10$)*.
+- **c) Greatest element of $\{5, 10, 65\}$:** **None / Does not exist** *($10$ and $65$ are incomparable maximal elements in $\{5, 10, 65\}$, and $650 \notin \{5, 10, 65\}$)*.
+- **d) Upper bounds of $\{13, 65\}$:** **$65, 650$** *(elements in the whole poset $A$ divisible by both $13$ and $65$)*.
+- **e) Greatest lower bound (GLB) of $\{10, 65\}$:** **$5$** *(lower bounds in $A$ are $\{1, 5\}$, whose greatest element under $|$ is $5$)*.
+
+<details>
+<summary><strong>练习 · 在无顶无底偏序集上快练一整套八连问（Tutorial 06 Q12 原题）</strong></summary>
+
+对偏序集 $(\{3, 5, 9, 15, 24, 45\}, \mid)$：求全集的 (a) maximal elements；(b) minimal elements；(c) greatest element；(d) least element；(e) $\{3,5\}$ 的所有上界与 LUB；(f) $\{15,45\}$ 的所有下界与 GLB。
+
+<details>
+<summary>给我一点提示</summary>
+
+别漏掉 $3 \mid 24$ 这根线！全集底下有 $3, 5$ 两个极小，顶上有 $24, 45$ 两个极大。
+
+</details>
+
+<details>
+<summary>对照考场满分写法</summary>
+
+- (a) Maximal: **$24, 45$**；(b) Minimal: **$3, 5$**；
+- (c) Greatest: **None**；(d) Least: **None**；
+- (e) $\{3,5\}$ 的上界：**$15, 45$**，$\operatorname{LUB}\{3,5\} = \mathbf{15}$；
+- (f) $\{15,45\}$ 的下界：**$3, 5, 15$**，$\operatorname{GLB}\{15,45\} = \mathbf{15}$。
+
+</details>
+
+</details>
+
+## 12 不能排成一条直线时，每对元素还能找到唯一的公共汇合点吗？
+
+*当场拿下 Test 02 Question 5f, 5g（6 分 · 全卷 76 分通关！）*
+
+整张 76 分考卷只剩最后两道各 3 分的简答题：**5f) Is $R$ a total order? Explain why.** 以及 **5g) Is $R$ a lattice? Explain why.**
+
+先看 **5f) 全序（total order）**，这是白送的 3 分。
+在偏序集里，如果两个元素 $a, b$ 满足 $a \preceq b$ 或 $b \preceq a$ 至少成立一个（一个在另一个楼上或同一层），就叫它们 **可比的（comparable）**；如果谁也不整除谁，就叫不可比（incomparable）。只有当集合里**任意抓两个元素全都可比**（整张哈斯图没有任何分叉，退化成一根笔直的单链 chain）时，才叫 **全序（total order，也叫线序 linear order）**。
+
+看看我们刚才画的哈斯图：$5$ 和 $13$ 并排站着，$5 \nmid 13$ 且 $13 \nmid 5$（或者拿 $10$ 和 $65$ 举例也行）！抓出这一对不可比元素写进卷子，**No, not a total order** 的 3 分就到手了。
+
+真正的压轴好戏在最后一问 **5g) 它是不是一个格（lattice）？**
+
+什么叫 **格（lattice）**？规则非常对称：**在偏序集里随便挑一对元素 $\{a, b\}$，往上找它们有唯一的最小上界（LUB，记作 $a \lor b$），往下找它们也有唯一的最大下界（GLB，记作 $a \land b$）——每一对都儿女双全、上下都有唯一汇合点，整张偏序集就叫一个格！**
+
+现在请你先停下来做个判断：在 $A = \{1, 5, 10, 13, 65, 650\}$ 上，随便挑一对数，它们都有唯一的 LUB 和 GLB 吗？**特别请你盯住 $\{10, 13\}$ 这一对！**
+
+考场上很多背过半吊子结论的同学是这么想的：“老师说过，整除关系下的 LUB 就是最小公倍数 $\operatorname{lcm}$，GLB 就是最大公约数 $\gcd$。我算一下 $\operatorname{lcm}(10, 13) = 130$——咦，$130$ 根本不在集合 $\{1, 5, 10, 13, 65, 650\}$ 里！所以 $\{10, 13\}$ 没有 LUB，这不是一个格！”
+
+**大错特错！！** 这正是把“背二级公式”错当成“懂定义”的最惨烈现场！
+
+只有在**全体正整数 $\mathbb{Z}^+$** 都在场的时候，整除的最小上界才等于数论里的 $\operatorname{lcm}$。现在我们的世界里总共只有 $\{1, 5, 10, 13, 65, 650\}$ 这 **6 个居民**，$130$ 压根不在这个世界里！回到上一节刚学的原始定义，老老实实在 $A$ 的 6 个数里找 $\{10, 13\}$ 的公共上界（同时是 $10$ 和 $13$ 倍数的居民）：
+- $A$ 里 $10$ 的倍数只有 $\{10, 650\}$；
+- $A$ 里 $13$ 的倍数只有 $\{13, 65, 650\}$；
+- 两边一交，公共上界集合就是 **$\{650\}$**！
+
+上界集合 $\{650\}$ 里总共就坐着 `650` 一个人，那它的最小元（LUB）是谁？当然就是 **`650`** 自己！
+
+在下面的哈斯图沙盘里，先点一下快捷按钮 `Q5g 神坑 {10,13}` 亲眼看看绿色的 `LUB = 650` 圈在了哪里；再切换顶部的预设，对比看看 `Tutorial 06 Q12`（缺封顶元素）和 `蝴蝶图反例`（有两个互不可比的天花板 $c, d$，分不出谁更矮）到底是怎么真正把“格”破坏掉的：
+
+检查一张有限哈斯图是不是格，其实根本不用查全部 $\binom{6}{2} = 15$ 对元素——因为凡是上下可比的一对 $a \mid b$，自动就有 $\operatorname{glb}\{a,b\} = a$、$\operatorname{lub}\{a,b\} = b$！你只需要把图里仅有的 **3 对不可比元素** 列出来逐对验明正身：
+- $\{5, 13\}$：下界 $\{1\} \implies \operatorname{glb}=1$；上界 $\{65, 650\} \implies \operatorname{lub}=65$；
+- $\{10, 13\}$：下界 $\{1\} \implies \operatorname{glb}=1$；上界 $\{650\} \implies \operatorname{lub}=650$；
+- $\{10, 65\}$：下界 $\{1, 5\} \implies \operatorname{glb}=5$；上界 $\{650\} \implies \operatorname{lub}=650$。
+
+三对全部上下有唯一归宿，理直气壮写下 **Yes, $R$ is a lattice**——恭喜你，Midterm Test 02 从第 1 分到第 76 分，已经被你完完整整拿下了！
+
+### 【考场真题落笔】Test 02 · Question 5f & 5g（6 marks）满分英文解释模板
+
+- **f) Is $R$ a total order? Explain why. (3 marks)**
+  **No.** A poset is a total order iff every pair of elements is comparable. Here $5, 13 \in A$, but $5 \nmid 13$ and $13 \nmid 5$ (incomparable). Hence $R$ is not a total order.
+
+- **g) Is $R$ a lattice? Explain why. (3 marks)**
+  **Yes, $(A, \mid)$ is a lattice.** A poset is a lattice iff every pair of elements in $A$ has both a unique least upper bound (LUB) and a unique greatest lower bound (GLB) in $A$:
+  - Every comparable pair $a \mid b$ automatically has $\operatorname{glb}\{a,b\} = a$ and $\operatorname{lub}\{a,b\} = b$.
+  - For the three incomparable pairs in $A$:
+    - $\{5, 13\}$: lower bounds $= \{1\} \implies \operatorname{glb} = 1$; upper bounds $= \{65, 650\} \implies \operatorname{lub} = 65$.
+    - $\{10, 13\}$: lower bounds $= \{1\} \implies \operatorname{glb} = 1$; upper bounds $= \{650\} \implies \operatorname{lub} = 650$.
+    - $\{10, 65\}$: lower bounds $= \{1, 5\} \implies \operatorname{glb} = 5$; upper bounds $= \{650\} \implies \operatorname{lub} = 650$.
+
+  Since every pair has both a unique LUB and a unique GLB in $A$, $R$ is a lattice.
+
+<details>
+<summary><strong>选读 · 课件最后三页：格的代数律、有界格（Bounded Lattice）与有补格（Complemented Lattice）</strong></summary>
+
+在格 $(L, \preceq)$ 里，把 $\operatorname{lub}\{a,b\}$ 记作并 $a \lor b$、把 $\operatorname{glb}\{a,b\}$ 记作交 $a \land b$，它们天然满足幂等律、交换律、结合律以及吸收律 $a \lor (a \land b) = a$（课件 Ch9.6 p32）。往后再加两层性质就到头了：
+1. **有界格（bounded lattice，Slide 34）**：同时拥有全集最大元（记作 $1$）和全集最小元（记作 $0$）的格。**一切有限格都自动是有界格**（例如第 5 题的格里，$0 = 1$，$1 = 650$）。
+2. **有补格（complemented lattice，Slide 35）**：在有界格里，如果**每一个**元素 $x$ 都能找到至少一个搭档（补元 $y$），使得它俩往上汇到全集顶 $x \lor y = 1$、往下落到全集底 $x \land y = 0$，就叫有补格。
+   - 最标准的例子：幂集布尔格 $(\mathcal{P}(\{a,b,c\}), \subseteq)$（可以在上方沙盘第 3 个预设里点开看）是有界有补格——子集 $X$ 的补元就是集合补 $\overline{X}$，满足 $X \cup \overline{X} = \{a,b,c\}$ 且 $X \cap \overline{X} = \varnothing$。
+   - 那 Test 02 第 5 题的 $(\{1,5,10,13,65,650\}, \mid)$ 是有补格吗？**不是！** 试着给元素 $5$ 找补元 $y$：要满足 $\operatorname{glb}\{5, y\} = 1$，就要求 $5 \nmid y$，只能选 $y = 1$ 或 $y = 13$；可 $\operatorname{lub}\{5, 1\} = 5 \neq 650$，$\operatorname{lub}\{5, 13\} = 65 \neq 650$，谁也凑不够顶上的 $650$（因为 $5^2 = 25$ 的因子拆不散）！
+
+</details>
+
+<details>
+<summary><strong>练习 · 一秒钟揪出“为什么不是格”的两种死法</strong></summary>
+
+分别用一句话解释为什么下列两个偏序集**不是格（not a lattice）**：
+1. Tutorial 06 Q12 的 $(\{3, 5, 9, 15, 24, 45\}, \mid)$；
+2. 含有 4 个元素 $\{a, b, c, d\}$ 的蝴蝶图偏序集，其中 $a, b$ 都排在 $c, d$ 下方（$a \prec c, a \prec d, b \prec c, b \prec d$），而 $a$ 与 $b$ 不可比、$c$ 与 $d$ 也不可比。
+
+<details>
+<summary>给我一点提示</summary>
+
+第 1 个找一对根本没有公共天花板的元素；第 2 个看 $\{a, b\}$ 虽然有两个公共天花板 $c, d$，但能选出“最矮的那一个”吗？
+
+</details>
+
+<details>
+<summary>对照考场满分写法</summary>
+
+1. 取元素对 $\{24, 45\}$（或 $\{9, 24\}$）：集合中没有任何元素能同时被它们整除（**upper bounds 为空集**），故 $\operatorname{lub}\{24, 45\}$ 不存在，不是格。
+2. 取元素对 $\{a, b\}$：虽然它在图中有公共上界 $\{c, d\}$，但 $c$ 与 $d$ 互不可比，上界集合 $\{c, d\}$ 没有最小元，故 **$\operatorname{lub}\{a, b\}$ 不存在**，也不是格！
+
+</details>
 
 </details>

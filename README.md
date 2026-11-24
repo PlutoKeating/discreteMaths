@@ -1,42 +1,45 @@
-# 离散数学学习站点（discreteMaths）
+# 离散数学学习空间（discreteMaths）
 
-按章节整理的离散数学复习资料，每个章节子目录既存放原始资料（slides、tutorial、试卷、Markdown 笔记），也自带一个 React + Tailwind 构建的复习网页。构建后由 Cloudflare Workers 以静态资源形式发布。
+以真实纯英文考卷（Midterm Test 01 / Test 02）为第一性原理构建的渐进式离散数学学习站点。每一门课都从零基础读者能懂的具体小问题出发，顺着攻克考卷真题的脉络水到渠成引出概念、交互实验与英文证明落笔示范，由 Cloudflare Workers 以静态资源形式发布。
 
 ## 目录结构
 
 ```
 .
-├── index.html                 # 站点首页入口（Vite 多页面入口之一）
+├── index.html                 # 学习空间首页入口（Vite 多页面入口之一）
 ├── src/
 │   ├── main.jsx               # 首页挂载
-│   ├── Home.jsx               # 首页：章节卡片列表（按课程推进顺序排列）
-│   ├── styles.css             # 全站设计令牌 + Tailwind v4 + Markdown 与交互沙盘样式
+│   ├── Home.jsx               # 首页：课程追问卡片列表（Logic → Relation → Counting → Graph）
+│   ├── styles.css             # 沉静纸感编辑部设计令牌（浅色/深色）+ 阅读器与交互教具样式
 │   └── components/
-│       ├── ChapterUi.jsx      # 跨章节共用导航栏、小节标题、切角真题卡与 hash 路由 Hook
-│       ├── GlossaryView.jsx   # 跨章节共用中英术语分类检索页
-│       ├── Markdown.jsx       # react-markdown + GFM + KaTeX + 原生 HTML + Mermaid 代码块
-│       ├── Mermaid.jsx        # Mermaid 流程图渲染组件
-│       ├── Term.jsx           # 可点击术语悬浮/底部弹窗组件
-│       ├── chapterHelpers.js  # 纯函数路由辅助
+│       ├── CourseReader.jsx   # 渐进式连续阅读器（左侧分幕问题目录、内嵌实验、真题落笔框、分级练习与三个工具抽屉）
+│       ├── courseStorage.js   # 本机分课程隔离存储（已读进度、各节思考笔记与 Markdown 导出）
+│       ├── GlossaryView.jsx   # 术语检索视图（支持一键跳回正文首次讲解处）
+│       ├── Markdown.jsx       # react-markdown + GFM + KaTeX + 原生 HTML + Mermaid
+│       ├── Mermaid.jsx        # Mermaid 图表渲染
+│       ├── Term.jsx           # 英文术语轻虚线点击释义气泡
 │       └── markdownPreprocess.js # 术语自动识别与高亮预处理
-├── Logic-and-Proof/           # 第 1 模块：逻辑与证明（Ch1.1–1.6，已上线）
-│   ├── index.html             # 本章网页入口 → 部署后路径 /Logic-and-Proof/
-│   ├── src/                   # App.jsx、figures.jsx（SVG 示意图）、GlossaryPage.jsx、main.jsx
-│   ├── content/*.md           # 页面正文（Markdown + LaTeX + Mermaid），含 Test 01 双语与精讲
-│   ├── content/glossary.js    # 本章中英术语表
-│   ├── Midterm-Review-Guide.md  # 同一份内容的纯 Markdown 离线版
-│   ├── Midterm-Test-01.md     # 期中试卷 Test 01 原题
+├── Logic-and-Proof/           # 课程 01：逻辑与证明（以 Test 01 · 60 分为主线，4 幕 7 问，已开放）
+│   ├── index.html             # 部署路径 /Logic-and-Proof/
+│   ├── chapters/*.md          # 开篇引子与 s01–s07 问题式渐进正文
+│   ├── content/exam.md        # Test 01 英文原题与中文逐句对照
+│   ├── content/glossary.js    # 中英术语表（带正文讲解章节定位）
+│   ├── src/                   # courseData.js、logicEngine.js、labs.jsx（3 座交互教具）、App.jsx、main.jsx
+│   ├── Midterm-Review-Guide.md # 由 sync:guides 生成的纯 Markdown 渐进式离线同步讲义
+│   ├── Midterm-Test-01.md     # 期中试卷 Test 01 原始转录（含手写附注）
 │   └── Slides-2in1/、Tutorials/ # 课程 PDF（已 gitignore）
-├── Relation/                  # 第 2 模块：集合、函数与二元关系（Ch2.1–2.3, Ch9.1–9.6，已上线）
-│   ├── index.html             # 本章网页入口 → 部署后路径 /Relation/
-│   ├── src/                   # App.jsx、engine.js（离散数学算法引擎）、sandboxes.jsx（3 个交互沙盘）、figures.jsx、main.jsx
-│   ├── content/*.md           # 体系精讲（集合与函数/关系与闭包/等价与偏序格）+ Test 02 双语与逐题精讲 + 模板自测
-│   ├── content/glossary.js    # 本章中英术语表（约 100 条）
-│   ├── Midterm-Review-Guide.md  # 同一份内容的纯 Markdown 离线同步版
-│   ├── Midterm-Test-02.md     # 期中试卷 Test 02 原题（76 分，含手写附注）
+├── Relation/                  # 课程 02：集合、函数与二元关系（以 Test 02 · 76 分为主线，4 幕 12 问，已开放）
+│   ├── index.html             # 部署路径 /Relation/
+│   ├── chapters/*.md          # 开篇引子与 s01–s12 问题式渐进正文
+│   ├── content/exam.md        # Test 02 英文原题与中文逐句对照
+│   ├── content/glossary.js    # 中英术语表（101 条，带正文讲解章节定位）
+│   ├── src/                   # courseData.js、engine.js、sandboxes.jsx（3 座交互教具）、App.jsx、main.jsx
+│   ├── Midterm-Review-Guide.md # 由 sync:guides 生成的纯 Markdown 渐进式离线同步讲义
+│   ├── Midterm-Test-02.md     # 期中试卷 Test 02 原始转录（76 分，含手写附注）
 │   └── Slides-2in1/、Tutorials/ # 课程 PDF（已 gitignore）
-├── Counting/ Graph/           # 其他章节（资料目录，网页待建）
-├── tests/                     # Node 原生测试（离散数学算法引擎、术语自动链接、Markdown 公式/容器规范、构建入口检查）
+├── Counting/ Graph/           # 后续课程资料目录（网页待建）
+├── scripts/sync-guides.mjs    # 从课程源码同步生成两份离线 Midterm-Review-Guide.md
+├── tests/*.test.mjs           # Node 原生测试（数学引擎、去术语堆砌检查、存储隔离、SSR 公式/粗体渲染校验）
 ├── vite.config.js             # 多页面入口注册
 ├── wrangler.jsonc             # Cloudflare Workers 静态资源配置（托管 dist/）
 └── package.json
@@ -46,34 +49,19 @@
 
 ```bash
 npm install
-npm run dev        # http://localhost:5173/ 、 /Logic-and-Proof/ 与 /Relation/
-npm test           # 运行离散数学引擎单元测试与 Markdown/LaTeX 规范检查（node --test）
-npm run build      # 产物输出到 dist/，保持子目录结构
-npm run preview    # 本地预览构建产物
+npm run dev          # 本地开发：/ 、 /Logic-and-Proof/ 与 /Relation/
+npm run sync:guides  # 同步生成两门课的离线纯 Markdown 讲义
+npm test             # 运行全部单元测试、教学叙事与 KaTeX/SSR 渲染检查
+npm run build        # 构建静态产物至 dist/
+npm run preview      # 本地预览生产构建产物
 ```
 
 ## 部署（Cloudflare Workers）
 
-仓库已连接 Cloudflare Workers Builds，推送到 `main` 即自动构建部署。控制台里的设置：
+仓库已连接 Cloudflare Workers Builds，推送到 `main` 即自动执行 `npm run build` 与 `npx wrangler deploy` 发布 `dist/`。
 
-| 字段 | 值 |
-|---|---|
-| 构建命令 | `npm run build` |
-| 部署命令 | `npx wrangler deploy` |
-| 根目录 / 路径 | `/` |
+## 新增或修改一门课程
 
-`wrangler.jsonc` 声明 `assets.directory = ./dist`，没有 Worker 脚本，纯静态托管。本地手动部署：`npm run deploy`。
-
-## 新增一个章节网页
-
-1. 在章节目录（如 `Counting/`）创建 `index.html`、`src/main.jsx`、`src/App.jsx`、`content/*.md`，复用 `src/components/ChapterUi.jsx` 与 `GlossaryView.jsx`。
-2. 在 `vite.config.js` 的 `rollupOptions.input` 注册入口，例如 `counting: resolve(__dirname, 'Counting/index.html')`。
-3. 在 `src/Home.jsx` 的 `CHAPTERS` 里把该章节标记为 `ready: true`。
-
-## 内容书写约定（content/*.md）
-
-- 公式用 LaTeX：行内 `$...$`；块级 `$$` 必须独占一行开头和结尾（否则 remark-math 会把后续全文吞进公式块，`npm test` 会自动校验）。
-- 流程图用 ```mermaid 围栏。
-- 重点术语用 `==词语==` 包裹，渲染为暗红加粗放大（深色卡片上为白色高亮）。
-- 可以写原生 HTML 容器（`callout`、`proof`、双语对照 `bi > en / zh` 等），容器起止标签与内部 Markdown 之间要留空行。
-- 英文术语：`content/glossary.js` 里的 `en` 和 `alias` 会在正文中自动识别并变为可点击弹窗（代码、公式、HTML 标签内不识别）；也可手动写 `[[term]]` 或 `[[term|显示文本]]`。新增术语只需在 glossary.js 加一条。
+1. 在章节目录创建 `chapters/opening.md`、`chapters/s01.md`… 及 `src/courseData.js`（遵循「具体情境切入 → 对话式追问 → 水到渠成首次定名 → 内嵌预测实验 → 考场英文落笔框 → 折叠分级练习/选读」结构），并在 `App.jsx` 挂载 `<CourseReader />`。
+2. 在 `vite.config.js` 注册入口，在 `src/Home.jsx` 标记 `ready: true`。
+3. 运行 `npm run sync:guides && npm test && npm run build` 确保离线讲义、公式块独立成行及 SSR 渲染零错误。

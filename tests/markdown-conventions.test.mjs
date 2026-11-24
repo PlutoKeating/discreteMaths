@@ -9,7 +9,6 @@ import remarkGfm from 'remark-gfm';
 import remarkMath from 'remark-math';
 import rehypeKatex from 'rehype-katex';
 import rehypeRaw from 'rehype-raw';
-import { readTabFromHash } from '../src/components/chapterHelpers.js';
 import { preprocess } from '../src/components/markdownPreprocess.js';
 import { ALL_PATTERNS as LOGIC_PATTERNS } from '../Logic-and-Proof/content/glossary.js';
 import { ALL_PATTERNS as REL_PATTERNS } from '../Relation/content/glossary.js';
@@ -79,13 +78,6 @@ export function checkMarkdownFile(filePath, patterns = []) {
   );
 }
 
-test('readTabFromHash resolves valid tab ids and falls back to default', () => {
-  const tabs = [{ id: 'overview' }, { id: 'relations' }, { id: 'glossary' }];
-  assert.equal(readTabFromHash('#relations', tabs, 'overview'), 'relations');
-  assert.equal(readTabFromHash('#unknown', tabs, 'overview'), 'overview');
-  assert.equal(readTabFromHash('', tabs, 'overview'), 'overview');
-});
-
 test('markdownPreprocess autolinks terms while skipping math, code, and HTML tags', () => {
   const src = 'A partial order in <div class="callout"> and $partial order$ and `partial order` ==key==.';
   const out = preprocess(src, ['partial order', 'order']);
@@ -110,5 +102,20 @@ test('all progressive chapter and exam Markdown files obey standalone $$, HTML c
     for (const f of mdFiles) {
       checkMarkdownFile(path.join(absDir, f), patterns);
     }
+  }
+});
+
+test('standalone progressive Midterm-Review-Guide.md files for both Logic and Relation are synced and clean', () => {
+  for (const [relPath, expectedHeading] of [
+    ['Logic-and-Proof/Midterm-Review-Guide.md', '一句话什么时候算真，一段话凭什么推得出来？'],
+    ['Relation/Midterm-Review-Guide.md', '怎么把对象配成对、连成网、分好类、排出上下级？'],
+  ]) {
+    const full = path.join(ROOT, relPath);
+    assert.equal(fs.existsSync(full), true, `Missing ${relPath}`);
+    checkMarkdownFile(full);
+    const raw = fs.readFileSync(full, 'utf8');
+    assert.ok(raw.includes(expectedHeading), `${relPath} not synced to progressive Causally narrative`);
+    assert.equal(raw.includes('<!-- LAB -->'), false, `${relPath} must not leak <!-- LAB --> marker`);
+    assert.equal(/<div\b/i.test(raw), false, `${relPath} must not contain raw <div HTML tags`);
   }
 });

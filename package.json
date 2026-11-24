@@ -9,6 +9,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "node --test tests/*.test.mjs",
+    "sync:guides": "node scripts/sync-guides.mjs",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
