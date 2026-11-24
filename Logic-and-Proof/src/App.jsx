@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import Markdown from '../../src/components/Markdown.jsx';
+import { ChapterNav, SectionHead, QCard, useHashTab } from '../../src/components/ChapterUi.jsx';
 import { HeroFig, ImplicationFig, ArrowRulesFig, GameFig, QuantPairFig, UniqueFig } from './figures.jsx';
 
 import mdOverview from '../content/overview.md?raw';
@@ -27,10 +28,6 @@ const TABS = [
   { id: 'review', label: '5 · 失分复盘与自测' },
   { id: 'glossary', label: '6 · 英文术语表' },
 ];
-const readHash = () => {
-  const h = location.hash.replace('#', '');
-  return TABS.some((t) => t.id === h) ? h : 'overview';
-};
 
 function Hero() {
   return (
@@ -53,44 +50,6 @@ function Hero() {
         <div className="d-text" style={{ fontSize: '.85rem', opacity: .85, textAlign: 'center' }}>总纲 0.1–0.4：所有定律都只是对 T / F 的计算</div>
       </div>
     </section>
-  );
-}
-
-function Nav({ cur }) {
-  return (
-    <div className="nav gutter" style={{ marginLeft: 'calc(-1 * max(16px,env(safe-area-inset-left,0px)))', marginRight: 'calc(-1 * max(16px,env(safe-area-inset-right,0px)))' }}>
-      <div className="chips" role="tablist" aria-label="章节">
-        {TABS.map((t) => (
-          <button key={t.id} type="button" role="tab" aria-selected={cur === t.id} className={'chip' + (cur === t.id ? ' on' : '')}
-            onClick={() => { location.hash = t.id; }}>{t.label}</button>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function SectionHead({ eyebrow, title, desc }) {
-  return (
-    <header className="mt-8 mb-5">
-      <span className="tag red">{eyebrow}</span>
-      <h2 className="txt-shadow" style={{ fontSize: 'clamp(1.5rem,3.4vw,2.2rem)', margin: '.4rem 0 .3rem' }}>{title}</h2>
-      {desc && <p className="song" style={{ color: 'var(--muted)', maxWidth: '44rem', margin: 0 }}>{desc}</p>}
-    </header>
-  );
-}
-
-function QCard({ no, marks, title, verdicts, children }) {
-  return (
-    <article className="cut mt-8">
-      <div className="cut-in p-5 md:p-8">
-        <div className="flex flex-wrap items-center gap-2 mb-3">
-          <span className="tag">第 {no} 题 · {marks} 分</span>
-          {verdicts && verdicts.map((v, i) => <span key={i} className={'tag ' + (v.ok ? 'ok' : 'bad')}>{v.t}</span>)}
-        </div>
-        <h3 className="txt-shadow" style={{ fontSize: 'clamp(1.25rem,2.6vw,1.6rem)', margin: '0 0 1rem', color: 'var(--accent)' }}>{title}</h3>
-        {children}
-      </div>
-    </article>
   );
 }
 
@@ -204,16 +163,11 @@ function Review() {
 }
 
 export default function App() {
-  const [cur, setCur] = useState(readHash());
-  useEffect(() => {
-    const on = () => { setCur(readHash()); window.scrollTo({ top: 0, behavior: 'instant' }); };
-    window.addEventListener('hashchange', on);
-    return () => window.removeEventListener('hashchange', on);
-  }, []);
+  const cur = useHashTab(TABS, 'overview');
   return (
     <div className="gutter" style={{ maxWidth: '72rem', margin: '0 auto', paddingBlock: '0 4rem' }}>
       <Hero />
-      <Nav cur={cur} />
+      <ChapterNav tabs={TABS} cur={cur} />
       <main key={cur}>
         {cur === 'overview' && <Overview />}
         {cur === 'exam' && <Exam />}
