@@ -21,7 +21,7 @@ test('src/Home.jsx orders Logic -> Relation (ready: true) -> Counting -> Graph',
   assert.ok(iLogic > -1 && iRel > iLogic && iCount > iRel && iGraph > iCount, 'Chapter order must match course progression');
   const relBlock = home.slice(iRel, iCount);
   assert.match(relBlock, /ready:\s*true/);
-  assert.match(home, /var\(--ink-fg\)/, 'Active inkcard on Home.jsx must preserve light-on-dark contrast in light mode');
+  assert.match(home, /course-card/, 'Home.jsx uses calm editorial course-card styling');
 });
 
 test('Relation webpage entry, figures, sandboxes, and README update are in place', () => {
