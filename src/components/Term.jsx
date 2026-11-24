@@ -18,32 +18,61 @@ export default function Term({ term, children }) {
   }, [open]);
 
   useEffect(() => {
-    if (!open) return;
-    const onDoc = (e) => { if (!pop.current?.contains(e.target) && !btn.current?.contains(e.target)) setOpen(false); };
-    const onKey = (e) => { if (e.key === 'Escape') setOpen(false); };
+    if (!open) return undefined;
+    const onDoc = (e) => {
+      if (!pop.current?.contains(e.target) && !btn.current?.contains(e.target)) setOpen(false);
+    };
+    const onKey = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setOpen(false);
+      }
+    };
     const onScroll = () => setOpen(false);
     document.addEventListener('pointerdown', onDoc);
-    document.addEventListener('keydown', onKey);
-    window.addEventListener('scroll', onScroll, { passive: true });
-    return () => { document.removeEventListener('pointerdown', onDoc); document.removeEventListener('keydown', onKey); window.removeEventListener('scroll', onScroll); };
+    document.addEventListener('keydown', onKey, true);
+    window.addEventListener('scroll', onScroll, { passive: true, capture: true });
+    return () => {
+      document.removeEventListener('pointerdown', onDoc);
+      document.removeEventListener('keydown', onKey, true);
+      window.removeEventListener('scroll', onScroll, { capture: true });
+    };
   }, [open]);
 
   if (!term) return <>{children}</>;
   return (
     <>
-      <button type="button" ref={btn} className={'term' + (open ? ' open' : '')} onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={`术语：${term.en}`}>
+      <button
+        type="button"
+        ref={btn}
+        className={'term' + (open ? ' open' : '')}
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-label={`术语：${term.en}`}
+      >
         {children}
       </button>
-      {open && createPortal(
-        <div ref={pop} className="term-pop" role="dialog" aria-label={term.en} style={{ top: pos.top, left: pos.left, width: pos.width }}>
-          <div className="term-pop-en">{term.en}</div>
-          <div className="term-pop-zh">{term.zh}</div>
-          <div className="term-pop-def">{term.def}</div>
-          {term.alias?.length ? <div className="term-pop-alias">其他写法：{term.alias.join(' / ')}</div> : null}
-          <button type="button" className="term-pop-close" onClick={() => setOpen(false)} aria-label="关闭">×</button>
-        </div>,
-        document.body
-      )}
+      {open &&
+        createPortal(
+          <div
+            ref={pop}
+            className="term-pop"
+            role="dialog"
+            aria-label={term.en}
+            style={{ top: pos.top, left: pos.left, width: pos.width }}
+          >
+            <div className="term-pop-en">{term.en}</div>
+            <div className="term-pop-zh">{term.zh}</div>
+            <div className="term-pop-def">{term.def}</div>
+            {term.alias?.length ? (
+              <div className="term-pop-alias">其他写法：{term.alias.join(' / ')}</div>
+            ) : null}
+            <button type="button" className="term-pop-close" onClick={() => setOpen(false)} aria-label="关闭">
+              ×
+            </button>
+          </div>,
+          document.body
+        )}
     </>
   );
 }

@@ -104,12 +104,21 @@ test('LOGIC_COURSE follows Causally anti-jargon question-driven structure and co
   const allExamText = [];
   for (const ch of LOGIC_COURSE.chapters) {
     assert.match(ch.title, /[？?]$/, `Chapter ${ch.id} title must be a question: ${ch.title}`);
-    const firstPara = ch.markdown.trim().split(/\n\s*\n/)[0] || '';
+    const paras = ch.markdown.trim().split(/\n\s*\n/);
+    const firstPara = paras[0] || '';
     assert.equal(
       /^(#|\||\*\*定义|定义[:：]|Definition[:：])/i.test(firstPara),
       false,
       `Chapter ${ch.id} must open with a concrete scenario/question, not a definition or table`
     );
+    // Reviewer I2: No single paragraph may cram > 3 bolded bilingual definitions **...（...）**
+    for (const para of paras) {
+      const biDefs = para.match(/\*\*[^*\n]+?[（(][A-Za-z][^)\n]*?[）)]\*\*/g) || [];
+      assert.ok(
+        biDefs.length <= 3,
+        `Chapter ${ch.id} crams ${biDefs.length} bolded bilingual terms into one paragraph: ${biDefs.join(', ')}`
+      );
+    }
 
     assertCleanMarkdown(`${ch.id}.markdown`, ch.markdown, patterns);
     if (ch.examBox) {
@@ -133,4 +142,9 @@ test('LOGIC_COURSE follows Causally anti-jargon question-driven structure and co
   for (const marker of ['Question 1a', 'Question 1b', 'Question 2a', 'Question 2c', 'Question 4', 'Question 5', 'Question 6']) {
     assert.ok(joinedExam.includes(marker), `Missing Test 01 exam writing box for ${marker}`);
   }
+
+  assert.equal(LOGIC_COURSE.glossary.lookup('logically equivalent')?.sectionId, 's02');
+  assert.equal(LOGIC_COURSE.glossary.lookup('absorption laws')?.sectionId, 's03');
+  assert.equal(LOGIC_COURSE.glossary.lookup('free variable')?.sectionId, 's04');
+  assert.equal(LOGIC_COURSE.glossary.lookup('existence proof')?.sectionId, 's07');
 });

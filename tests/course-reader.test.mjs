@@ -78,6 +78,24 @@ test('Review Focus #1: corrupted or inaccessible localStorage degrades gracefull
   assert.doesNotThrow(() => saveChapterRead('dismath.logic.v2', 's01', true, brokenStorage));
 });
 
+test('Reviewer C2: malformed inner JSON types flag corrupted, and in-memory updates survive SecurityError or corrupted storage', () => {
+  const badTypes = makeMemoryStorage({ 'dismath.logic.v2': '{"read":[],"notes":{"s01":123}}' });
+  const recBad = loadCourseRecord('dismath.logic.v2', badTypes);
+  assert.equal(recBad.corrupted, true);
+  assert.deepEqual(recBad.notes, {});
+
+  const throwingStorage = {
+    getItem: () => { throw new Error('SecurityError'); },
+    setItem: () => { throw new Error('SecurityError'); },
+    removeItem: () => { throw new Error('SecurityError'); },
+  };
+  let state = loadCourseRecord('dismath.logic.v2', throwingStorage);
+  state = saveChapterNote('dismath.logic.v2', 's01', '  保留前导空格与会话内状态 ', throwingStorage, state);
+  state = saveChapterRead('dismath.logic.v2', 's02', true, throwingStorage, state);
+  assert.equal(state.notes.s01, '  保留前导空格与会话内状态 ');
+  assert.equal(state.read.s02, true);
+});
+
 test('CourseReader component and calm Causally tokens exist', () => {
   const readerPath = path.join(ROOT, 'src/components/CourseReader.jsx');
   assert.equal(fs.existsSync(readerPath), true, 'Missing src/components/CourseReader.jsx');

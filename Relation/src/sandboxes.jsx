@@ -743,9 +743,9 @@ export function RelationMatrixLab() {
                         .join(', ') +
                       '}'}
                   </div>
-                  <div style={{ color: 'var(--ok)', fontWeight: 700 }}>
+                  <div style={{ color: 'var(--warm)', fontWeight: 650 }}>
                     {wSteps[safeWStep].added.length > 0
-                      ? `本步新补上的 1（绿格）：${wSteps[safeWStep].added.map(([r, c]) => `(${labels[r]},${labels[c]})`).join('、')}`
+                      ? `本步新补上的 1（橙褐格）：${wSteps[safeWStep].added.map(([r, c]) => `(${labels[r]},${labels[c]})`).join('、')}`
                       : '本步交叉位置原本全都是 1（或无交叉），矩阵无新增边。'}
                   </div>
                 </div>
@@ -945,7 +945,7 @@ export function HassePosetLab() {
                     x={x}
                     y={y + 4.5}
                     textAnchor="middle"
-                    fill={inB ? '#fff' : 'currentColor'}
+                    fill={inB ? 'var(--on-accent)' : 'currentColor'}
                     fontSize={str.length > 5 ? '10.5' : str.length > 3 ? '12' : '13.5'}
                     className="d-mono"
                     fontWeight="700"
@@ -967,7 +967,7 @@ export function HassePosetLab() {
             })}
           </svg>
           <div className="cap">
-            蓝底实心 = 当前选中子集 B · 绿虚圈 = LUB · 金虚圈 = GLB（省去自环、跨级边与向上箭头）
+            松绿实心 = 当前选中子集 B · 绿虚圈 = LUB · 金虚圈 = GLB（省去自环、跨级边与向上箭头）
           </div>
         </div>
 

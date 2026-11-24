@@ -14,7 +14,10 @@ export function ImplicationProbeLab() {
   const res = evalImplicationFamily(p, q);
 
   const Pill = ({ v }) => (
-    <span className={'tag ' + (v ? 'ok' : 'bad')} style={{ fontFamily: 'var(--font-mono)' }}>
+    <span
+      className={'tag ' + (v ? 'ok' : 'bad')}
+      style={{ fontFamily: 'var(--font-mono)', whiteSpace: 'nowrap', flexShrink: 0 }}
+    >
       {v ? 'T (真)' : 'F (假)'}
     </span>
   );
@@ -95,8 +98,10 @@ export function QuantifierGameLab() {
   const numId = useId();
   const [gameKey, setGameKey] = useState('exists_forall_sum10');
   const [domainKey, setDomainKey] = useState('Z');
-  const [val, setVal] = useState(7);
+  const [rawVal, setRawVal] = useState('7');
 
+  const parsed = Number.parseInt(rawVal, 10);
+  const val = Number.isNaN(parsed) ? (domainKey === 'Z+' ? 1 : 0) : domainKey === 'Z+' ? Math.max(1, parsed) : parsed;
   const info = evaluateQuantifierRound(gameKey, domainKey, val);
 
   return (
@@ -115,8 +120,8 @@ export function QuantifierGameLab() {
               className={'sbx-btn' + (gameKey === k ? ' on' : '')}
               onClick={() => {
                 setGameKey(k);
-                if (k === 'exists_forall_mul0' && domainKey === 'Z') setVal(0);
-                else if (val <= 0 && domainKey === 'Z+') setVal(4);
+                if (k === 'exists_forall_mul0' && domainKey === 'Z') setRawVal('0');
+                else if (val <= 0 && domainKey === 'Z+') setRawVal('4');
               }}
             >
               {lbl}
@@ -135,7 +140,7 @@ export function QuantifierGameLab() {
               className={'sbx-btn' + (domainKey === k ? ' on' : '')}
               onClick={() => {
                 setDomainKey(k);
-                if (k === 'Z+' && val < 1) setVal(12);
+                if (k === 'Z+' && val < 1) setRawVal('12');
               }}
             >
               {lbl}
@@ -159,7 +164,7 @@ export function QuantifierGameLab() {
                   key={n}
                   type="button"
                   className={'sbx-btn' + (val === n ? ' on' : '')}
-                  onClick={() => setVal(n)}
+                  onClick={() => setRawVal(String(n))}
                 >
                   y = {n}
                 </button>
@@ -167,10 +172,11 @@ export function QuantifierGameLab() {
             <input
               id={numId}
               type="number"
-              value={val}
+              step="1"
+              value={rawVal}
               min={domainKey === 'Z+' ? 1 : -99}
               max={99}
-              onChange={(e) => setVal(Number(e.target.value || (domainKey === 'Z+' ? 1 : 0)))}
+              onChange={(e) => setRawVal(e.target.value)}
               style={{
                 width: '4.8rem',
                 padding: '.28rem .5rem',
@@ -186,7 +192,7 @@ export function QuantifierGameLab() {
         </div>
 
         <div className="sbx-panel">
-          <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
             <span className="mono" style={{ fontWeight: 650 }}>{info.formula}</span>
             <span className={'tag ' + (info.formulaTrue ? 'ok' : 'bad')}>
               整句在 {domainKey === 'Z' ? 'ℤ' : 'ℤ⁺'} 上为 {info.formulaTrue ? 'True' : 'False'}

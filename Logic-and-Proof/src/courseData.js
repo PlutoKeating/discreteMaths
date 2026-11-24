@@ -104,6 +104,7 @@ export function buildLogicCourse(md) {
             '- **`q if p`** / **`q whenever p`** / **`p is sufficient for q`（充分条件）**：都是标准的 $p \\to q$（`if` 后面的永远是前件 $p$！）。',
             '- **`p only if q`（仅当）** / **`q is necessary for p`（必要条件）**：依然是 **$p \\to q$**！为什么？“只有年满 18 岁才能考驾照”（考驾照 only if 满 18 岁），意思是“如果你考了驾照，那你必定满 18 岁”，而不是满了 18 岁就非去考驾照不可！记住：**`only if` 后面跟的是箭头右边的结论 $q$**。',
             '- **`p if and only if q`（当且仅当，简写 `iff`）**：写作双箭头 $p \\leftrightarrow q$，叫 **双条件（biconditional）**。只有两边同真或同假时才为 $\\mathbf{T}$，拆开就是 $(p \\to q) \\land (q \\to p)$。',
+            '- **`p ⊕ q`（异或 exclusive or）**：日常英语说“选茶或咖啡”往往指二选一不能都要，逻辑里专门用圆圈加号 $p \\oplus q$ 表示“恰好一个为真”（即 $\\neg(p \\leftrightarrow q)$）；而普通析取 $\\lor$ 默认包含“两个都要”。',
             '- **运算优先级（Ch1.1 p41）**：$\\neg$ 最高 $\\succ \\land \\succ \\lor / \\oplus \\succ \\to \\succ \\leftrightarrow$ 最低（量词 $\\forall, \\exists$ 高于一切联结词）。考场手写答案**宁可多套一层括号**，也别赌阅卷人替你猜优先级。',
           ].join('\n'),
         },
@@ -437,6 +438,14 @@ export function buildLogicCourse(md) {
             'so $r_2 - r_1$ is an integer multiple of $n$. Meanwhile, from $0 \\le r_1 < n$ and $0 \\le r_2 < n$, we have $-n < r_2 - r_1 < n$. The only multiple of $n$ strictly between $-n$ and $n$ is $0$. Hence $r_2 - r_1 = 0$, so $r_1 = r_2$.',
             '',
             'Substituting $r_1 = r_2$ back gives $n(q_1 - q_2) = 0$. Since $n \\ge 2 > 0$, dividing by $n$ yields $q_1 - q_2 = 0$, so $q_1 = q_2$. Therefore, $q$ and $r$ are unique. $\\square$',
+          ].join('\n'),
+        },
+        optionalReading: {
+          title: '如果不借用向下取整 ⌊a/n⌋，还能怎么严格证明“余数一定存在”？（良序原理）',
+          markdown: [
+            '有些严格数论考题会问：如果不直接默认向下取整函数 $\\lfloor a/n \\rfloor$ 的性质，怎么只从整数最原始的性质造出满足 $0 \\le r < n$ 的余数？',
+            '答案靠的是自然数的一条根本公理——**良序原理（well-ordering principle）**：**任何非空的非负整数集合，必定拥有一个最小元**。',
+            '构造法非常漂亮：把所有形如 $a - nk$ 且不小于 $0$ 的候选零头全收集进一个袋子 $S = \\{a - nk \\mid k \\in \\mathbb{Z},\\ a - nk \\ge 0\\}$。先取一个足够小的负整数 $k = -|a|$，算出 $a - n(-|a|) = a + n|a| \\ge a + |a| \\ge 0$，说明袋子 $S$ **绝不是空的**。由良序原理，袋子 $S$ 里一定躺着一个**最小**的非负整数，把它取出来叫 $r = a - nq \\ge 0$。它会不会还大于等于 $n$ 呢？不可能！万一 $r \\ge n$，再多减一个 $n$ 得到的 $r - n = a - n(q+1)$ 依然 $\\ge 0$（还在袋子 $S$ 里），却比最小元 $r$ 更小，当场矛盾！所以必定有 $0 \\le r < n$。',
           ].join('\n'),
         },
         practice: {

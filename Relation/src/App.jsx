@@ -27,46 +27,46 @@ const LABS = {
 
 function RelationHeroVisual() {
   return (
-    <svg viewBox="0 0 360 230" role="img" aria-label="从有序对配对出发，衍生出可逆函数、关系矩阵、等价划分与偏序哈斯图">
+    <svg viewBox="0 0 420 230" role="img" aria-label="从有序对配对出发，衍生出可逆函数、关系矩阵、等价划分与偏序哈斯图">
       <g fill="none" stroke="var(--line)" strokeWidth="1.4">
-        <rect x="18" y="18" width="324" height="194" rx="12" fill="var(--bg)" />
+        <rect x="14" y="16" width="392" height="198" rx="12" fill="var(--bg)" />
       </g>
       <g fontFamily="var(--font-reading)">
-        <rect x="34" y="152" width="128" height="40" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" strokeWidth="1.5" />
-        <text x="98" y="177" textAnchor="middle" fill="var(--fg)" fontSize="13" fontWeight="650">
+        <rect x="28" y="152" width="144" height="40" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" strokeWidth="1.5" />
+        <text x="100" y="177" textAnchor="middle" fill="var(--fg)" fontSize="12.5" fontWeight="650">
           集合与配对 (a, b)
         </text>
 
-        <rect x="34" y="92" width="128" height="40" rx="8" fill="var(--paper)" stroke="var(--line)" strokeWidth="1.5" />
-        <text x="98" y="117" textAnchor="middle" fill="var(--fg)" fontSize="13" fontWeight="600">
+        <rect x="28" y="92" width="144" height="40" rx="8" fill="var(--paper)" stroke="var(--line)" strokeWidth="1.5" />
+        <text x="100" y="117" textAnchor="middle" fill="var(--fg)" fontSize="12.5" fontWeight="600">
           可逆函数手术 (Q1)
         </text>
 
-        <rect x="196" y="152" width="130" height="40" rx="8" fill="var(--paper)" stroke="var(--line)" strokeWidth="1.5" />
-        <text x="261" y="177" textAnchor="middle" fill="var(--fg)" fontSize="13" fontWeight="600">
+        <rect x="202" y="152" width="188" height="40" rx="8" fill="var(--paper)" stroke="var(--line)" strokeWidth="1.5" />
+        <text x="296" y="177" textAnchor="middle" fill="var(--fg)" fontSize="12.5" fontWeight="600">
           0-1 矩阵闭包 (Q2)
         </text>
 
-        <rect x="196" y="92" width="130" height="40" rx="8" fill="var(--paper)" stroke="var(--line)" strokeWidth="1.5" />
-        <text x="261" y="117" textAnchor="middle" fill="var(--fg)" fontSize="13" fontWeight="600">
+        <rect x="202" y="92" width="188" height="40" rx="8" fill="var(--paper)" stroke="var(--line)" strokeWidth="1.5" />
+        <text x="296" y="117" textAnchor="middle" fill="var(--fg)" fontSize="12.5" fontWeight="600">
           性质与等价证明 (Q3·Q4)
         </text>
 
-        <rect x="196" y="34" width="130" height="40" rx="8" fill="var(--paper)" stroke="var(--warm)" strokeWidth="1.5" />
-        <text x="261" y="59" textAnchor="middle" fill="var(--warm)" fontSize="13" fontWeight="650">
+        <rect x="202" y="34" width="188" height="40" rx="8" fill="var(--paper)" stroke="var(--warm)" strokeWidth="1.5" />
+        <text x="296" y="59" textAnchor="middle" fill="var(--warm)" fontSize="12.5" fontWeight="650">
           Hasse 图与格 (Q5)
         </text>
 
         <g stroke="var(--accent)" strokeWidth="1.6" fill="none">
-          <path d="M98 152 L98 134" />
-          <path d="M162 172 L194 172" />
-          <path d="M261 152 L261 134" />
-          <path d="M261 92 L261 76" />
+          <path d="M100 152 L100 134" />
+          <path d="M172 172 L200 172" />
+          <path d="M296 152 L296 134" />
+          <path d="M296 92 L296 76" />
         </g>
-        <text x="36" y="54" fill="var(--muted)" fontSize="11.5">
+        <text x="30" y="54" fill="var(--muted)" fontSize="11.5">
           Test 02 · 76 分全链路
         </text>
-        <text x="36" y="72" fill="var(--muted)" fontSize="11">
+        <text x="30" y="72" fill="var(--muted)" fontSize="11">
           同一个“配对”的四种约束
         </text>
       </g>

@@ -8,6 +8,10 @@ function getDefaultStorage() {
   }
 }
 
+function isPlainObject(v) {
+  return Boolean(v) && typeof v === 'object' && !Array.isArray(v);
+}
+
 export function loadCourseRecord(storageKey, storage = getDefaultStorage()) {
   if (!storage || !storageKey) {
     return { read: {}, notes: {}, corrupted: false, corruptedRaw: null };
@@ -23,11 +27,36 @@ export function loadCourseRecord(storageKey, storage = getDefaultStorage()) {
   }
   try {
     const parsed = JSON.parse(raw);
-    if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
+    if (!isPlainObject(parsed)) {
       return { read: {}, notes: {}, corrupted: true, corruptedRaw: raw };
     }
-    const read = parsed.read && typeof parsed.read === 'object' ? { ...parsed.read } : {};
-    const notes = parsed.notes && typeof parsed.notes === 'object' ? { ...parsed.notes } : {};
+    if (parsed.read !== undefined && !isPlainObject(parsed.read)) {
+      return { read: {}, notes: {}, corrupted: true, corruptedRaw: raw };
+    }
+    if (parsed.notes !== undefined && !isPlainObject(parsed.notes)) {
+      return { read: {}, notes: {}, corrupted: true, corruptedRaw: raw };
+    }
+
+    const read = {};
+    if (parsed.read) {
+      for (const [k, v] of Object.entries(parsed.read)) {
+        if (typeof v !== 'boolean') {
+          return { read: {}, notes: {}, corrupted: true, corruptedRaw: raw };
+        }
+        if (v) read[k] = true;
+      }
+    }
+
+    const notes = {};
+    if (parsed.notes) {
+      for (const [k, v] of Object.entries(parsed.notes)) {
+        if (typeof v !== 'string') {
+          return { read: {}, notes: {}, corrupted: true, corruptedRaw: raw };
+        }
+        notes[k] = v;
+      }
+    }
+
     return { read, notes, corrupted: false, corruptedRaw: null };
   } catch {
     // Preserve raw string in storage without overwriting silently
@@ -36,7 +65,7 @@ export function loadCourseRecord(storageKey, storage = getDefaultStorage()) {
 }
 
 function writeRecord(storageKey, nextRec, storage = getDefaultStorage()) {
-  if (!storage || !storageKey) return false;
+  if (!storage || !storageKey || nextRec.corrupted) return false;
   try {
     storage.setItem(
       storageKey,
@@ -53,24 +82,35 @@ function writeRecord(storageKey, nextRec, storage = getDefaultStorage()) {
   }
 }
 
-export function saveChapterRead(storageKey, chapterId, isRead, storage = getDefaultStorage()) {
-  const cur = loadCourseRecord(storageKey, storage);
-  if (cur.corrupted) return cur;
-  const nextRead = { ...cur.read };
+export function saveChapterRead(
+  storageKey,
+  chapterId,
+  isRead,
+  storage = getDefaultStorage(),
+  prevRecord = null
+) {
+  const cur = prevRecord || loadCourseRecord(storageKey, storage);
+  const nextRead = { ...(cur.read || {}) };
   if (isRead) nextRead[chapterId] = true;
   else delete nextRead[chapterId];
-  const next = { ...cur, read: nextRead };
+  const next = { ...cur, read: nextRead, notes: { ...(cur.notes || {}) } };
   writeRecord(storageKey, next, storage);
   return next;
 }
 
-export function saveChapterNote(storageKey, chapterId, note, storage = getDefaultStorage()) {
-  const cur = loadCourseRecord(storageKey, storage);
-  if (cur.corrupted) return cur;
-  const nextNotes = { ...cur.notes };
-  if (note && note.trim()) nextNotes[chapterId] = note;
+export function saveChapterNote(
+  storageKey,
+  chapterId,
+  note,
+  storage = getDefaultStorage(),
+  prevRecord = null
+) {
+  const cur = prevRecord || loadCourseRecord(storageKey, storage);
+  const nextNotes = { ...(cur.notes || {}) };
+  const str = typeof note === 'string' ? note : String(note ?? '');
+  if (str.length > 0) nextNotes[chapterId] = str;
   else delete nextNotes[chapterId];
-  const next = { ...cur, notes: nextNotes };
+  const next = { ...cur, read: { ...(cur.read || {}) }, notes: nextNotes };
   writeRecord(storageKey, next, storage);
   return next;
 }
@@ -97,7 +137,8 @@ export function exportNotesMarkdown(courseTitle, chapters, record) {
   ];
   for (const ch of chapters) {
     const done = record?.read?.[ch.id] ? '✓ 已读' : '未标已读';
-    const note = record?.notes?.[ch.id]?.trim();
+    const rawNote = record?.notes?.[ch.id];
+    const note = typeof rawNote === 'string' ? rawNote.trim() : '';
     lines.push(`## ${ch.num} ${ch.title}（${done}）`);
     lines.push('');
     lines.push(note || '_（本节暂无手写笔记）_');

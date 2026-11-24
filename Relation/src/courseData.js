@@ -241,7 +241,7 @@ export function buildRelationCourse(md) {
             '\\begin{bmatrix}0 & 1 & 1\\\\0 & 1 & 1\\\\1 & 1 & 1\\end{bmatrix}',
             '$$',
             '',
-            '前两行全都不同！可见在考场上一旦把左右矩阵摆反，9 个数字里能错 5 个。',
+            '前两行有 3 个格子（`(1,1)`、`(2,1)`、`(2,2)`）全都算错了！可见在考场上一旦把左右矩阵摆反，整道小题就会功亏一篑。',
           ].join('\n'),
           variant: {
             prompt:
@@ -334,7 +334,7 @@ export function buildRelationCourse(md) {
           title: '测一测空真与极端矩阵：全 0 空关系与单位矩阵各满足哪几项？',
           prompt:
             '在非空集合 $A = \\{1, 2, 3\\}$ 上：(1) 如果关系 $R = \\varnothing$（全 `0` 矩阵），它在自反、反自反、对称、反对称、传递里满足哪几项？(2) 如果 $R = \\{(1,1),(2,2),(3,3)\\}$（单位矩阵 $I_3$）呢？',
-          hint: '凡是“如果 $(a,b)\\in R$ 则……”的句式，在 $\\varnothing$ 里前件永远为假！可以在上一节的矩阵沙盘里点“清空 R₁ 为全 0”现场核对。',
+          hint: '凡是“如果 $(a,b)\\in R$ 则……”的蕴含句式，在 $\\varnothing$ 里因为没有任何有序对，前件永远为假！回想第 1 门课第 01 节，前件恒假时蕴含式算真还是算假？',
           solution:
             '1. **空关系 $R = \\varnothing$**（$A$ 非空）：**不自反**（缺 $(1,1)$），但**反自反、对称、反对称、非对称、传递全部为真（空真 vacuously true）**！\n2. **恒等关系 $I_3$**：**自反、对称、反对称、传递、函数、等价关系、自反偏序全部为真**（唯一既是等价关系又是偏序关系的特例！），仅反自反与非对称为假。',
         },
@@ -383,7 +383,7 @@ export function buildRelationCourse(md) {
             '- **iii) transitive:** **Yes** ($F(a)=F(b) \\land F(b)=F(c) \\implies F(a)=F(c)$).',
             '- **iv) irreflexive:** **No** ($F(a)=F(a)$ for every person $a$).',
             '- **v) reflexive:** **Yes** ($F(a)=F(a)$ for every person $a$).',
-            '- **vi) a function:** **No** (a person is related to themselves and to any other person sharing the same friend set).',
+            '- **vi) a function:** **No** (if two distinct persons $a \\neq b$ share the same friend set, e.g., $F(a)=F(b)=\\varnothing$, then both $(a,a) \\in R$ and $(a,b) \\in R$, so $a$ does not map to a unique person).',
             '- **vii) an equivalence relation:** **Yes** (reflexive, symmetric, and transitive).',
             '- **viii) a reflexive partial order:** **No** (not antisymmetric).',
             '',
@@ -452,7 +452,7 @@ export function buildRelationCourse(md) {
             '在集合 $\\{1, 2, 3, 6, 12, 24, 36, 48\\}$ 上按整除关系 $|$ 列出每一层的元素和所有覆盖边（即哈斯图里真正要画的连线）。',
           hint: '按质因子重数 $\\Omega(n)$ 分层：$1$（0 个）$\\to 2,3$（1 个）$\\to 6$（2 个）$\\to 12$（3 个）$\\to 24, 36$（4 个）$\\to 48$（5 个）。特别小心：$36$ 能整除 $48$ 吗？',
           solution:
-            '- 层级：$L_0: \\{1\\}$；$L_1: \\{2, 3\\}$；$L_2: \\{6\\}$；$L_3: \\{12\\}$；$L_4: \\{24, 36\\}$；$L_5: \\{48\\}$。\n- 全部覆盖边（共 7 条）：`1—2`, `1—3`, `2—6`, `3—6`, `6—12`, `12—24`, `12—36`, 以及 **`24—48`**（共 8 条边；千万注意 $36 \\nmid 48$，所以 `36` 头顶没有任何连线，这个偏序集有两个极大元 `36` 和 `48`！）。',
+            '- 层级：$L_0: \\{1\\}$；$L_1: \\{2, 3\\}$；$L_2: \\{6\\}$；$L_3: \\{12\\}$；$L_4: \\{24, 36\\}$；$L_5: \\{48\\}$。\n- 全部覆盖边（共 8 条）：`1—2`, `1—3`, `2—6`, `3—6`, `6—12`, `12—24`, `12—36`, 以及 **`24—48`**（千万注意 $36 \\nmid 48$，所以 `36` 头顶没有任何连线，这个偏序集有两个极大元 `36` 和 `48`！）。',
         },
       },
       {
@@ -512,7 +512,7 @@ export function buildRelationCourse(md) {
             '在格 $(L, \\preceq)$ 里，把 $\\operatorname{lub}\\{a,b\\}$ 记作并 $a \\lor b$、把 $\\operatorname{glb}\\{a,b\\}$ 记作交 $a \\land b$，它们天然满足幂等律、交换律、结合律以及吸收律 $a \\lor (a \\land b) = a$（课件 Ch9.6 p32）。往后再加两层性质就到头了：',
             '1. **有界格（bounded lattice，Slide 34）**：同时拥有全集最大元（记作 $1$）和全集最小元（记作 $0$）的格。**一切有限格都自动是有界格**（例如第 5 题的格里，$0 = 1$，$1 = 650$）。',
             '2. **有补格（complemented lattice，Slide 35）**：在有界格里，如果**每一个**元素 $x$ 都能找到至少一个搭档（补元 $y$），使得它俩往上汇到全集顶 $x \\lor y = 1$、往下落到全集底 $x \\land y = 0$，就叫有补格。',
-            '   - 最标准的例子：幂集布尔格 $(\\mathcal{P}(\\{a,b,c\\}), \\subseteq)$（可以在上方沙盘第 3 个预设里点开看）是有界有补格——子集 $X$ 的补元就是集合补 $\\overline{X}$，满足 $X \\cup \\overline{X} = \\{a,b,c\\}$ 且 $X \\cap \\overline{X} = \\varnothing$。',
+            '   - 最标准的例子：幂集布尔格 $(\\mathcal{P}(\\{a,b,c\\}), \\subseteq)$ 是有界有补格——子集 $X$ 的补元就是集合补 $\\overline{X}$，满足 $X \\cup \\overline{X} = \\{a,b,c\\}$ 且 $X \\cap \\overline{X} = \\varnothing$。',
             '   - 那 Test 02 第 5 题的 $(\\{1,5,10,13,65,650\\}, \\mid)$ 是有补格吗？**不是！** 试着给元素 $5$ 找补元 $y$：要满足 $\\operatorname{glb}\\{5, y\\} = 1$，就要求 $5 \\nmid y$，只能选 $y = 1$ 或 $y = 13$；可 $\\operatorname{lub}\\{5, 1\\} = 5 \\neq 650$，$\\operatorname{lub}\\{5, 13\\} = 65 \\neq 650$，谁也凑不够顶上的 $650$（因为 $5^2 = 25$ 的因子拆不散）！',
           ].join('\n'),
         },

@@ -117,5 +117,10 @@ test('standalone progressive Midterm-Review-Guide.md files for both Logic and Re
     assert.ok(raw.includes(expectedHeading), `${relPath} not synced to progressive Causally narrative`);
     assert.equal(raw.includes('<!-- LAB -->'), false, `${relPath} must not leak <!-- LAB --> marker`);
     assert.equal(/<div\b/i.test(raw), false, `${relPath} must not contain raw <div HTML tags`);
+    assert.equal(
+      /下面的面板|下面的博弈台|下面的侦探面板|下面的交互面板|下面的[^\n]*沙盘|上方沙盘|矩阵沙盘里点/.test(raw),
+      false,
+      `${relPath} contains dangling references to interactive web panels`
+    );
   }
 });

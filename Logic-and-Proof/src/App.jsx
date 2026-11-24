@@ -22,41 +22,41 @@ const LABS = {
 
 function LogicHeroVisual() {
   return (
-    <svg viewBox="0 0 360 230" role="img" aria-label="从一句真假判断生长出等价变形、量词先后手与严格证明">
+    <svg viewBox="0 0 420 230" role="img" aria-label="从一句真假判断生长出等价变形、量词先后手与严格证明">
       <g fill="none" stroke="var(--line)" strokeWidth="1.4">
-        <rect x="18" y="18" width="324" height="194" rx="12" fill="var(--bg)" />
+        <rect x="14" y="16" width="392" height="198" rx="12" fill="var(--bg)" />
       </g>
       <g fontFamily="var(--font-reading)">
-        <rect x="34" y="152" width="128" height="40" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" strokeWidth="1.5" />
-        <text x="98" y="177" textAnchor="middle" fill="var(--fg)" fontSize="13" fontWeight="650">
+        <rect x="28" y="152" width="144" height="40" rx="8" fill="var(--accent-soft)" stroke="var(--accent)" strokeWidth="1.5" />
+        <text x="100" y="177" textAnchor="middle" fill="var(--fg)" fontSize="12.5" fontWeight="650">
           真假契约 p → q
         </text>
 
-        <rect x="34" y="92" width="128" height="40" rx="8" fill="var(--paper)" stroke="var(--line)" strokeWidth="1.5" />
-        <text x="98" y="117" textAnchor="middle" fill="var(--fg)" fontSize="13" fontWeight="600">
+        <rect x="28" y="92" width="144" height="40" rx="8" fill="var(--paper)" stroke="var(--line)" strokeWidth="1.5" />
+        <text x="100" y="117" textAnchor="middle" fill="var(--fg)" fontSize="12.5" fontWeight="600">
           无表等价变形 (Q2)
         </text>
 
-        <rect x="196" y="92" width="130" height="40" rx="8" fill="var(--paper)" stroke="var(--line)" strokeWidth="1.5" />
-        <text x="261" y="117" textAnchor="middle" fill="var(--fg)" fontSize="13" fontWeight="600">
+        <rect x="202" y="92" width="188" height="40" rx="8" fill="var(--paper)" stroke="var(--line)" strokeWidth="1.5" />
+        <text x="296" y="117" textAnchor="middle" fill="var(--fg)" fontSize="12.5" fontWeight="600">
           量词先后手 (Q1a·Q4)
         </text>
 
-        <rect x="196" y="34" width="130" height="40" rx="8" fill="var(--paper)" stroke="var(--warm)" strokeWidth="1.5" />
-        <text x="261" y="59" textAnchor="middle" fill="var(--warm)" fontSize="13" fontWeight="650">
+        <rect x="202" y="34" width="188" height="40" rx="8" fill="var(--paper)" stroke="var(--warm)" strokeWidth="1.5" />
+        <text x="296" y="59" textAnchor="middle" fill="var(--warm)" fontSize="12.5" fontWeight="650">
           推理与证明 (Q1b·Q5·Q6)
         </text>
 
         <g stroke="var(--accent)" strokeWidth="1.6" fill="none">
-          <path d="M98 152 L98 134" />
-          <path d="M162 172 C 210 172, 230 155, 242 134" />
-          <path d="M162 112 L194 112" />
-          <path d="M261 92 L261 76" />
+          <path d="M100 152 L100 134" />
+          <path d="M172 172 C 228 172, 250 155, 268 134" />
+          <path d="M172 112 L200 112" />
+          <path d="M296 92 L296 76" />
         </g>
-        <text x="36" y="54" fill="var(--muted)" fontSize="11.5">
+        <text x="30" y="54" fill="var(--muted)" fontSize="11.5">
           Test 01 · 60 分全链路
         </text>
-        <text x="36" y="72" fill="var(--muted)" fontSize="11">
+        <text x="30" y="72" fill="var(--muted)" fontSize="11">
           每一步只问：真值怎么保住？
         </text>
       </g>

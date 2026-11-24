@@ -5,8 +5,6 @@ export function evalImplicationFamily(p, q) {
   const disjForm = !p || q;
   const converse = !q || p;
   const inverse = p || !q;
-  const contrapositive = !q || p ? (!q ? true : !p) : true; // ¬q → ¬p ≡ q ∨ ¬p ≡ ¬p ∨ q
-  const contrapositiveExact = q ? !p || true : true; // wait: ¬q → ¬p is !( !q ) || !p = q || !p
   const contra = q || !p;
   const biconditional = p === q;
   return {

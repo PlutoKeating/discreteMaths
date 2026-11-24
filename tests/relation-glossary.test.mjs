@@ -21,6 +21,11 @@ test('Relation glossary has comprehensive entries, sectionId anchors, and longes
   assert.equal(lookupTerm('Hasse diagram')?.zh.includes('哈斯图'), true);
   assert.equal(lookupTerm('one-to-one correspondence')?.en, 'one-to-one correspondence');
   assert.equal(lookupTerm('bijection')?.en, 'one-to-one correspondence');
+  assert.equal(lookupTerm('floor function')?.sectionId, 's03');
+  assert.equal(lookupTerm('loop')?.sectionId, 's04');
+  assert.equal(lookupTerm('n-ary relation')?.sectionId, 's06');
+  assert.equal(lookupTerm('dual')?.sectionId, 's10');
+  assert.equal(lookupTerm('comparable')?.sectionId, 's12');
 });
 
 test('Review Focus #3: multi-word terms never get split by shorter terms or corrupt HTML/math', () => {

@@ -139,28 +139,40 @@ const SPECIFIC_SECTION = {
   'one-to-one': 's03',
   onto: 's03',
   'one-to-one correspondence': 's03',
+  'identity function': 's03',
   'inverse function': 's03',
+  'strictly increasing': 's03',
+  'floor function': 's03',
+  'ceiling function': 's03',
   'binary relation': 's04',
+  'relation on a set': 's04',
   'directed graph': 's04',
+  'in-degree': 's04',
+  'out-degree': 's04',
+  loop: 's04',
   'zero-one matrix': 's04',
   'inverse relation': 's04',
   'complementary relation': 's04',
   'composite of relations': 's05',
   'boolean product': 's05',
+  'n-ary relation': 's06',
+  'primary key': 's06',
   'partial ordering': 's10',
   poset: 's10',
+  dual: 's10',
   divisibility: 's10',
+  'well-ordered set': 's10',
+  'lexicographic order': 's10',
   'Hasse diagram': 's10',
   'covering relation': 's10',
+  comparable: 's12',
   'total order': 's12',
   lattice: 's12',
   'bounded lattice': 's12',
   'complemented lattice': 's12',
 };
 for (const item of GLOSSARY) {
-  if (!item.sectionId) {
-    item.sectionId = SPECIFIC_SECTION[item.en] || CAT_DEFAULT_SECTION[item.cat] || 's01';
-  }
+  item.sectionId = SPECIFIC_SECTION[item.en] || CAT_DEFAULT_SECTION[item.cat] || 's01';
 }
 
 const norm = (s) => s.toLowerCase().replace(/\s+/g, ' ').trim();

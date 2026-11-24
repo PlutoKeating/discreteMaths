@@ -155,6 +155,14 @@ export default function CourseReader({ course }) {
   const [confirmClear, setConfirmClear] = useState(false);
   const [scrollPct, setScrollPct] = useState(0);
 
+  const closeDrawer = () => {
+    setDrawer(null);
+    const h = location.hash.replace(/^#/, '');
+    if (h === 'exam' || h === 'glossary' || h === 'records') {
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+  };
+
   const chapterMap = useMemo(() => {
     const m = new Map();
     for (const ch of course.chapters) m.set(ch.id, ch);
@@ -199,12 +207,23 @@ export default function CourseReader({ course }) {
     return () => window.removeEventListener('hashchange', applyHash);
   }, []);
 
-  // Close drawers on Escape
+  // Close drawers on Escape & lock background scroll when modal drawer is open
+  useEffect(() => {
+    if (drawer) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [drawer]);
+
   useEffect(() => {
     if (!drawer && !navOpen) return undefined;
     const onKey = (e) => {
       if (e.key === 'Escape') {
-        setDrawer(null);
+        closeDrawer();
         setNavOpen(false);
       }
     };
@@ -213,13 +232,11 @@ export default function CourseReader({ course }) {
   }, [drawer, navOpen]);
 
   const handleToggleRead = (chapterId, nextVal) => {
-    const next = saveChapterRead(course.storageKey, chapterId, nextVal);
-    setRecord(next);
+    setRecord((prev) => saveChapterRead(course.storageKey, chapterId, nextVal, undefined, prev));
   };
 
   const handleChangeNote = (chapterId, text) => {
-    const next = saveChapterNote(course.storageKey, chapterId, text);
-    setRecord(next);
+    setRecord((prev) => saveChapterNote(course.storageKey, chapterId, text, undefined, prev));
   };
 
   const handleDownloadNotes = () => {
@@ -313,7 +330,7 @@ export default function CourseReader({ course }) {
           className="drawer-backdrop"
           onClick={() => {
             setNavOpen(false);
-            setDrawer(null);
+            closeDrawer();
           }}
           aria-hidden="true"
         />
@@ -522,7 +539,7 @@ export default function CourseReader({ course }) {
               {drawer === 'glossary' && '英文术语速查词典'}
               {drawer === 'records' && '我的学习记录与笔记'}
             </h2>
-            <button type="button" className="drawer-close" onClick={() => setDrawer(null)} aria-label="关闭面板">
+            <button type="button" className="drawer-close" onClick={closeDrawer} aria-label="关闭面板">
               ×
             </button>
           </div>
@@ -606,7 +623,8 @@ export default function CourseReader({ course }) {
                 <div className="records-list">
                   {course.chapters.map((ch) => {
                     const done = !!record.read?.[ch.id];
-                    const note = record.notes?.[ch.id]?.trim();
+                    const rawNote = record.notes?.[ch.id];
+                    const note = typeof rawNote === 'string' ? rawNote.trim() : '';
                     return (
                       <div key={ch.id} className="record-item">
                         <div className="record-item-top">

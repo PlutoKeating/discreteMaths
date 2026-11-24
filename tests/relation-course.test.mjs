@@ -70,12 +70,21 @@ test('RELATION_COURSE follows Causally anti-jargon question-driven structure and
 
   for (const ch of course.chapters) {
     assert.match(ch.title, /[？?]$/, `Chapter ${ch.id} title must be a question: ${ch.title}`);
-    const firstPara = ch.markdown.trim().split(/\n\s*\n/)[0] || '';
+    const paras = ch.markdown.trim().split(/\n\s*\n/);
+    const firstPara = paras[0] || '';
     assert.equal(
       /^(#|\||\*\*定义|定义[:：]|Definition[:：])/i.test(firstPara),
       false,
       `Chapter ${ch.id} must open with a concrete scenario/question, not a definition or table`
     );
+    // Reviewer I2: No single paragraph may cram > 3 bolded bilingual definitions **...（...）**
+    for (const para of paras) {
+      const biDefs = para.match(/\*\*[^*\n]+?[（(][A-Za-z][^)\n]*?[）)]\*\*/g) || [];
+      assert.ok(
+        biDefs.length <= 3,
+        `Chapter ${ch.id} crams ${biDefs.length} bolded bilingual terms into one paragraph: ${biDefs.join(', ')}`
+      );
+    }
 
     assertCleanMarkdown(`${ch.id}.markdown`, ch.markdown, patterns);
     allCourseCorpus.push(ch.markdown);
