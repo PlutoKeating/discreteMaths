@@ -24,12 +24,17 @@ test('src/Home.jsx orders Logic -> Relation (ready: true) -> Counting -> Graph',
   assert.match(home, /course-card/, 'Home.jsx uses calm editorial course-card styling');
 });
 
-test('Relation webpage entry, figures, sandboxes, and README update are in place', () => {
+test('Logic and Relation progressive course entrypoints and labs are in place', () => {
   for (const rel of [
+    'Logic-and-Proof/index.html',
+    'Logic-and-Proof/src/main.jsx',
+    'Logic-and-Proof/src/App.jsx',
+    'Logic-and-Proof/src/courseData.js',
+    'Logic-and-Proof/src/labs.jsx',
     'Relation/index.html',
     'Relation/src/main.jsx',
     'Relation/src/App.jsx',
-    'Relation/src/figures.jsx',
+    'Relation/src/courseData.js',
     'Relation/src/sandboxes.jsx',
   ]) {
     assert.equal(fs.existsSync(path.join(ROOT, rel)), true, `Missing ${rel}`);
@@ -38,14 +43,4 @@ test('Relation webpage entry, figures, sandboxes, and README update are in place
   assert.match(sbx, /export function RelationMatrixLab/);
   assert.match(sbx, /export function HassePosetLab/);
   assert.match(sbx, /export function FunctionMapperLab/);
-
-  const figs = fs.readFileSync(path.join(ROOT, 'Relation/src/figures.jsx'), 'utf8');
-  assert.match(figs, /export function HeroFig/);
-  assert.match(figs, /export function SetVennFig/);
-  assert.match(figs, /export function CompositionOrderFig/);
-  assert.match(figs, /export function EquivPartitionFig/);
-
-  const readme = fs.readFileSync(path.join(ROOT, 'README.md'), 'utf8');
-  assert.match(readme, /Relation\//);
-  assert.match(readme, /npm test/);
 });

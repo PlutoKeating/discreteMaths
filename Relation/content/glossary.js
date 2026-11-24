@@ -126,6 +126,43 @@ export const GLOSSARY = [
   { en: 'complemented lattice', zh: '有补格', cat: 'poset', def: '有界格中每个元素 x 都存在补元 y，满足 x ∨ y = 1 且 x ∧ y = 0。典型例子：(P(S), ⊆)。' },
 ];
 
+const CAT_DEFAULT_SECTION = {
+  exam: 's03',
+  set: 's01',
+  fn: 's02',
+  rel: 's07',
+  closure: 's06',
+  equiv: 's09',
+  poset: 's11',
+};
+const SPECIFIC_SECTION = {
+  'one-to-one': 's03',
+  onto: 's03',
+  'one-to-one correspondence': 's03',
+  'inverse function': 's03',
+  'binary relation': 's04',
+  'directed graph': 's04',
+  'zero-one matrix': 's04',
+  'inverse relation': 's04',
+  'complementary relation': 's04',
+  'composite of relations': 's05',
+  'boolean product': 's05',
+  'partial ordering': 's10',
+  poset: 's10',
+  divisibility: 's10',
+  'Hasse diagram': 's10',
+  'covering relation': 's10',
+  'total order': 's12',
+  lattice: 's12',
+  'bounded lattice': 's12',
+  'complemented lattice': 's12',
+};
+for (const item of GLOSSARY) {
+  if (!item.sectionId) {
+    item.sectionId = SPECIFIC_SECTION[item.en] || CAT_DEFAULT_SECTION[item.cat] || 's01';
+  }
+}
+
 const norm = (s) => s.toLowerCase().replace(/\s+/g, ' ').trim();
 export const TERM_INDEX = (() => {
   const m = new Map();

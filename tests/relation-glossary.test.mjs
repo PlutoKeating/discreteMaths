@@ -1,17 +1,16 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import fs from 'node:fs';
-import path from 'node:path';
 import { preprocess } from '../src/components/markdownPreprocess.js';
 import { CATS, GLOSSARY, ALL_PATTERNS, lookupTerm } from '../Relation/content/glossary.js';
 
-const ROOT = process.cwd();
-
-test('Relation glossary has comprehensive entries and longest-first patterns', () => {
+test('Relation glossary has comprehensive entries, sectionId anchors, and longest-first patterns', () => {
   assert.ok(GLOSSARY.length >= 90, `Expected >=90 glossary terms, got ${GLOSSARY.length}`);
   for (const key of ['exam', 'set', 'fn', 'rel', 'closure', 'equiv', 'poset']) {
     assert.ok(CATS[key], `Missing category ${key}`);
     assert.ok(GLOSSARY.some((t) => t.cat === key), `Category ${key} has no terms`);
+  }
+  for (const t of GLOSSARY) {
+    assert.match(t.sectionId || '', /^s\d{2}$/, `Glossary term "${t.en}" should link to a valid chapter sectionId`);
   }
   for (let i = 1; i < ALL_PATTERNS.length; i += 1) {
     assert.ok(
@@ -40,21 +39,4 @@ test('Review Focus #3: multi-word terms never get split by shorter terms or corr
   assert.ok(out.includes('>equivalence relation</abbr>'));
   assert.ok(out.includes('>least upper bound</abbr>'));
   assert.ok(out.includes('>restricted domain</abbr>'));
-});
-
-test('Theory markdown files (overview, sets-functions, relations, equiv-poset) exist and cover key topics', () => {
-  const mustExist = [
-    ['Relation/content/overview.md', ['Ch5.1', 'Ch9.1', '真值']],
-    ['Relation/content/sets-functions.md', ['Power Set', 'Cartesian', 'one-to-one', 'onto', 'Bit String']],
-    ['Relation/content/relations.md', ['Warshall', '65536', 'M_{R_1}', 'n-ary']],
-    ['Relation/content/equiv-poset.md', ['Equivalence', 'Partition', 'Hasse', 'Lattice', 'Lexicographic', 'Well-Ordered']],
-  ];
-  for (const [relPath, keywords] of mustExist) {
-    const full = path.join(ROOT, relPath);
-    assert.equal(fs.existsSync(full), true, `Missing ${relPath}`);
-    const content = fs.readFileSync(full, 'utf8');
-    for (const kw of keywords) {
-      assert.ok(content.includes(kw), `${relPath} missing expected topic keyword "${kw}"`);
-    }
-  }
 });

@@ -63,13 +63,10 @@ export function FunctionMapperLab({ defaultMode = 'restrict' }) {
   }, [yLine, domKey]);
 
   return (
-    <section className="card rim p-4 md:p-6 my-6" aria-label="函数单射满射与定义域限制交互沙盘">
+    <div aria-label="函数单射满射与定义域限制交互沙盘">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
-        <div>
-          <span className="tag">交互图解沙盘 1</span>
-          <h3 className="head" style={{ fontSize: '1.25rem', margin: '.3rem 0 0' }}>
-            函数单射 / 满射 / 双射 & 定义域限制演示器
-          </h3>
+        <div className="head" style={{ fontSize: '1.02rem' }}>
+          函数映射与定义域限制手术台
         </div>
         <div className="flex flex-wrap gap-2">
           <button
@@ -340,7 +337,7 @@ export function FunctionMapperLab({ defaultMode = 'restrict' }) {
           </div>
         </div>
       )}
-    </section>
+    </div>
   );
 }
 
@@ -551,13 +548,10 @@ export function RelationMatrixLab() {
   const safeJ = Math.min(hiJ, labels.length - 1);
 
   return (
-    <section className="card rim p-4 md:p-6 my-6" aria-label="0-1关系矩阵、有向图与Warshall闭包交互沙盘">
+    <div aria-label="0-1关系矩阵、有向图与Warshall闭包交互沙盘">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-        <div>
-          <span className="tag">交互图解沙盘 2</span>
-          <h3 className="head" style={{ fontSize: '1.25rem', margin: '.3rem 0 0' }}>
-            0-1 关系矩阵 ↔ 有向图 · R₂∘R₁ 顺序 · Warshall 传递闭包沙盘
-          </h3>
+        <div className="head" style={{ fontSize: '1.02rem' }}>
+          0-1 关系矩阵 ↔ 有向图 · 复合顺序 · Warshall 步进器
         </div>
         <div className="flex flex-wrap gap-2">
           {Object.entries(PRESET_MATRICES).map(([k, p]) => (
@@ -796,7 +790,7 @@ export function RelationMatrixLab() {
           </div>
         )}
       </div>
-    </section>
+    </div>
   );
 }
 
@@ -848,13 +842,10 @@ export function HassePosetLab() {
   const fmtOne = (idx) => (idx === null ? 'None（不存在）' : String(poset.elements[idx]));
 
   return (
-    <section className="card rim p-4 md:p-6 my-6" aria-label="Hasse图极值上下界与格交互沙盘">
+    <div aria-label="Hasse图极值上下界与格交互沙盘">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-        <div>
-          <span className="tag">交互图解沙盘 3</span>
-          <h3 className="head" style={{ fontSize: '1.25rem', margin: '.3rem 0 0' }}>
-            Hasse 图极值 / 上下界 / LUB·GLB 与 Lattice 判定沙盘
-          </h3>
+        <div className="head" style={{ fontSize: '1.02rem' }}>
+          哈斯图（Hasse Diagram）极值 · 上下界 · 格（Lattice）沙盘
         </div>
         <div className="flex flex-wrap gap-2">
           {Object.entries(PRESET_POSETS).map(([k, p]) => (
@@ -1044,6 +1035,6 @@ export function HassePosetLab() {
           </div>
         </div>
       </div>
-    </section>
+    </div>
   );
 }
