@@ -1,7 +1,7 @@
 ## 2.1 二元关系及其三种等价表示【高频必考】
 
 - **定义（Slides 5.1 p3–p8）**：
-  - 从集合 $A$ 到集合 $B$ 的**二元关系（binary relation）**是笛卡尔积的任意子集 $R \subseteq A \times B$。$(a,b)\in R$ 记作 $aRb$。
+  - 从集合 $A$ 到集合 $B$ 的 ==二元关系==（binary relation）是笛卡尔积的任意子集 $R \subseteq A \times B$。$(a,b)\in R$ 记作 $aRb$。
   - **集合 $A$ 上的关系（relation on a set $A$）**：特指 $A$ 到自身的关系 $R \subseteq A \times A$。
   - **函数是关系的特例（Slides p2）**：函数 $f: A \to B$ 就是满足“每个 $a\in A$ 恰与一个 $b\in B$ 配对”的特殊二元关系。
 

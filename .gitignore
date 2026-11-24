@@ -4,8 +4,9 @@
 # Except the final review notes at project root
 !/FinalReviewNotes.pdf
 
-# Node / Vite / Wrangler
+# Node / Vite / Wrangler / Agent QA scratch
 node_modules/
 dist/
 .wrangler/
+.opencode/
 *.log

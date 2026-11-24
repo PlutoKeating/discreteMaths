@@ -5,7 +5,7 @@
 - 页面底部可一键展开 `Relation/Midterm-Test-02.md` 原件与卷面手写附注对照。
 
 > **考试信息**：Discrete Mathematics – Test 02（Semester 1, 2025–2026 · Date: November-2025 · **Total Marks: 76**）  
-> **考试范围**：Ch2.1–2.3 Sets and Functions · Ch9.1–9.3 Relations and Properties · Ch9.5–9.6 Equivalence and Partial Orderings。
+> **考试范围**：Ch2.1–2.3 Sets and Functions · Ch9.1–9.3 Relations and Properties · Ch9.5–9.6 Equivalence and Partial Orderings.
 
 ---
 

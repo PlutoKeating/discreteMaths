@@ -34,6 +34,11 @@ export default function GlossaryView({ glossary, cats, placeholder = '例如：c
           {total} / {glossary.length} 条 · 正文中所有带虚线下划线的英文词都可以点击查看
         </div>
       </div>
+      {total === 0 && (
+        <div className="card p-5 text-center song" style={{ color: 'var(--muted)' }}>
+          未找到匹配的术语，请尝试其他英文原词、中文译名或核心关键词。
+        </div>
+      )}
       {Object.keys(cats)
         .filter((c) => groups[c]?.length)
         .map((c) => (

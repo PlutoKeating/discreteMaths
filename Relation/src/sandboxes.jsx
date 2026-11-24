@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useId, useMemo, useState } from 'react';
 import {
   cloneMat,
   matTranspose,
@@ -30,6 +30,11 @@ function Badge({ ok, label }) {
  * 1. FunctionMapperLab — 离散函数箭头映射 & Test 02 Q1d 定义域限制交互器
  * ========================================================================= */
 export function FunctionMapperLab({ defaultMode = 'restrict' }) {
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
+  const sliderId = `hline_${uid}`;
+  const fArrId = `fArr_${uid}`;
+  const fArrInvId = `fArrInv_${uid}`;
+
   const [mode, setMode] = useState(defaultMode); // 'discrete' | 'restrict'
   const [presetIdx, setPresetIdx] = useState(0);
   const [showInv, setShowInv] = useState(false);
@@ -46,7 +51,6 @@ export function FunctionMapperLab({ defaultMode = 'restrict' }) {
   );
   const restInfo = useMemo(() => analyzeRestrictedAbsHalf(domKey, codKey), [domKey, codKey]);
 
-  // Compute intersections of y = yLine with h(x) = |x/2| on active domain
   const hits = useMemo(() => {
     if (yLine < 0) return [];
     if (yLine === 0) return [0];
@@ -126,7 +130,6 @@ export function FunctionMapperLab({ defaultMode = 'restrict' }) {
           <div className="sbx-split">
             <div className="fig" style={{ margin: 0 }}>
               <svg viewBox="0 0 420 260" role="img" aria-label="h(x)=|x/2| 坐标与水平线检验图">
-                {/* Codomain shading along y-axis */}
                 <rect
                   x="196"
                   y="18"
@@ -136,7 +139,6 @@ export function FunctionMapperLab({ defaultMode = 'restrict' }) {
                   opacity=".14"
                   rx="4"
                 />
-                {/* Domain shading along x-axis */}
                 <rect
                   x={domKey === 'R>=0' ? 210 : 30}
                   y="152"
@@ -146,18 +148,15 @@ export function FunctionMapperLab({ defaultMode = 'restrict' }) {
                   opacity=".16"
                   rx="4"
                 />
-                {/* Axes */}
                 <line x1="24" y1="160" x2="396" y2="160" stroke="currentColor" strokeOpacity=".45" strokeWidth="1.5" />
                 <line x1="210" y1="16" x2="210" y2="244" stroke="currentColor" strokeOpacity=".45" strokeWidth="1.5" />
                 <text x="388" y="152" fontSize="12" fill="currentColor" className="d-mono">x</text>
                 <text x="218" y="28" fontSize="12" fill="currentColor" className="d-mono">y</text>
                 <text x="216" y="174" fontSize="11" fill="currentColor" opacity=".75" className="d-mono">0</text>
 
-                {/* Inactive ghost branches */}
                 <line x1="50" y1="32" x2="210" y2="160" stroke="currentColor" strokeOpacity=".2" strokeWidth="2.5" strokeDasharray="5 4" />
                 <line x1="210" y1="160" x2="370" y2="32" stroke="currentColor" strokeOpacity=".2" strokeWidth="2.5" strokeDasharray="5 4" />
 
-                {/* Active branches: scale 1 unit x = 32px, 1 unit y = 64px => slope |1/2| gives dx=160 -> dy=128 */}
                 {(domKey === 'R' || domKey === 'R<=0') && (
                   <line x1="50" y1="32" x2="210" y2="160" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" />
                 )}
@@ -165,7 +164,6 @@ export function FunctionMapperLab({ defaultMode = 'restrict' }) {
                   <line x1="210" y1="160" x2="370" y2="32" stroke="var(--accent)" strokeWidth="4" strokeLinecap="round" />
                 )}
 
-                {/* Horizontal test line y = yLine */}
                 {(() => {
                   const py = 160 - yLine * 64;
                   const inCod = codKey === 'R' || yLine >= 0;
@@ -184,11 +182,11 @@ export function FunctionMapperLab({ defaultMode = 'restrict' }) {
                 })()}
               </svg>
               <div className="mt-2 flex items-center gap-3">
-                <label htmlFor="hline-slider" className="mono" style={{ fontSize: '.8rem', whiteSpace: 'nowrap' }}>
+                <label htmlFor={sliderId} className="mono" style={{ fontSize: '.8rem', whiteSpace: 'nowrap' }}>
                   拖动水平线 y = {yLine.toFixed(1)}
                 </label>
                 <input
-                  id="hline-slider"
+                  id={sliderId}
                   type="range"
                   min="-1.0"
                   max="2.0"
@@ -253,10 +251,10 @@ export function FunctionMapperLab({ defaultMode = 'restrict' }) {
             <div className="fig" style={{ margin: 0 }}>
               <svg viewBox="0 0 400 230" role="img" aria-label="离散集合箭头映射示意图">
                 <defs>
-                  <marker id="fArr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <marker id={fArrId} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                     <path d="M0 0L10 5L0 10z" fill="var(--accent)" />
                   </marker>
-                  <marker id="fArrInv" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                  <marker id={fArrInvId} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                     <path d="M0 0L10 5L0 10z" fill="var(--ok)" />
                   </marker>
                 </defs>
@@ -282,7 +280,7 @@ export function FunctionMapperLab({ defaultMode = 'restrict' }) {
                       y2={y1}
                       stroke="var(--ok)"
                       strokeWidth="2.6"
-                      markerEnd="url(#fArrInv)"
+                      markerEnd={`url(#${fArrInvId})`}
                     />
                   ) : (
                     <line
@@ -293,7 +291,7 @@ export function FunctionMapperLab({ defaultMode = 'restrict' }) {
                       y2={y2}
                       stroke="var(--accent)"
                       strokeWidth="2.6"
-                      markerEnd="url(#fArr)"
+                      markerEnd={`url(#${fArrId})`}
                     />
                   );
                 })}
@@ -399,6 +397,9 @@ function MatrixGrid({ title, labels, matrix, onToggle, highlightRow = -1, highli
 }
 
 function DigraphSvg({ labels, matrix }) {
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
+  const dgArrId = `dgArr_${uid}`;
+  const dgArrBiId = `dgArrBi_${uid}`;
   const n = labels.length;
   const cx = 145;
   const cy = 122;
@@ -411,15 +412,14 @@ function DigraphSvg({ labels, matrix }) {
   return (
     <svg viewBox="0 0 290 244" role="img" aria-label="关系 R1 的实时有向图">
       <defs>
-        <marker id="dgArr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <marker id={dgArrId} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0 0L10 5L0 10z" fill="var(--accent)" />
         </marker>
-        <marker id="dgArrBi" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <marker id={dgArrBiId} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
           <path d="M0 0L10 5L0 10z" fill="var(--ok)" />
         </marker>
       </defs>
 
-      {/* Edges */}
       {matrix.map((row, i) =>
         row.map((val, j) => {
           if (!val) return null;
@@ -461,13 +461,12 @@ function DigraphSvg({ labels, matrix }) {
               fill="none"
               stroke={bi ? 'var(--ok)' : 'var(--accent)'}
               strokeWidth="2.3"
-              markerEnd={bi ? 'url(#dgArrBi)' : 'url(#dgArr)'}
+              markerEnd={bi ? `url(#${dgArrBiId})` : `url(#${dgArrId})`}
             />
           );
         })
       )}
 
-      {/* Vertices */}
       {pts.map((p, i) => (
         <g key={labels[i]}>
           <circle cx={p.x} cy={p.y} r="17" fill="var(--card)" stroke="var(--accent)" strokeWidth="2.5" />
@@ -485,7 +484,7 @@ export function RelationMatrixLab() {
   const [m1, setM1] = useState(() => cloneMat(PRESET_MATRICES.test02_q2.m1));
   const [m2, setM2] = useState(() => cloneMat(PRESET_MATRICES.test02_q2.m2));
   const [labels, setLabels] = useState(PRESET_MATRICES.test02_q2.labels);
-  const [opTab, setOpTab] = useState('comp'); // 'inv' | 'comp_not' | 'xor' | 'comp' | 'sym2' | 'warshall'
+  const [opTab, setOpTab] = useState('comp');
   const [wStep, setWStep] = useState(3);
   const [hoverCell, setHoverCell] = useState([0, 1]);
   const [selProp, setSelProp] = useState('transitive');
@@ -502,11 +501,13 @@ export function RelationMatrixLab() {
 
   const clearZero = () => {
     const n = labels.length;
+    setPresetKey('zero');
     setM1(Array.from({ length: n }, () => Array(n).fill(0)));
     setWStep(0);
   };
 
   const toggleM1 = (i, j) => {
+    setPresetKey('custom');
     setM1((prev) => {
       const next = cloneMat(prev);
       next[i][j] = next[i][j] ? 0 : 1;
@@ -514,6 +515,7 @@ export function RelationMatrixLab() {
     });
   };
   const toggleM2 = (i, j) => {
+    setPresetKey('custom');
     setM2((prev) => {
       const next = cloneMat(prev);
       next[i][j] = next[i][j] ? 0 : 1;
@@ -568,13 +570,16 @@ export function RelationMatrixLab() {
               {p.name}
             </button>
           ))}
-          <button type="button" className="sbx-btn" onClick={clearZero}>
+          <button
+            type="button"
+            className={'sbx-btn' + (presetKey === 'zero' ? ' on' : '')}
+            onClick={clearZero}
+          >
             清空 R₁ 为全 0（测空真）
           </button>
         </div>
       </div>
 
-      {/* Top row: M_R1 + M_R2 + Digraph of R1 */}
       <div className="sbx-tri mb-4">
         <MatrixGrid
           title="点击翻转 M_R₁（左：先出发）"
@@ -599,7 +604,6 @@ export function RelationMatrixLab() {
         </div>
       </div>
 
-      {/* Live 9-property badges for R1 */}
       <div className="sbx-panel mb-4">
         <div className="mono mb-2" style={{ fontSize: '.8rem', color: 'var(--muted)' }}>
           R₁ 的 9 项性质实时判定（点击任意徽章查看判定依据 / 具体反例）：
@@ -625,7 +629,6 @@ export function RelationMatrixLab() {
         </div>
       </div>
 
-      {/* Operation & Warshall Stepper Tabs */}
       <div className="flex flex-wrap gap-2 mb-3">
         {[
           ['comp', 'd) 复合 R₂ ∘ R₁ = M_R₁ ⊙ M_R₂'],
@@ -681,12 +684,12 @@ export function RelationMatrixLab() {
             </div>
             <div>
               <div className="head mb-1" style={{ color: 'var(--accent)' }}>
-                正在拆解第 ({labels[safeI]}, {labels[safeJ]}) 格的布尔内积：
+                正在拆解元素 ({labels[safeI]}, {labels[safeJ]}) 格的布尔内积：
               </div>
               <p className="mono text-sm" style={{ margin: '.3rem 0' }}>
-                左矩阵 M_R₁ 第 {labels[safeI]} 行 = [{m1[safeI].join(', ')}]
+                左矩阵 M_R₁ 顶点 {labels[safeI]} 行 = [{m1[safeI].join(', ')}]
                 <br />
-                右矩阵 M_R₂ 第 {labels[safeJ]} 列 = [{m2.map((r) => r[safeJ]).join(', ')}]ᵀ
+                右矩阵 M_R₂ 顶点 {labels[safeJ]} 列 = [{m2.map((r) => r[safeJ]).join(', ')}]ᵀ
               </p>
               <p className="mono text-sm" style={{ margin: '.4rem 0', color: 'var(--kw)', fontWeight: 700 }}>
                 (M_(R₂∘R₁))_({labels[safeI]},{labels[safeJ]}) ={' '}
@@ -731,7 +734,7 @@ export function RelationMatrixLab() {
                     <strong>第 k = {safeWStep} 步（允许顶点 {labels[safeWStep - 1]} 作中转站）：</strong>
                   </div>
                   <div className="mono">
-                    第 {safeWStep} 列为 1 的行 C_{safeWStep} = {'{' +
+                    顶点 {labels[safeWStep - 1]} 所在列（第 {safeWStep} 列）为 1 的行 C_{safeWStep} = {'{' +
                       wSteps[safeWStep - 1].matrix
                         .map((r, idx) => (r[safeWStep - 1] ? labels[idx] : null))
                         .filter(Boolean)
@@ -739,7 +742,7 @@ export function RelationMatrixLab() {
                       '}'}
                   </div>
                   <div className="mono">
-                    第 {safeWStep} 行为 1 的列 R_{safeWStep} = {'{' +
+                    顶点 {labels[safeWStep - 1]} 所在行（第 {safeWStep} 行）为 1 的列 R_{safeWStep} = {'{' +
                       wSteps[safeWStep - 1].matrix[safeWStep - 1]
                         .map((v, idx) => (v ? labels[idx] : null))
                         .filter(Boolean)
@@ -749,7 +752,7 @@ export function RelationMatrixLab() {
                   <div style={{ color: 'var(--ok)', fontWeight: 700 }}>
                     {wSteps[safeWStep].added.length > 0
                       ? `本步新补上的 1（绿格）：${wSteps[safeWStep].added.map(([r, c]) => `(${labels[r]},${labels[c]})`).join('、')}`
-                      : '本步交叉位置原本全都是 1，矩阵无新增边。'}
+                      : '本步交叉位置原本全都是 1（或无交叉），矩阵无新增边。'}
                   </div>
                 </div>
               )}
@@ -802,16 +805,20 @@ export function RelationMatrixLab() {
  * ========================================================================= */
 export function HassePosetLab() {
   const [presetKey, setPresetKey] = useState('test02_q5');
-  const [subset, setSubset] = useState([1, 2, 3]); // default Q5b {5,10,13}
+  const [subset, setSubset] = useState([1, 2, 3]);
 
   const cur = PRESET_POSETS[presetKey];
   const { poset } = cur;
 
-  const selectPreset = (key) => {
-    setPresetKey(key);
+  const resetDefaultSubset = (key = presetKey) => {
     const p = PRESET_POSETS[key];
     const firstQuick = p.quickSubsets[0]?.values || p.poset.elements;
     setSubset(firstQuick.map((v) => p.poset.elements.indexOf(v)).filter((i) => i >= 0));
+  };
+
+  const selectPreset = (key) => {
+    setPresetKey(key);
+    resetDefaultSubset(key);
   };
 
   const toggleNode = (idx) => {
@@ -821,14 +828,13 @@ export function HassePosetLab() {
   const subRes = useMemo(() => analyzePosetSubset(poset, subset), [poset, subset]);
   const globRes = useMemo(() => analyzePosetGlobal(poset), [poset]);
 
-  // Compute clean upward Hasse coordinates from poset.levels
   const coords = useMemo(() => {
     const W = 380;
-    const H = 260;
+    const H = 266;
     const L = poset.levels.length;
     const map = {};
     poset.levels.forEach((lvl, r) => {
-      const y = L === 1 ? H / 2 : H - 38 - (r * (H - 76)) / (L - 1);
+      const y = L === 1 ? H / 2 : H - 40 - (r * (H - 80)) / (L - 1);
       lvl.forEach((nodeIdx, k) => {
         const x = ((k + 1) * W) / (lvl.length + 1);
         map[nodeIdx] = { x, y };
@@ -864,7 +870,6 @@ export function HassePosetLab() {
         </div>
       </div>
 
-      {/* Quick subset buttons */}
       <div className="flex flex-wrap items-center gap-2 mb-4">
         <span className="mono" style={{ fontSize: '.8rem', color: 'var(--muted)' }}>
           一键切换待测子集 B（或直接点击图中圆点）：
@@ -888,8 +893,7 @@ export function HassePosetLab() {
 
       <div className="sbx-split">
         <div className="fig" style={{ margin: 0 }}>
-          <svg viewBox="0 0 380 260" role="img" aria-label={cur.name + ' Hasse 图'}>
-            {/* Covering lines (upward, no arrows, no loops) */}
+          <svg viewBox="0 0 380 266" role="img" aria-label={cur.name + ' Hasse 图'}>
             {poset.covers.map(([u, v]) => (
               <line
                 key={`${u}-${v}`}
@@ -903,9 +907,10 @@ export function HassePosetLab() {
               />
             ))}
 
-            {/* Nodes */}
             {poset.elements.map((el, idx) => {
               const { x, y } = coords[idx];
+              const str = String(el);
+              const r = str.length > 5 ? 24 : 19;
               const inB = subset.includes(idx);
               const isLub = !subRes.empty && subRes.lub === idx;
               const isGlb = !subRes.empty && subRes.glb === idx;
@@ -913,7 +918,7 @@ export function HassePosetLab() {
                 !subRes.empty && (subRes.upperBounds.includes(idx) || subRes.lowerBounds.includes(idx));
               return (
                 <g
-                  key={String(el)}
+                  key={str}
                   onClick={() => toggleNode(idx)}
                   style={{ cursor: 'pointer' }}
                   role="button"
@@ -930,7 +935,7 @@ export function HassePosetLab() {
                     <circle
                       cx={x}
                       cy={y}
-                      r="25"
+                      r={r + 6}
                       fill="none"
                       stroke={isLub ? 'var(--ok)' : 'var(--warn)'}
                       strokeWidth="2.6"
@@ -940,29 +945,29 @@ export function HassePosetLab() {
                   <circle
                     cx={x}
                     cy={y}
-                    r="19"
+                    r={r}
                     fill={inB ? 'var(--accent)' : isBound ? 'var(--card2)' : 'var(--card)'}
                     stroke={inB ? 'var(--accent)' : isBound ? 'var(--kw)' : 'currentColor'}
                     strokeWidth={inB ? '3' : '2'}
                   />
                   <text
                     x={x}
-                    y={y + 5}
+                    y={y + 4.5}
                     textAnchor="middle"
                     fill={inB ? '#fff' : 'currentColor'}
-                    fontSize={String(el).length > 4 ? '11' : '13.5'}
+                    fontSize={str.length > 5 ? '10.5' : str.length > 3 ? '12' : '13.5'}
                     className="d-mono"
                     fontWeight="700"
                   >
-                    {String(el)}
+                    {str}
                   </text>
                   {isLub && (
-                    <text x={x + 26} y={y - 8} fontSize="11" fill="var(--ok)" className="d-mono" fontWeight="700">
+                    <text x={x + r + 7} y={y - 6} fontSize="11" fill="var(--ok)" className="d-mono" fontWeight="700">
                       LUB
                     </text>
                   )}
                   {isGlb && (
-                    <text x={x + 26} y={y + 16} fontSize="11" fill="var(--warn)" className="d-mono" fontWeight="700">
+                    <text x={x + r + 7} y={y + 15} fontSize="11" fill="var(--warn)" className="d-mono" fontWeight="700">
                       GLB
                     </text>
                   )}
@@ -976,14 +981,18 @@ export function HassePosetLab() {
         </div>
 
         <div className="flex flex-col gap-3">
-          {/* Subset B internal extremals + external bounds */}
           <div className="sbx-panel">
             <div className="mono mb-2" style={{ fontSize: '.88rem', fontWeight: 700, color: 'var(--accent)' }}>
               当前子集 B = {'{' + subset.map((i) => poset.elements[i]).join(', ') + '}'}
             </div>
             {subRes.empty ? (
               <div className="text-sm" style={{ color: 'var(--muted)' }}>
-                子集 B 为空集 ∅：无极小/极大/最小/最大元（全集所有元素空真地作为 ∅ 的上界与下界）。请点击左侧节点或上方快捷按钮选择非空子集！
+                <p style={{ margin: '0 0 .5rem' }}>
+                  子集 B 为空集 ∅：无极小/极大/最小/最大元（全集所有元素空真地作为 ∅ 的上下界，此时 LUB(∅)={fmtOne(subRes.lub)}，GLB(∅)={fmtOne(subRes.glb)}）。
+                </p>
+                <button type="button" className="sbx-btn on" onClick={() => resetDefaultSubset()}>
+                  一键恢复默认子集
+                </button>
               </div>
             ) : (
               <div className="grid gap-2 text-sm">
@@ -1012,7 +1021,6 @@ export function HassePosetLab() {
             )}
           </div>
 
-          {/* Global Poset Properties */}
           <div className="sbx-panel">
             <div className="flex flex-wrap gap-2 mb-2">
               <Badge ok={globRes.isTotalOrder} label="Total Order (全序)" />

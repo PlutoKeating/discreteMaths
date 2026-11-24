@@ -162,13 +162,26 @@ test('Test 02 Q5 poset {1,5,10,13,65,650} under divisibility & empty subset safe
   assert.equal(g.isLattice, true);
   assert.equal(g.isBounded, true);
 
-  // Review Focus #1: Empty subset safety
+  // Review Focus #1: Empty subset safety & mathematically exact vacuous bounds on bounded poset
   const emptyRes = analyzePosetSubset(poset, []);
   assert.equal(emptyRes.empty, true);
   assert.deepEqual(emptyRes.minimal, []);
   assert.deepEqual(emptyRes.maximal, []);
   assert.equal(emptyRes.least, null);
   assert.equal(emptyRes.greatest, null);
+  assert.equal(poset.elements[emptyRes.lub], 1);
+  assert.equal(poset.elements[emptyRes.glb], 650);
+});
+
+test('Tutorial 05 Q8 Warshall preset trace matches step-by-step added pairs', () => {
+  const steps = warshallSteps(PRESET_MATRICES.tut05_q8.m1);
+  assert.equal(steps.length, 5);
+  assert.notDeepEqual(steps[1].matrix, steps[0].matrix);
+  assert.deepEqual(steps[1].added, [[2, 1], [3, 1]]);
+  assert.deepEqual(steps[2].added, [[0, 2], [3, 2]]);
+  assert.deepEqual(steps[3].added, [[0, 0], [1, 0]]);
+  assert.deepEqual(steps[4].added, []);
+  assert.deepEqual(steps[4].matrix, steps[3].matrix);
 });
 
 test('Tutorial 06 Q12 and Bowtie non-lattice posets are accurately distinguished', () => {

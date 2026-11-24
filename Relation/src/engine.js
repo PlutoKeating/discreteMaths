@@ -250,16 +250,19 @@ export function analyzePosetSubset(poset, subsetIndices) {
   const B = [...new Set(subsetIndices)].sort((a, b) => a - b);
 
   if (B.length === 0) {
+    const allBounds = Array.from({ length: n }, (_, i) => i);
+    const glbEmpty = allBounds.filter((l) => allBounds.every((x) => matrix[x][l]));
+    const lubEmpty = allBounds.filter((u) => allBounds.every((x) => matrix[u][x]));
     return {
       empty: true,
       minimal: [],
       maximal: [],
       least: null,
       greatest: null,
-      lowerBounds: Array.from({ length: n }, (_, i) => i),
-      upperBounds: Array.from({ length: n }, (_, i) => i),
-      glb: null,
-      lub: null,
+      lowerBounds: allBounds,
+      upperBounds: allBounds,
+      glb: glbEmpty.length === 1 ? glbEmpty[0] : null,
+      lub: lubEmpty.length === 1 ? lubEmpty[0] : null,
     };
   }
 
@@ -608,6 +611,16 @@ export const PRESET_FUNCTIONS = [
       ['2', '3'],
       ['3', '1'],
       ['3', '2'],
+    ],
+  },
+  {
+    id: 'not_function_missing',
+    label: '非函数（漏定义，如 Tutorial 04 Q11 的 1/x）',
+    domain: ['0', '1', '2'],
+    codomain: ['a', 'b', 'c'],
+    pairs: [
+      ['1', 'a'],
+      ['2', 'c'],
     ],
   },
 ];

@@ -1,50 +1,66 @@
-import React from 'react';
+import React, { useId } from 'react';
 
-const Defs = () => (
+function useSvgIds() {
+  const raw = useId().replace(/[^a-zA-Z0-9]/g, '');
+  const p = `rf_${raw}_`;
+  return {
+    ind: p + 'Ind',
+    red: p + 'Red',
+    grn: p + 'Grn',
+    amb: p + 'Amb',
+    paper: p + 'Paper',
+    shine: p + 'Shine',
+    sh: p + 'Sh',
+    arr: p + 'Arr',
+    arrD: p + 'ArrD',
+  };
+}
+
+const Defs = ({ ids }) => (
   <defs>
-    <linearGradient id="rInd" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id={ids.ind} x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stopColor="#5a6fe0" />
       <stop offset="1" stopColor="#1f2a6e" />
     </linearGradient>
-    <linearGradient id="rRed" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id={ids.red} x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stopColor="#d9534f" />
       <stop offset="1" stopColor="#7a1414" />
     </linearGradient>
-    <linearGradient id="rGrn" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id={ids.grn} x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stopColor="#4fcf8f" />
       <stop offset="1" stopColor="#176b42" />
     </linearGradient>
-    <linearGradient id="rAmb" x1="0" y1="0" x2="1" y2="1">
+    <linearGradient id={ids.amb} x1="0" y1="0" x2="1" y2="1">
       <stop offset="0" stopColor="#f6b93b" />
       <stop offset="1" stopColor="#8f5c00" />
     </linearGradient>
-    <linearGradient id="rPaper" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id={ids.paper} x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stopColor="#ffffff" />
       <stop offset="1" stopColor="#ece8dc" />
     </linearGradient>
-    <linearGradient id="rShine" x1="0" y1="0" x2="0" y2="1">
+    <linearGradient id={ids.shine} x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stopColor="#fff" stopOpacity=".35" />
       <stop offset=".5" stopColor="#fff" stopOpacity="0" />
     </linearGradient>
-    <filter id="rSh" x="-20%" y="-20%" width="140%" height="160%">
+    <filter id={ids.sh} x="-20%" y="-20%" width="140%" height="160%">
       <feDropShadow dx="0" dy="6" stdDeviation="6" floodColor="#000" floodOpacity=".26" />
     </filter>
-    <marker id="rArr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <marker id={ids.arr} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
       <path d="M0 0L10 5L0 10z" fill="currentColor" />
     </marker>
-    <marker id="rArrD" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+    <marker id={ids.arrD} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
       <path d="M0 0L10 5L0 10z" fill="#1d1a16" />
     </marker>
   </defs>
 );
 
-function Slab({ x, y, w, h, d = 13, fill, label, sub, fs = 17 }) {
+function Slab({ ids, x, y, w, h, d = 13, fill, label, sub, fs = 17 }) {
   return (
-    <g filter="url(#rSh)">
+    <g filter={`url(#${ids.sh})`}>
       <polygon points={`${x + d},${y - d} ${x + w + d},${y - d} ${x + w},${y} ${x},${y}`} fill={fill} opacity=".75" />
       <polygon points={`${x + w},${y} ${x + w + d},${y - d} ${x + w + d},${y + h - d} ${x + w},${y + h}`} fill="#000" opacity=".28" />
       <rect x={x} y={y} width={w} height={h} rx="6" fill={fill} />
-      <rect x={x} y={y} width={w} height={h / 2} rx="6" fill="url(#rShine)" />
+      <rect x={x} y={y} width={w} height={h / 2} rx="6" fill={`url(#${ids.shine})`} />
       {label && (
         <text x={x + w / 2} y={y + h / 2 + (sub ? -5 : 6)} textAnchor="middle" fill="#fff" fontSize={fs} className="d-text">
           {label}
@@ -60,17 +76,18 @@ function Slab({ x, y, w, h, d = 13, fill, label, sub, fs = 17 }) {
 }
 
 export function HeroFig() {
+  const ids = useSvgIds();
   return (
     <div className="float">
       <svg viewBox="0 0 560 330" role="img" aria-label="从集合与有序对生长出函数、等价关系与偏序格的结构树">
-        <Defs />
+        <Defs ids={ids} />
         <ellipse cx="280" cy="304" rx="240" ry="16" fill="#000" opacity=".14" />
-        <Slab x={34} y={232} w={215} h={56} fill="url(#rInd)" label="集合与笛卡尔积" sub="x ∈ A · (a,b) ∈ A × B" />
-        <Slab x={150} y={160} w={230} h={56} fill="url(#rInd)" label="二元关系 R ⊆ A × B" sub="0-1 矩阵 · 有向图 · Warshall" />
-        <Slab x={45} y={66} w={215} h={58} fill="url(#rAmb)" label="函数 Function" sub="每行恰一个 1 · 双射可逆" />
-        <Slab x={295} y={90} w={225} h={56} fill="url(#rRed)" label="等价关系 ∼" sub="自反+对称+传递 ↔ 划分" />
-        <Slab x={315} y={18} w={215} h={56} fill="url(#rGrn)" label="偏序与格 (A, ≼)" sub="自反+反对称+传递 · Hasse" />
-        <g stroke="currentColor" strokeWidth="2.2" fill="none" markerEnd="url(#rArr)" opacity=".85">
+        <Slab ids={ids} x={34} y={232} w={215} h={56} fill={`url(#${ids.ind})`} label="集合与笛卡尔积" sub="x ∈ A · (a,b) ∈ A × B" />
+        <Slab ids={ids} x={150} y={160} w={230} h={56} fill={`url(#${ids.ind})`} label="二元关系 R ⊆ A × B" sub="0-1 矩阵 · 有向图 · Warshall" />
+        <Slab ids={ids} x={45} y={66} w={215} h={58} fill={`url(#${ids.amb})`} label="函数 Function" sub="每行恰一个 1 · 双射可逆" />
+        <Slab ids={ids} x={295} y={90} w={225} h={56} fill={`url(#${ids.red})`} label="等价关系 ∼" sub="自反+对称+传递 ↔ 划分" />
+        <Slab ids={ids} x={315} y={18} w={215} h={56} fill={`url(#${ids.grn})`} label="偏序与格 (A, ≼)" sub="自反+反对称+传递 · Hasse" />
+        <g stroke="currentColor" strokeWidth="2.2" fill="none" markerEnd={`url(#${ids.arr})`} opacity=".85">
           <path d="M150 230 C 165 205, 215 205, 230 218" />
           <path d="M210 158 C 190 138, 165 135, 155 126" />
           <path d="M330 158 C 350 142, 370 142, 385 148" />
@@ -82,15 +99,15 @@ export function HeroFig() {
 }
 
 export function SetVennFig() {
+  const ids = useSvgIds();
   return (
     <div className="fig">
       <svg viewBox="0 0 680 250" role="img" aria-label="空集嵌套盒子模型与集合对称差文氏图">
-        <Defs />
-        <g filter="url(#rSh)">
-          <rect x="16" y="18" width="312" height="214" rx="16" fill="url(#rPaper)" stroke="#c9c2b2" />
-          <rect x="352" y="18" width="312" height="214" rx="16" fill="url(#rPaper)" stroke="#c9c2b2" />
+        <Defs ids={ids} />
+        <g filter={`url(#${ids.sh})`}>
+          <rect x="16" y="18" width="312" height="214" rx="16" fill={`url(#${ids.paper})`} stroke="#c9c2b2" />
+          <rect x="352" y="18" width="312" height="214" rx="16" fill={`url(#${ids.paper})`} stroke="#c9c2b2" />
         </g>
-        {/* Left: Empty set vs {Empty set} */}
         <text x="172" y="46" textAnchor="middle" fill="#1d1a16" fontSize="16" className="d-text">
           快递盒拆箱法：∅ vs {'{∅}'} vs {'{∅, {∅}}'}
         </text>
@@ -130,7 +147,6 @@ export function SetVennFig() {
           ∈ 只拆最外一层包装；⊆ 逐件比对内部成员
         </text>
 
-        {/* Right: Venn diagram for operations */}
         <text x="508" y="46" textAnchor="middle" fill="#1d1a16" fontSize="16" className="d-text">
           集合四大高频区域：A − B · A ∩ B · A ⊕ B
         </text>
@@ -164,20 +180,20 @@ export function SetVennFig() {
 }
 
 export function CompositionOrderFig() {
+  const ids = useSvgIds();
   return (
     <div className="fig">
       <svg viewBox="0 0 680 220" role="img" aria-label="复合关系 R2 o R1 的路径方向与布尔矩阵乘法左右顺序对照图">
-        <Defs />
-        <g filter="url(#rSh)">
-          <rect x="16" y="16" width="648" height="188" rx="18" fill="url(#rPaper)" stroke="#c9c2b2" />
+        <Defs ids={ids} />
+        <g filter={`url(#${ids.sh})`}>
+          <rect x="16" y="16" width="648" height="188" rx="18" fill={`url(#${ids.paper})`} stroke="#c9c2b2" />
         </g>
-        <rect x="16" y="16" width="648" height="44" rx="18" fill="url(#rRed)" />
-        <rect x="16" y="42" width="648" height="18" fill="url(#rRed)" />
+        <rect x="16" y="16" width="648" height="44" rx="18" fill={`url(#${ids.red})`} />
+        <rect x="16" y="42" width="648" height="18" fill={`url(#${ids.red})`} />
         <text x="340" y="44" textAnchor="middle" fill="#fff" fontSize="17" className="d-text">
           Slide 45 保命对齐：为什么求 R₂ ∘ R₁ 时左边必须放 M_R₁、右边放 M_R₂？
         </text>
 
-        {/* Left path */}
         <circle cx="75" cy="122" r="22" fill="#2d3d8f" />
         <text x="75" y="128" textAnchor="middle" fill="#fff" fontSize="17" className="d-mono" fontWeight="700">
           i
@@ -190,20 +206,19 @@ export function CompositionOrderFig() {
         <text x="305" y="128" textAnchor="middle" fill="#fff" fontSize="17" className="d-mono" fontWeight="700">
           j
         </text>
-        <path d="M101 122 L162 122" stroke="#1d1a16" strokeWidth="2.6" markerEnd="url(#rArrD)" />
-        <path d="M216 122 L277 122" stroke="#1d1a16" strokeWidth="2.6" markerEnd="url(#rArrD)" />
+        <path d="M101 122 L162 122" stroke="#1d1a16" strokeWidth="2.6" markerEnd={`url(#${ids.arrD})`} />
+        <path d="M216 122 L277 122" stroke="#1d1a16" strokeWidth="2.6" markerEnd={`url(#${ids.arrD})`} />
         <text x="132" y="108" textAnchor="middle" fill="#2d3d8f" fontSize="14" className="d-mono" fontWeight="700">
           第 1 步 R₁
         </text>
         <text x="247" y="108" textAnchor="middle" fill="#176b42" fontSize="14" className="d-mono" fontWeight="700">
           第 2 步 R₂
         </text>
-        <path d="M82 148 Q 190 192 298 148" fill="none" stroke="#8e1b1b" strokeWidth="2.4" strokeDasharray="6 4" markerEnd="url(#rArrD)" />
+        <path d="M82 148 Q 190 192 298 148" fill="none" stroke="#8e1b1b" strokeWidth="2.4" strokeDasharray="6 4" markerEnd={`url(#${ids.arrD})`} />
         <text x="190" y="188" textAnchor="middle" fill="#8e1b1b" fontSize="14" className="d-mono" fontWeight="700">
           合成一步：(i, j) ∈ R₂ ∘ R₁
         </text>
 
-        {/* Right matrix order */}
         <rect x="356" y="76" width="286" height="110" rx="12" fill="#fff" stroke="#2d3d8f" strokeWidth="2" />
         <text x="499" y="104" textAnchor="middle" fill="#1d1a16" fontSize="16" className="d-mono" fontWeight="700">
           M_(R₂ ∘ R₁) = M_R₁ ⊙ M_R₂
@@ -224,6 +239,7 @@ export function CompositionOrderFig() {
 }
 
 export function EquivPartitionFig() {
+  const ids = useSvgIds();
   const mat = [
     [1, 1, 0, 0, 0],
     [1, 1, 0, 0, 0],
@@ -234,10 +250,10 @@ export function EquivPartitionFig() {
   return (
     <div className="fig">
       <svg viewBox="0 0 680 245" role="img" aria-label="等价关系分块全1矩阵与集合划分的一一对应图">
-        <Defs />
-        <g filter="url(#rSh)">
-          <rect x="16" y="16" width="300" height="212" rx="16" fill="url(#rPaper)" stroke="#c9c2b2" />
-          <rect x="364" y="16" width="300" height="212" rx="16" fill="url(#rPaper)" stroke="#c9c2b2" />
+        <Defs ids={ids} />
+        <g filter={`url(#${ids.sh})`}>
+          <rect x="16" y="16" width="300" height="212" rx="16" fill={`url(#${ids.paper})`} stroke="#c9c2b2" />
+          <rect x="364" y="16" width="300" height="212" rx="16" fill={`url(#${ids.paper})`} stroke="#c9c2b2" />
         </g>
         <text x="166" y="44" textAnchor="middle" fill="#1d1a16" fontSize="15" className="d-text">
           等价关系矩阵：主对角全 1 方块
@@ -266,7 +282,7 @@ export function EquivPartitionFig() {
           })
         )}
 
-        <path d="M324 122 L356 122" stroke="currentColor" strokeWidth="2.8" markerEnd="url(#rArr)" />
+        <path d="M324 122 L356 122" stroke="currentColor" strokeWidth="2.8" markerEnd={`url(#${ids.arr})`} />
         <text x="340" y="108" textAnchor="middle" fill="currentColor" fontSize="13" className="d-mono" fontWeight="700">
           ⇔
         </text>

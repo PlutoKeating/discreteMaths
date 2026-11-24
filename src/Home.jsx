@@ -53,7 +53,7 @@ export default function Home() {
             className={'card rim p-5 block ' + (c.ready ? 'inkcard' : '')}
             style={{
               textDecoration: 'none',
-              color: 'inherit',
+              color: c.ready ? 'var(--ink-fg)' : 'inherit',
               opacity: c.ready ? 1 : 0.6,
               cursor: c.ready ? 'pointer' : 'default',
             }}
